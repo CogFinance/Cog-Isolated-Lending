@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "Cog-Vyper-Contracts"
+version = "0.1.0"
+description = ""
+authors = ["ControlCplusControlV"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+colorama = "^0.4.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
