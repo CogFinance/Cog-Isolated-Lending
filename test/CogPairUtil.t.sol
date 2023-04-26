@@ -19,15 +19,14 @@ contract CogPairTest is DSTest {
     Vm vm;
 
     function setUp() public {
-        ///@notice deploy a new instance of ICogPair by passing in the address of the deployed Vyper contract
-        pair = ICogPair(vyperDeployer.deployContract("cog_pair", abi.encode(1234)));
-
         asset = new MockERC20("asset", "TKA", 18);
         collateral = new MockERC20("collateral", "TKB", 18);
         oracle = new MockOracle();
 
-        pair.setup(address(asset), address(collateral), address(oracle));
-
+        address pair_blueprint = vyperDeployer.deployBlueprint("cog_pair");
+        address pair_factory = vyperDeployer.deployContract("cog_factory", abi.encode(pair_blueprint));
+        pair = ICogPair(ICogFactory(pair_factory).deploy_medium_risk_pair(address(asset), address(collateral), address(oracle)));
+        
         vm = Vm(HEVM_ADDRESS);
     }
 }

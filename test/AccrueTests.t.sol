@@ -83,4 +83,46 @@ contract CollateralPairTest is CogPairTest {
 
         require(interest_per_second_1 < interest_per_second_0, "interest_per_second_1 < interest_per_second_0");
     }
+
+    function test_interest_rate_accrues_value() public {
+        oracle.setPrice(5000000000000000000);
+        oracle.setUpdated(true);
+        pair.get_exchange_rate();
+
+        vm.startPrank(address(0x06));
+
+        asset.mint(address(0x06), 10000000);
+        asset.approve(address(pair), 10000000);
+
+        pair.add_asset(address(0x06), 10000000);
+
+        vm.stopPrank();
+        vm.startPrank(address(0x07));
+
+        collateral.mint(address(0x07), 90000000000);
+        collateral.approve(address(pair), 90000000000);
+
+        pair.add_collateral(address(0x07), 90000000000);
+
+        pair.borrow(address(0x07), 810000); // Bump up to minimum utilization
+
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + 2678400); // About one month
+
+        pair.accrue();
+
+        vm.startPrank(address(0x07));
+
+        uint256 borrow_share = pair.user_borrow_part(address(0x07));
+        asset.mint(address(0x07), borrow_share);
+        asset.approve(address(pair), borrow_share);
+        pair.repay(address(0x07), borrow_share);
+
+        vm.stopPrank();
+        vm.startPrank(address(0x06));
+
+        pair.accrue();
+        pair.remove_asset(address(0x06), 810050);
+    }
 }

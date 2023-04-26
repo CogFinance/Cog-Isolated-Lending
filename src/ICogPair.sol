@@ -20,7 +20,6 @@ interface ICogPair {
     function remove_asset(address to, uint256 amount) external returns (uint256);
     function borrow(address to, uint256 amount) external returns (uint256);
     function repay(address to, uint256 payment) external returns (uint256);
-    function setup(address token_a, address token_b, address oracle) external;
     function total_collateral_share() external view returns (uint256);
     function user_collateral_share(address user) external view returns (uint256);
     function user_borrow_part(address user) external view returns (uint256);
@@ -30,4 +29,8 @@ interface ICogPair {
     function get_exchange_rate() external returns (bool, uint256);
     function exchange_rate() external view returns (uint256);
     function accrue_info() external view returns (AccrueInfo memory);
+}
+
+interface ICogFactory {
+    function deploy_medium_risk_pair(address asset, address collateral, address oracle) external returns (address);
 }
