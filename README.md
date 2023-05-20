@@ -21,6 +21,8 @@ ape plugins install .
 
 forge build
 forge test
+ape compile
+ape test
 ```
 
 This repo makes full use of Vyper's Swiss Army Knife set of tools, to fully test and analyze the Cog Finance Contracts. The contracts are designed to be battle-hardened, with beyond standard security measures in place.
@@ -34,6 +36,25 @@ Then in a seperate shell terminal via Deploy the Contracts via
 ```
 ape run scripts/deploy.py deploy --network ethereum:local
 ```
+
+## Todo
+
+Stuff I would like to finish before big_tech_sux reviews the code
+
+-[ ] Repay overrepay test needs to be added back in, failing for some reason
+-[ ] Remove add_asset, remove_asset, in favor of deposit, withdraw, and redeem
+-[ ] So so much testing to do with accrue
+-[ ] Make negative IR test attacks
+-[ ] Ensure PoL accrues properly
+-[ ] Add management functions like timelocks, Tinkermaster's ability to withdraw PoL
+-[ ] Add full features to the factory
+-[ ] fmt one last time
+
+Long-term To-Dos
+-[ ] Support approval style usage of shares (deposit, etc)
+-[ ] Jade mutation testing
+-[ ] State machine testing
+-[ ] Low, High, and Stable Risk Pairs
 
 ## Contracts
 

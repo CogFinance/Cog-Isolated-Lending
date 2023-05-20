@@ -3,3 +3,7 @@ contracts_folder: vyper_contracts
 
 plugins:
   - name: vyper
+
+geth:
+  scroll:
+    uri: https://alpha-rpc.scroll.io/l2
