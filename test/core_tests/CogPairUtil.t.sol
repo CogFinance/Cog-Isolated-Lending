@@ -2,10 +2,10 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../lib/utils/VyperDeployer.sol";
-import "../src/ICogPair.sol";
-import "./mocks/MockERC20.sol";
-import "./mocks/MockOracle.sol";
+import "../../lib/utils/VyperDeployer.sol";
+import "../../src/ICogPair.sol";
+import "../mocks/MockERC20.sol";
+import "../mocks/MockOracle.sol";
 
 /// @title Base Contract for running CogPair Tests
 contract CogPairTest is DSTest {

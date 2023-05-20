@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../src/ICogPair.sol";
+import "../../src/ICogPair.sol";
 import "./CogPairUtil.t.sol";
 
 contract CollateralPairTest is CogPairTest {

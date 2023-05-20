@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../src/ICogPair.sol";
+import "../../src/ICogPair.sol";
 import "./CogPairUtil.t.sol";
 
 contract CollateralPairTest is CogPairTest {
@@ -15,7 +15,7 @@ contract CollateralPairTest is CogPairTest {
         asset.mint(address(0x06), 1000000);
         asset.approve(address(pair), 1000000);
 
-        pair.add_asset(address(0x06), 1000000);
+        pair.deposit(1000000, address(0x06));
 
         vm.stopPrank();
         vm.startPrank(address(0x07));
@@ -50,7 +50,7 @@ contract CollateralPairTest is CogPairTest {
         asset.mint(address(0x06), 90000000000000000000000000000);
         asset.approve(address(pair), 90000000000000000000000000000);
 
-        pair.add_asset(address(0x06), 90000000000000000000000000000);
+        pair.deposit(90000000000000000000000000000, address(0x06));
 
         vm.stopPrank();
         vm.startPrank(address(0x07));
@@ -94,7 +94,7 @@ contract CollateralPairTest is CogPairTest {
         asset.mint(address(0x06), 10000000);
         asset.approve(address(pair), 10000000);
 
-        pair.add_asset(address(0x06), 10000000);
+        pair.deposit(10000000, address(0x06));
 
         vm.stopPrank();
         vm.startPrank(address(0x07));
@@ -123,6 +123,6 @@ contract CollateralPairTest is CogPairTest {
         vm.startPrank(address(0x06));
 
         pair.accrue();
-        pair.remove_asset(address(0x06), 810050);
+        pair.withdraw(810050, address(0x06), address(0x06));
     }
 }
