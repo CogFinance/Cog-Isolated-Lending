@@ -22,13 +22,16 @@ class CogPairFuzz(RuleBasedStateMachine):
     user_id = st.integers(min_value=0, max_value=9)
     amount = st.integers(min_value=5, max_value=50)
     SCALE = 10 ** 18
+    STARTING_PRICE = 10 * 10 ** 18
     ratio = st.floats(min_value=0.1, max_value=0.9)
+    oracle_step = st.floats(min_value=-0.01, max_value=0.01)
 
     def __init__(self):
         super().__init__()
-        oracle.setPrice(asset_one_coin_price, sender=account)
-        oracle.setUpdated(True, sender=account)
-        cog_pair.get_exchange_rate(sender=account)
+        account = self.accounts[0]
+        self.oracle.setPrice(self.STARTING_PRICE, sender=account)
+        self.oracle.setUpdated(True, sender=account)
+        self.cog_pair.get_exchange_rate(sender=account)
 
 
     @rule(uid=user_id, amt = amount)
@@ -45,6 +48,7 @@ class CogPairFuzz(RuleBasedStateMachine):
         amt = amt * self.SCALE
         if self.cog_pair.balanceOf(account) > 0:
             amt = min(amt, self.cog_pair.balanceOf(account))
+            amt = min(amt, self.cog_pair.maxWithdraw(account))
             self.cog_pair.withdraw(amt, account, sender=account)
 
     @rule(uid=user_id, amt = amount)
@@ -62,7 +66,8 @@ class CogPairFuzz(RuleBasedStateMachine):
         amt = amt * self.SCALE
         if self.cog_pair.balanceOf(account) > 0:
             amt = min(amt, self.cog_pair.balanceOf(account))
-            self.cog_pair.redeem(account, amt, sender=account)
+            amt = min(amt, self.cog_pair.maxRedeem(account))
+            self.cog_pair.redeem(amt, account, sender=account)
 
     @rule(uid=user_id, amt = amount)
     def add_collateral(self, uid, amt):
@@ -83,10 +88,14 @@ class CogPairFuzz(RuleBasedStateMachine):
     @rule(uid=user_id, amt = amount)
     def borrow(self, uid, amt):
         account = self.accounts[uid]
+        cog_pair = self.cog_pair
         amt = amt * self.SCALE
-        if self.cog_pair.user_collateral_share(account) > 0:
-            amt = min(amt, self.cog_pair.user_collateral_share(account))
-            self.cog_pair.borrow(account, amt, sender=account)
+        if cog_pair.user_collateral_share(account) > 0 and cog_pair.user_borrow_part(account) == 0:
+            return_val = self.oracle.get()
+            price = return_val[1]
+            max_borrowable_amount = ((cog_pair.convertToAssets(cog_pair.user_collateral_share(account)) * price / 10 ** 18) * 0.73)
+            if self.asset.balanceOf(cog_pair) > max_borrowable_amount:
+                cog_pair.borrow(account, max_borrowable_amount, sender=account)
 
     @rule(uid=user_id, amt = amount)
     def repay(self, uid, amt):
@@ -103,6 +112,13 @@ class CogPairFuzz(RuleBasedStateMachine):
         account = self.accounts[uid]
         self.cog_pair.accrue(sender=account)
 
+    @rule(uid=user_id, step=oracle_step)
+    def update_oracle(self, uid, step):
+        account = self.accounts[uid]
+        (_, current_price) = self.oracle.get()
+        new_price = int(current_price + (current_price * step))
+        self.oracle.setPrice(new_price, sender=account)
+
     @invariant()
     def true(self):
         assert True
@@ -112,5 +128,5 @@ def test_big_fuzz(cog_pair, asset, collateral, accounts, oracle):
     for k, v in locals().items():
         setattr(CogPairFuzz, k, v)
 
-    CogPairFuzz.TestCase.settings = settings(max_examples=5, stateful_step_count=30, deadline=timedelta(milliseconds=5000))
+    CogPairFuzz.TestCase.settings = settings(max_examples=5, stateful_step_count=50, deadline=timedelta(milliseconds=5000))
     run_state_machine_as_test(CogPairFuzz)
