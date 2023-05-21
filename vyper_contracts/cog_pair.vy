@@ -323,6 +323,156 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
     log Transfer(sender, receiver, amount)
     return True
 
+# //////////////////////////////////////////////////////////////// #
+#                             EIP712                               #
+# //////////////////////////////////////////////////////////////// #
+# Ty snekmate for this code
+
+# @dev Returns the current on-chain tracked nonce
+# of `address`.
+nonces: public(HashMap[address, uint256])
+
+# @dev The 32-byte type hash of the `permit` function.
+_PERMIT_TYPE_HASH: constant(bytes32) = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+
+
+# @dev Constant used as part of the ECDSA recovery function.
+_MALLEABILITY_THRESHOLD: constant(bytes32) = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
+
+
+# @dev Caches the domain separator as an `immutable`
+# value, but also stores the corresponding chain id
+# to invalidate the cached domain separator if the
+# chain id changes.
+_CACHED_CHAIN_ID: immutable(uint256)
+_CACHED_SELF: immutable(address)
+_CACHED_DOMAIN_SEPARATOR: immutable(bytes32)
+
+
+# @dev `immutable` variables to store the name,
+# version, and type hash during contract creation.
+_HASHED_NAME: immutable(bytes32)
+_HASHED_VERSION: immutable(bytes32)
+_TYPE_HASH: immutable(bytes32)
+
+
+@internal
+@view
+def _domain_separator_v4() -> bytes32:
+    """
+    @dev Sourced from {EIP712DomainSeparator-domain_separator_v4}.
+    @notice See {EIP712DomainSeparator-domain_separator_v4}
+            for the function docstring.
+    """
+    if (self == _CACHED_SELF and chain.id == _CACHED_CHAIN_ID):
+        return _CACHED_DOMAIN_SEPARATOR
+    else:
+        return self._build_domain_separator(_TYPE_HASH, _HASHED_NAME, _HASHED_VERSION)
+
+
+@internal
+@view
+def _build_domain_separator(type_hash: bytes32, name_hash: bytes32, version_hash: bytes32) -> bytes32:
+    """
+    @dev Sourced from {EIP712DomainSeparator-_build_domain_separator}.
+    @notice See {EIP712DomainSeparator-_build_domain_separator}
+            for the function docstring.
+    """
+    return keccak256(_abi_encode(type_hash, name_hash, version_hash, chain.id, self))
+
+@external
+@view
+def DOMAIN_SEPARATOR() -> bytes32:
+    """
+    @dev Returns the domain separator for the current chain.
+    @return bytes32 The 32-byte domain separator.
+    """
+    return self._domain_separator_v4()
+
+@internal
+@view
+def _hash_typed_data_v4(struct_hash: bytes32) -> bytes32:
+    """
+    @dev Sourced from {EIP712DomainSeparator-hash_typed_data_v4}.
+    @notice See {EIP712DomainSeparator-hash_typed_data_v4}
+            for the function docstring.
+    """
+    return self._to_typed_data_hash(self._domain_separator_v4(), struct_hash)
+
+
+@internal
+@pure
+def _to_typed_data_hash(domain_separator: bytes32, struct_hash: bytes32) -> bytes32:
+    """
+    @dev Sourced from {ECDSA-to_typed_data_hash}.
+    @notice See {ECDSA-to_typed_data_hash} for the
+            function docstring.
+    """
+    return keccak256(concat(b"\x19\x01", domain_separator, struct_hash))
+
+@internal
+@pure
+def _recover_vrs(hash: bytes32, v: uint256, r: uint256, s: uint256) -> address:
+    """
+    @dev Sourced from {ECDSA-_recover_vrs}.
+    @notice See {ECDSA-_recover_vrs} for the
+            function docstring.
+    """
+    return self._try_recover_vrs(hash, v, r, s)
+
+
+@internal
+@pure
+def _try_recover_vrs(hash: bytes32, v: uint256, r: uint256, s: uint256) -> address:
+    """
+    @dev Sourced from {ECDSA-_try_recover_vrs}.
+    @notice See {ECDSA-_try_recover_vrs} for the
+            function docstring.
+    """
+    if (s > convert(_MALLEABILITY_THRESHOLD, uint256)):
+        raise "ECDSA: invalid signature 's' value"
+
+    signer: address = ecrecover(hash, v, r, s)
+    if (signer == empty(address)):
+        raise "ECDSA: invalid signature"
+
+    return signer
+
+@external
+def permit(owner: address, spender: address, amount: uint256, deadline: uint256, v: uint8, r: bytes32, s: bytes32):
+    """
+    @dev Sets `amount` as the allowance of `spender`
+         over `owner`'s tokens, given `owner`'s signed
+         approval.
+    @notice Note that `spender` cannot be the zero address.
+            Also, `deadline` must be a block timestamp in
+            the future. `v`, `r`, and `s` must be a valid
+            secp256k1 signature from `owner` over the
+            EIP-712-formatted function arguments. Eventually,
+            the signature must use `owner`'s current nonce.
+    @param owner The 20-byte owner address.
+    @param spender The 20-byte spender address.
+    @param amount The 32-byte token amount that is
+           allowed to be spent by the `spender`.
+    @param deadline The 32-byte block timestamp up
+           which the `spender` is allowed to spend `amount`.
+    @param v The secp256k1 1-byte signature parameter `v`.
+    @param r The secp256k1 32-byte signature parameter `r`.
+    @param s The secp256k1 32-byte signature parameter `s`.
+    """
+    assert block.timestamp <= deadline, "ERC20Permit: expired deadline"
+
+    current_nonce: uint256 = self.nonces[owner]
+    self.nonces[owner] = unsafe_add(current_nonce, 1)
+
+    struct_hash: bytes32 = keccak256(_abi_encode(_PERMIT_TYPE_HASH, owner, spender, amount, current_nonce, deadline))
+    hash: bytes32  = self._hash_typed_data_v4(struct_hash)
+
+    signer: address = self._recover_vrs(hash, convert(v, uint256), convert(r, uint256), convert(s, uint256))
+    assert signer == owner, "ERC20Permit: invalid signature"
+
+    self.allowance[owner][spender] = amount
+    log Approval(owner, spender, amount)
 
 # ///////////////////////////////////////////////////// #
 #		            ERC4626 Compatibility	        	#
@@ -875,6 +1025,15 @@ def __init__(_asset: address, _collateral: address, _oracle: address):
     asset = _asset
     oracle = _oracle
     self.protocol_fee = DEFAULT_PROTOCOL_FEE  # 10% 
+    hashed_name: bytes32 = keccak256(convert(NAME, Bytes[50]))
+    hashed_version: bytes32 = keccak256(convert("1", Bytes[20]))
+    type_hash: bytes32 = keccak256(convert("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)", Bytes[82]))
+    _HASHED_NAME = hashed_name
+    _HASHED_VERSION = hashed_version
+    _TYPE_HASH = type_hash
+    _CACHED_CHAIN_ID = chain.id
+    _CACHED_SELF = self
+    _CACHED_DOMAIN_SEPARATOR = self._build_domain_separator(type_hash, hashed_name, hashed_version)
 
 
 @external
