@@ -86,6 +86,5 @@ def deploy(network):
 
     kw['nonce'] = account.nonce
 
-    # Note this uses reciept.to which is wrong
     receipt = factory.deploy_medium_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    print(f"Deployed CogPair to {Fore.GREEN}{receipt.to}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed CogPair to {Fore.GREEN}{receipt.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
