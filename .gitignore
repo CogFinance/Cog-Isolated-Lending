@@ -1,0 +1,4 @@
+.build/
+tests/__pycache__/
+utils/__pycache__/
+
