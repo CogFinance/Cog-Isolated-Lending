@@ -1137,7 +1137,7 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
     )
 
     borrow_part = self.user_borrow_part[user]
-    borrow_part_new: uint256 = self.mul_div((borrow_part * convert(_total_borrow.elastic, uint256)), exchange_rate, convert(_total_borrow.base, uint256), False)
+    borrow_part = self.mul_div((borrow_part * convert(_total_borrow.elastic, uint256)), exchange_rate, convert(_total_borrow.base, uint256), False)
 
     return collateral_amt >= borrow_part
 

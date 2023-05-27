@@ -1,5 +1,4 @@
 import ape
-import boa
 import pytest
 
 from datetime import timedelta

@@ -1,6 +1,5 @@
 import pytest
 import ape
-import boa
 
 from utils.blueprint import (
     construct_blueprint_deploy_bytecode,
