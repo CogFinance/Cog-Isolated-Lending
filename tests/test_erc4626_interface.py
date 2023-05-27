@@ -88,11 +88,11 @@ def test_totalAssets(cog_pair, oracle, accounts, collateral, asset, chain):
     # it is not, and the condition is still tested, while actual interest accrual should be tested in borrow and repay tests
     assert cog_pair.totalAssets() > 500000000000000000
 
-@given(
-    amount=st.integers(min_value=100000, max_value=2**128),
-)
-@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
-def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain, amount):
+#@given(
+#    amount=st.integers(min_value=100000, max_value=2**128),
+#)
+#@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
+def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain):
     """
     Invariants Tested
     -----------------
@@ -105,7 +105,7 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain, a
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = amount
+    AMOUNT = 1000000000000000000
 
     # convertToShares returns 1:1 if totalAssets is 0
     assert cog_pair.convertToShares(AMOUNT) == AMOUNT
@@ -129,7 +129,7 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain, a
 
     # Borrow has caused total_asset to decrease, and total borrow to increase
     # So shares should lower than AMOUNT until all debt is repaid
-    #assert cog_pair.convertToShares(AMOUNT) <= AMOUNT
+    assert cog_pair.convertToShares(AMOUNT) < AMOUNT
     
     asset.mint(account, amt, sender=account)
     asset.approve(cog_pair, amt, sender=account)
@@ -138,11 +138,11 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain, a
     # Once debt is repaid, and total_borrow is (0,0) shares mint 1:1 again
     assert cog_pair.convertToShares(AMOUNT) == AMOUNT
     
-#@given(
-#    amount=st.integers(min_value=100000, max_value=2**128),
-#)
-#@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
-def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, chain):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**128),
+)
+@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
+def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, chain, amount):
     """
     Invariants Tested
     -----------------
@@ -155,7 +155,7 @@ def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, chain):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 1000000000000000000
+    AMOUNT = amount
     AMOUNT_IN_SHARES = cog_pair.convertToShares(AMOUNT)
     
     # convertToAssets returns 1:1 if totalAssets is 0
@@ -187,7 +187,6 @@ def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, chain):
 
     # Shares should still retain their superior value, which now includes interest after debt is repaid
     assert cog_pair.convertToAssets(AMOUNT) > AMOUNT
-
 
 def test_maxDeposit(cog_pair, account):
     """
