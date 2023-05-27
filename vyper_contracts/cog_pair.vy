@@ -647,7 +647,7 @@ def convertToShares(assetAmount: uint256) -> uint256:
 @internal
 def _convertToShares(assetAmount: uint256) -> uint256:
     total_asset_base: uint256 = convert(self.total_asset.base, uint256)
-    all_share: uint256 = convert(self.total_borrow.elastic + self.total_borrow.elastic, uint256)
+    all_share: uint256 = convert(self.total_asset.elastic + self.total_borrow.elastic, uint256)
     if all_share == 0:
         # Shares mint 1:1 at the start until interest accrues
         return assetAmount
