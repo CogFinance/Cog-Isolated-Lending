@@ -1,8 +1,9 @@
 # @version 0.3.7
+
 """
 @title CogPair
 @author cog.finance
-@license GPL-3.0
+@license GNU Affero General Public License v3.0
 @notice Implementation of an isolated lending pool with PoL in Vyper
 @dev ERC20 support for True/revert, return True/False, return None, ty Curve for the inspiration
 """
@@ -75,7 +76,7 @@ def to_elastic(total: Rebase, base: uint256, round_up: bool) -> uint256:
             < base
         ):
             elastic = elastic + 1
-            
+
         return elastic
 
 
@@ -112,13 +113,16 @@ def sub(total: Rebase, base: uint256, round_up: bool) -> (Rebase, uint256):
     total.base -= convert(base, uint128)
     return (total, elastic)
 
+
 # ///////////////////////////////////////////////////// #
 #		      Math Helper For Precision					#
 # ///////////////////////////////////////////////////// #
 # Ty snekmate again
 @pure
 @internal
-def mul_div(x: uint256, y: uint256, denominator: uint256, roundup: bool) -> uint256:
+def mul_div(
+    x: uint256, y: uint256, denominator: uint256, roundup: bool
+) -> uint256:
     """
     @dev Calculates "(x * y) / denominator" in 512-bit precision,
          following the selected rounding direction.
@@ -149,14 +153,13 @@ def mul_div(x: uint256, y: uint256, denominator: uint256, roundup: bool) -> uint
     # The most significant 256 bits of the product.
     prod1: uint256 = empty(uint256)
 
-    if (mm < prod0):
+    if mm < prod0:
         prod1 = unsafe_sub(unsafe_sub(mm, prod0), 1)
     else:
         prod1 = unsafe_sub(mm, prod0)
 
-    # Handling of non-overflow cases, 256 by 256 division.
-    if (prod1 == empty(uint256)):
-        if (roundup and uint256_mulmod(x, y, denominator) != empty(uint256)):
+    if prod1 == empty(uint256):
+        if roundup and uint256_mulmod(x, y, denominator) != empty(uint256):
             # Calculate "ceil((x * y) / denominator)". The following
             # line cannot overflow because we have the previous check
             # "(x * y) % denominator != 0", which accordingly rules out
@@ -180,7 +183,7 @@ def mul_div(x: uint256, y: uint256, denominator: uint256, roundup: bool) -> uint
 
     # Second, subtract the 256-bit number from the 512-bit
     # number.
-    if (remainder > prod0):
+    if remainder > prod0:
         prod1 = unsafe_sub(prod1, 1)
     prod0 = unsafe_sub(prod0, remainder)
 
@@ -214,12 +217,24 @@ def mul_div(x: uint256, y: uint256, denominator: uint256, roundup: bool) -> uint
     # Use Newton-Raphson iteration to improve accuracy. Thanks to Hensel's
     # lifting lemma, this also works in modular arithmetic by doubling the
     # correct bits in each step.
-    inverse = unsafe_mul(inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))) # Inverse "mod 2**8".
-    inverse = unsafe_mul(inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))) # Inverse "mod 2**16".
-    inverse = unsafe_mul(inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))) # Inverse "mod 2**32".
-    inverse = unsafe_mul(inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))) # Inverse "mod 2**64".
-    inverse = unsafe_mul(inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))) # Inverse "mod 2**128".
-    inverse = unsafe_mul(inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))) # Inverse "mod 2**256".
+    inverse = unsafe_mul(
+        inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))
+    )  # Inverse "mod 2**8".
+    inverse = unsafe_mul(
+        inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))
+    )  # Inverse "mod 2**16".
+    inverse = unsafe_mul(
+        inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))
+    )  # Inverse "mod 2**32".
+    inverse = unsafe_mul(
+        inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))
+    )  # Inverse "mod 2**64".
+    inverse = unsafe_mul(
+        inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))
+    )  # Inverse "mod 2**128".
+    inverse = unsafe_mul(
+        inverse, unsafe_sub(2, unsafe_mul(denominator_div, inverse))
+    )  # Inverse "mod 2**256".
 
     # Since the division is now exact, we can divide by multiplying
     # with the modular inverse of the denominator. This returns the
@@ -229,13 +244,14 @@ def mul_div(x: uint256, y: uint256, denominator: uint256, roundup: bool) -> uint
     # `prod1` is no longer necessary.
     result: uint256 = unsafe_mul(prod0, inverse)
 
-    if (roundup and uint256_mulmod(x, y, denominator) != empty(uint256)):
+    if roundup and uint256_mulmod(x, y, denominator) != empty(uint256):
         # Calculate "ceil((x * y) / denominator)". The following
         # line uses intentionally checked arithmetic to prevent
         # a theoretically possible overflow.
         result += 1
 
     return result
+
 
 # ///////////////////////////////////////////////////// #
 #						Interfaces						#
@@ -245,16 +261,23 @@ def mul_div(x: uint256, y: uint256, denominator: uint256, roundup: bool) -> uint
 interface IOracle:
     def get() -> (bool, uint256): nonpayable
 
+# Factory Interface
+interface ICogFactory:
+    def fee_to() -> address: view
+
+
 # Cog Pair Specific Events
 event AddCollateral:
     to: indexed(address)
     amount: indexed(uint256)
     user_collateral_share: indexed(uint256)
 
+
 event RemoveCollateral:
     to: indexed(address)
     amount: indexed(uint256)
     user_collateral_share: indexed(uint256)
+
 
 # ERC20 Events
 
@@ -309,7 +332,9 @@ user_collateral_share: public(
     HashMap[address, uint256]
 )  # Collateral share of each user
 
-user_borrow_part: public(HashMap[address, uint256])  # Borrow ""share"" of each user
+user_borrow_part: public(
+    HashMap[address, uint256]
+)  # Borrow ""share"" of each user
 
 exchange_rate: public(uint256)  # Exchange rate between asset and collateral
 
@@ -319,20 +344,18 @@ struct AccrueInfo:
         last_accrued: uint64
         fees_earned_fraction: uint128
 
-# Surge Info for keeping track of when to trigger PoL only mode
+
 struct SurgeInfo:
         last_interest_per_second: uint64
         last_elapsed_time: uint64
 
 
-# Instantiations of each struct
-accrue_info: public(
-    AccrueInfo
-)
+accrue_info: public(AccrueInfo)
 
-surge_info: public(
-    SurgeInfo
-)
+surge_info: public(SurgeInfo)
+
+factory: public(immutable(address))  # Address of the factory
+paused: public(bool)  # Status of if the pool is paused
 
 # ///////////////////////////////////////////////////// #
 #          Configuration Constants - (Medium)           #
@@ -342,19 +365,18 @@ EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 COLLATERIZATION_RATE_PRECISION: constant(uint256) = 100000  # 1e5
 COLLATERIZATION_RATE: constant(uint256) = 75000  # 75%
 
-BORROW_OPENING_FEE: constant(uint256) = 50
+BORROW_OPENING_FEE: public(uint256)
 BORROW_OPENING_FEE_PRECISION: constant(uint256) = 100000
 
 protocol_fee: public(
     uint256
 )  # Starts at 10%, raised when PoL only mode is activated to PROTOCOL_FEE_DIVISOR or 100%
-DEFAULT_PROTOCOL_FEE: constant(uint256) = 100000  # 10%
+DEFAULT_PROTOCOL_FEE: public(uint256)
 PROTOCOL_FEE_DIVISOR: constant(uint256) = 1000000
 # dr/dt, where dt = 1 day (86400), and dr is change in interest_rate per second or 3170979200 (10% interest rate)
 PROTOCOL_SURGE_THRESHOLD: constant(
     uint64
 ) = 36701  # If IR surges ~10% in 1 day then Protocol begins accuring PoL
-
 
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 MINIMUM_TARGET_UTILIZATION: constant(uint256) = 600000000000000000  # 60%
@@ -369,14 +391,13 @@ INTEREST_ELASTICITY: constant(
 ) = 28800000000000000000000000000000000000000  # 2.88e40
 
 LIQUIDATION_MULTIPLIER: constant(uint256) = 112000  # 12
-LIQUIDATION_MULTIPLIER_PRECISION: constant(
-    uint256
-) = 100000  # 1e5
+LIQUIDATION_MULTIPLIER_PRECISION: constant(uint256) = 100000  # 1e5
 
 # //////////////////////////////////////////////////////////////// #
 #                              ERC20                               #
 # //////////////////////////////////////////////////////////////// #
 balanceOf: public(HashMap[address, uint256])
+
 
 @view
 @external
@@ -404,6 +425,7 @@ def name() -> String[26]:
 
 SYMBOL: constant(String[3]) = "COG"
 
+
 @view
 @external
 def symbol() -> String[3]:
@@ -414,6 +436,7 @@ def symbol() -> String[3]:
 
 
 DECIMALS: constant(uint8) = 18
+
 
 @view
 @external
@@ -447,6 +470,7 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
     log Transfer(sender, receiver, amount)
     return True
 
+
 # //////////////////////////////////////////////////////////////// #
 #                             EIP712                               #
 # //////////////////////////////////////////////////////////////// #
@@ -457,11 +481,15 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
 nonces: public(HashMap[address, uint256])
 
 # @dev The 32-byte type hash of the `permit` function.
-_PERMIT_TYPE_HASH: constant(bytes32) = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+_PERMIT_TYPE_HASH: constant(bytes32) = keccak256(
+    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+)
 
 
 # @dev Constant used as part of the ECDSA recovery function.
-_MALLEABILITY_THRESHOLD: constant(bytes32) = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
+_MALLEABILITY_THRESHOLD: constant(
+    bytes32
+) = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
 
 
 # @dev Caches the domain separator as an `immutable`
@@ -488,21 +516,28 @@ def _domain_separator_v4() -> bytes32:
     @notice See {EIP712DomainSeparator-domain_separator_v4}
             for the function docstring.
     """
-    if (self == _CACHED_SELF and chain.id == _CACHED_CHAIN_ID):
+    if self == _CACHED_SELF and chain.id == _CACHED_CHAIN_ID:
         return _CACHED_DOMAIN_SEPARATOR
     else:
-        return self._build_domain_separator(_TYPE_HASH, _HASHED_NAME, _HASHED_VERSION)
+        return self._build_domain_separator(
+            _TYPE_HASH, _HASHED_NAME, _HASHED_VERSION
+        )
 
 
 @internal
 @view
-def _build_domain_separator(type_hash: bytes32, name_hash: bytes32, version_hash: bytes32) -> bytes32:
+def _build_domain_separator(
+    type_hash: bytes32, name_hash: bytes32, version_hash: bytes32
+) -> bytes32:
     """
     @dev Sourced from {EIP712DomainSeparator-_build_domain_separator}.
     @notice See {EIP712DomainSeparator-_build_domain_separator}
             for the function docstring.
     """
-    return keccak256(_abi_encode(type_hash, name_hash, version_hash, chain.id, self))
+    return keccak256(
+        _abi_encode(type_hash, name_hash, version_hash, chain.id, self)
+    )
+
 
 @external
 @view
@@ -512,6 +547,7 @@ def DOMAIN_SEPARATOR() -> bytes32:
     @return bytes32 The 32-byte domain separator.
     """
     return self._domain_separator_v4()
+
 
 @internal
 @view
@@ -526,13 +562,16 @@ def _hash_typed_data_v4(struct_hash: bytes32) -> bytes32:
 
 @internal
 @pure
-def _to_typed_data_hash(domain_separator: bytes32, struct_hash: bytes32) -> bytes32:
+def _to_typed_data_hash(
+    domain_separator: bytes32, struct_hash: bytes32
+) -> bytes32:
     """
     @dev Sourced from {ECDSA-to_typed_data_hash}.
     @notice See {ECDSA-to_typed_data_hash} for the
             function docstring.
     """
     return keccak256(concat(b"\x19\x01", domain_separator, struct_hash))
+
 
 @internal
 @pure
@@ -547,23 +586,34 @@ def _recover_vrs(hash: bytes32, v: uint256, r: uint256, s: uint256) -> address:
 
 @internal
 @pure
-def _try_recover_vrs(hash: bytes32, v: uint256, r: uint256, s: uint256) -> address:
+def _try_recover_vrs(
+    hash: bytes32, v: uint256, r: uint256, s: uint256
+) -> address:
     """
     @dev Sourced from {ECDSA-_try_recover_vrs}.
     @notice See {ECDSA-_try_recover_vrs} for the
             function docstring.
     """
-    if (s > convert(_MALLEABILITY_THRESHOLD, uint256)):
+    if s > convert(_MALLEABILITY_THRESHOLD, uint256):
         raise "ECDSA: invalid signature 's' value"
 
     signer: address = ecrecover(hash, v, r, s)
-    if (signer == empty(address)):
+    if signer == empty(address):
         raise "ECDSA: invalid signature"
 
     return signer
 
+
 @external
-def permit(owner: address, spender: address, amount: uint256, deadline: uint256, v: uint8, r: bytes32, s: bytes32):
+def permit(
+    owner: address,
+    spender: address,
+    amount: uint256,
+    deadline: uint256,
+    v: uint8,
+    r: bytes32,
+    s: bytes32,
+):
     """
     @dev Sets `amount` as the allowance of `spender`
          over `owner`'s tokens, given `owner`'s signed
@@ -589,14 +639,21 @@ def permit(owner: address, spender: address, amount: uint256, deadline: uint256,
     current_nonce: uint256 = self.nonces[owner]
     self.nonces[owner] = unsafe_add(current_nonce, 1)
 
-    struct_hash: bytes32 = keccak256(_abi_encode(_PERMIT_TYPE_HASH, owner, spender, amount, current_nonce, deadline))
-    hash: bytes32  = self._hash_typed_data_v4(struct_hash)
+    struct_hash: bytes32 = keccak256(
+        _abi_encode(
+            _PERMIT_TYPE_HASH, owner, spender, amount, current_nonce, deadline
+        )
+    )
+    hash: bytes32 = self._hash_typed_data_v4(struct_hash)
 
-    signer: address = self._recover_vrs(hash, convert(v, uint256), convert(r, uint256), convert(s, uint256))
+    signer: address = self._recover_vrs(
+        hash, convert(v, uint256), convert(r, uint256), convert(s, uint256)
+    )
     assert signer == owner, "ERC20Permit: invalid signature"
 
     self.allowance[owner][spender] = amount
     log Approval(owner, spender, amount)
+
 
 # ///////////////////////////////////////////////////// #
 #		            ERC4626 Compatibility	        	#
@@ -611,9 +668,11 @@ def totalAssets() -> uint256:
     total_elastic: uint256 = convert(self.total_asset.elastic, uint256)
     _total_borrow: Rebase = self.total_borrow
     # This could maybe revert in the case of bad debt, is that desired?
-    total_interest: uint256 = convert(_total_borrow.elastic - 
-        _total_borrow.base, uint256) # Interest is the difference between elastic and base, since they start at 1:1
+    total_interest: uint256 = convert(
+        _total_borrow.elastic - _total_borrow.base, uint256
+    )  # Interest is the difference between elastic and base, since they start at 1:1
     return total_interest + total_elastic
+
 
 @view
 @external
@@ -624,6 +683,7 @@ def convertToAssets(shareAmount: uint256) -> uint256:
     """
     return self._convertToAssets(shareAmount)
 
+
 @view
 @internal
 def _convertToAssets(shareAmount: uint256) -> uint256:
@@ -631,8 +691,11 @@ def _convertToAssets(shareAmount: uint256) -> uint256:
     if _total_asset.base == 0:
         # Shares mint 1:1 at the start until interest accrues
         return shareAmount
-    all_share: uint256 = convert(_total_asset.elastic + self.total_borrow.elastic, uint256)
+    all_share: uint256 = convert(
+        _total_asset.elastic + self.total_borrow.elastic, uint256
+    )
     return shareAmount * all_share / convert(_total_asset.base, uint256)
+
 
 @view
 @external
@@ -643,15 +706,19 @@ def convertToShares(assetAmount: uint256) -> uint256:
     """
     return self._convertToShares(assetAmount)
 
+
 @view
 @internal
 def _convertToShares(assetAmount: uint256) -> uint256:
     total_asset_base: uint256 = convert(self.total_asset.base, uint256)
-    all_share: uint256 = convert(self.total_asset.elastic + self.total_borrow.elastic, uint256)
+    all_share: uint256 = convert(
+        self.total_asset.elastic + self.total_borrow.elastic, uint256
+    )
     if all_share == 0:
         # Shares mint 1:1 at the start until interest accrues
         return assetAmount
     return assetAmount * total_asset_base / all_share
+
 
 @view
 @external
@@ -675,13 +742,14 @@ def previewDeposit(assets: uint256) -> uint256:
 
 
 @external
-def deposit(assets: uint256, receiver: address = msg.sender) -> uint256: 
+def deposit(assets: uint256, receiver: address = msg.sender) -> uint256:
     """
     @param assets - The amount of assets to deposit
     @param receiver - The address of the receiver
 
     @return - Returns the amount of shares minted for the deposit
     """
+    self._isPaused()
     shares_out: uint256 = self._add_asset(receiver, assets)
     log Deposit(msg.sender, receiver, assets, shares_out)
 
@@ -706,7 +774,6 @@ def previewMint(shares: uint256) -> uint256:
     """
     # Convert shares to assets
     return self._convertToAssets(shares)
-    
 
 
 @external
@@ -717,6 +784,7 @@ def mint(shares: uint256, receiver: address = msg.sender) -> uint256:
 
     @return - The amount of assets used
     """
+    self._isPaused()
     tokens_to_deposit: uint256 = self._convertToAssets(shares)
     shares_out: uint256 = self._add_asset(receiver, tokens_to_deposit)
     log Deposit(msg.sender, receiver, tokens_to_deposit, shares_out)
@@ -731,7 +799,11 @@ def maxWithdraw(owner: address) -> uint256:
     @param owner - The address of the owner
     @return - Returns the maximum amount of assets that can be withdrawn from the vault
     """
-    return min(self._convertToAssets(self.balanceOf[owner]), ERC20(asset).balanceOf(self))
+    return min(
+        self._convertToAssets(self.balanceOf[owner]),
+        ERC20(asset).balanceOf(self),
+    )
+
 
 @view
 @external
@@ -770,7 +842,10 @@ def maxRedeem(owner: address) -> uint256:
     @param owner - The address of the owner
     @return - Returns the maximum amount of shares that can be redeemed from the vault by the owner
     """
-    return min(self.balanceOf[owner], self._convertToShares(ERC20(asset).balanceOf(self)))
+    return min(
+        self.balanceOf[owner],
+        self._convertToShares(ERC20(asset).balanceOf(self)),
+    )
 
 
 @view
@@ -780,7 +855,10 @@ def previewRedeem(shares: uint256) -> uint256:
     @param shares - The amount of shares to redeem
     @return - Returns the amount of assets that would be returned if the shares were redeemed
     """
-    return min(self._convertToAssets(shares), self._convertToShares(ERC20(asset).balanceOf(self)))
+    return min(
+        self._convertToAssets(shares),
+        self._convertToShares(ERC20(asset).balanceOf(self)),
+    )
 
 
 @external
@@ -795,7 +873,9 @@ def redeem(
     @return - The amount of assets returned
     """
     self._accrue()
-    assets_out: uint256 = self._convertToAssets(self._remove_asset(receiver, owner, shares))
+    assets_out: uint256 = self._convertToAssets(
+        self._remove_asset(receiver, owner, shares)
+    )
     log Withdraw(msg.sender, receiver, owner, assets_out, shares)
 
     return assets_out
@@ -804,6 +884,11 @@ def redeem(
 # ///////////////////////////////////////////////////// #
 # 		        Internal Implementations	         	#
 # ///////////////////////////////////////////////////// #
+@internal
+def _isPaused():
+    assert (not self.paused)
+
+
 @internal
 def _accrue():
     _accrue_info: AccrueInfo = self.accrue_info
@@ -841,7 +926,6 @@ def _accrue():
         interest_accrued, uint128
     )
 
-
     full_asset_amount: uint256 = convert(
         _total_asset.elastic, uint256
     ) + convert(_total_borrow.elastic, uint256)
@@ -850,17 +934,17 @@ def _accrue():
     fee_amount: uint256 = (
         interest_accrued * self.protocol_fee / PROTOCOL_FEE_DIVISOR
     )  # % of interest paid goes to fee
-    
+
     fee_fraction = (
         fee_amount * convert(_total_asset.base, uint256) / full_asset_amount
-    ) # Update total fees earned
+    )  # Update total fees earned
     _accrue_info.fees_earned_fraction = (
         _accrue_info.fees_earned_fraction + convert(fee_fraction, uint128)
     )
 
     # Fees should be considered in total assets
     self.total_asset.base = _total_asset.base + convert(fee_fraction, uint128)
-    
+
     # Write new total borrow state to storage
     self.total_borrow = _total_borrow
 
@@ -915,23 +999,32 @@ def _accrue():
 
         _accrue_info.interest_per_second = new_interest_per_second
 
-
-    # Surge protection, within 1 day
-    dt: uint64 = convert(block.timestamp, uint64) - self.surge_info.last_elapsed_time
+    dt: uint64 = (
+        convert(block.timestamp, uint64) - self.surge_info.last_elapsed_time
+    )
     if dt > 86400:
         # if interest rate is increasing
-        if _accrue_info.interest_per_second > self.surge_info.last_interest_per_second:
+        if (
+            _accrue_info.interest_per_second
+            > self.surge_info.last_interest_per_second
+        ):
             # If daily change in interest rate is greater than Surge threshold, trigger surge breaker
-            dr: uint64 = _accrue_info.interest_per_second - self.surge_info.last_interest_per_second
+            dr: uint64 = (
+                _accrue_info.interest_per_second
+                - self.surge_info.last_interest_per_second
+            )
             if dr > PROTOCOL_SURGE_THRESHOLD:
-                self.surge_info.last_elapsed_time = convert(block.timestamp, uint64)
-                self.surge_info.last_interest_per_second = _accrue_info.interest_per_second
+                self.surge_info.last_elapsed_time = convert(
+                    block.timestamp, uint64
+                )
+                self.surge_info.last_interest_per_second = (
+                    _accrue_info.interest_per_second
+                )
                 # PoL Should accrue here, instead of to lenders, to discourage pid attacks as described in https://gauntlet.network/reports/pid
                 self.protocol_fee = PROTOCOL_FEE_DIVISOR  # 100% Protocol Fee
         else:
             # Reset protocol fee elsewise
-            self.protocol_fee = DEFAULT_PROTOCOL_FEE  # 10% Protocol Fee
-
+            self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10% Protocol Fee
     self.accrue_info = _accrue_info
 
 
@@ -947,7 +1040,7 @@ def _add_collateral(to: address, amount: uint256):
     self.total_collateral_share = old_total_collateral_share + amount
     assert ERC20(collateral).transferFrom(
         msg.sender, self, amount, default_return_value=True
-    ) # dev: Transfer Failed
+    )  # dev: Transfer Failed
 
     log AddCollateral(to, amount, new_collateral_share)
 
@@ -961,7 +1054,9 @@ def _remove_collateral(to: address, amount: uint256):
     new_collateral_share: uint256 = self.user_collateral_share[to] - amount
     self.user_collateral_share[msg.sender] = new_collateral_share
     self.total_collateral_share = self.total_collateral_share - amount
-    assert ERC20(collateral).transfer(to, amount, default_return_value=True) # dev: Transfer Failed
+    assert ERC20(collateral).transfer(
+        to, amount, default_return_value=True
+    )  # dev: Transfer Failed
 
     log RemoveCollateral(to, amount, new_collateral_share)
 
@@ -997,8 +1092,8 @@ def _add_asset(to: address, amount: uint256) -> uint256:
     self.balanceOf[to] = new_balance
 
     assert ERC20(asset).transferFrom(
-        msg.sender, self, amount
-    , default_return_value=True) # dev: Transfer Failed
+        msg.sender, self, amount, default_return_value=True
+    )  # dev: Transfer Failed
 
     return fraction
 
@@ -1011,7 +1106,9 @@ def _remove_asset(to: address, owner: address, amount: uint256) -> uint256:
     @return The amount of shares burned
     """
     if owner != msg.sender:
-        assert self.allowance[owner][msg.sender] >= amount, "Insufficient Allowance"
+        assert (
+            self.allowance[owner][msg.sender] >= amount
+        ), "Insufficient Allowance"
         self.allowance[owner][msg.sender] -= amount
 
     _total_asset: Rebase = self.total_asset
@@ -1022,12 +1119,14 @@ def _remove_asset(to: address, owner: address, amount: uint256) -> uint256:
 
     _total_asset.elastic -= convert(amount, uint128)
     _total_asset.base -= convert(amount, uint128)
-    assert _total_asset.base >= 1000, "Below Minimum"  
+    assert _total_asset.base >= 1000, "Below Minimum"
     self.total_asset = _total_asset
 
     new_balance: uint256 = self.balanceOf[owner] - amount
     self.balanceOf[owner] = new_balance
-    assert ERC20(asset).transfer(to, amount, default_return_value=True) # dev: Transfer Failed
+    assert ERC20(asset).transfer(
+        to, amount, default_return_value=True
+    )  # dev: Transfer Failed
 
     return share
 
@@ -1061,7 +1160,7 @@ def _borrow(to: address, amount: uint256) -> uint256:
     """
     self._update_exchange_rate()
     fee_amount: uint256 = (
-        amount * BORROW_OPENING_FEE
+        amount * self.BORROW_OPENING_FEE
     ) / BORROW_OPENING_FEE_PRECISION
 
     temp_total_borrow: Rebase = Rebase(
@@ -1080,9 +1179,13 @@ def _borrow(to: address, amount: uint256) -> uint256:
 
     _total_asset: Rebase = self.total_asset
     assert _total_asset.base >= 1000, "Below Minimum"
-    _total_asset.elastic = convert(convert(_total_asset.elastic, uint256) - amount, uint128)
+    _total_asset.elastic = convert(
+        convert(_total_asset.elastic, uint256) - amount, uint128
+    )
     self.total_asset = _total_asset
-    assert ERC20(asset).transfer(to, amount, default_return_value=True) # dev: Transfer Failed
+    assert ERC20(asset).transfer(
+        to, amount, default_return_value=True
+    )  # dev: Transfer Failed
     return amount
 
 
@@ -1107,8 +1210,8 @@ def _repay(to: address, payment: uint256) -> uint256:
     self.user_borrow_part[to] = self.user_borrow_part[to] - payment
     total_share: uint128 = self.total_asset.elastic
     assert ERC20(asset).transferFrom(
-        msg.sender, self, payment
-    , default_return_value=True) # dev: Transfer Failed
+        msg.sender, self, payment, default_return_value=True
+    )  # dev: Transfer Failed
 
     self.total_asset.elastic = total_share + convert(amount, uint128)
     return amount
@@ -1130,16 +1233,23 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
 
     _total_borrow: Rebase = self.total_borrow
     collateral_amt: uint256 = (
-        (collateral_share
-        * (EXCHANGE_RATE_PRECISION
-        / COLLATERIZATION_RATE_PRECISION))
+        (
+            collateral_share
+            * (EXCHANGE_RATE_PRECISION / COLLATERIZATION_RATE_PRECISION)
+        )
         * COLLATERIZATION_RATE
     )
 
     borrow_part = self.user_borrow_part[user]
-    borrow_part = self.mul_div((borrow_part * convert(_total_borrow.elastic, uint256)), exchange_rate, convert(_total_borrow.base, uint256), False)
+    borrow_part = self.mul_div(
+        (borrow_part * convert(_total_borrow.elastic, uint256)),
+        exchange_rate,
+        convert(_total_borrow.base, uint256),
+        False,
+    )
 
     return collateral_amt >= borrow_part
+
 
 # ///////////////////////////////////////////////////// #
 # 				External Implementations				#
@@ -1152,16 +1262,27 @@ def __init__(_asset: address, _collateral: address, _oracle: address):
     collateral = _collateral
     asset = _asset
     oracle = _oracle
-    self.protocol_fee = DEFAULT_PROTOCOL_FEE  # 10% 
+    self.DEFAULT_PROTOCOL_FEE = 100000
+    self.protocol_fee = 100000  # 10%
     hashed_name: bytes32 = keccak256(convert(NAME, Bytes[50]))
     hashed_version: bytes32 = keccak256(convert("1", Bytes[20]))
-    type_hash: bytes32 = keccak256(convert("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)", Bytes[82]))
+    type_hash: bytes32 = keccak256(
+        convert(
+            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)",
+            Bytes[82],
+        )
+    )
     _HASHED_NAME = hashed_name
     _HASHED_VERSION = hashed_version
     _TYPE_HASH = type_hash
     _CACHED_CHAIN_ID = chain.id
     _CACHED_SELF = self
-    _CACHED_DOMAIN_SEPARATOR = self._build_domain_separator(type_hash, hashed_name, hashed_version)
+    _CACHED_DOMAIN_SEPARATOR = self._build_domain_separator(
+        type_hash, hashed_name, hashed_version
+    )
+    self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10%
+    self.BORROW_OPENING_FEE = 50
+    factory = msg.sender
 
 
 @external
@@ -1194,6 +1315,7 @@ def remove_collateral(to: address, amount: uint256):
         msg.sender, self.exchange_rate
     ), "Insufficient Collateral"
 
+
 @external
 def borrow(to: address, amount: uint256) -> uint256:
     """
@@ -1201,6 +1323,7 @@ def borrow(to: address, amount: uint256) -> uint256:
     @param amount The amount of asset to borrow, in tokens
     @return The amount of tokens borrowed
     """
+    self._isPaused()
     self._accrue()
     borrowed: uint256 = self._borrow(to, amount)
     assert self._is_solvent(
@@ -1242,7 +1365,6 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
     updated, exchange_rate = self._update_exchange_rate()
     self._accrue()
 
-
     all_collateral_share: uint256 = 0
     all_borrow_amount: uint256 = 0
     all_borrow_part: uint256 = 0
@@ -1253,12 +1375,12 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
         borrow_part: uint256 = min(maxBorrowParts, available_borrow_part)
         self.user_borrow_part[user] = available_borrow_part - borrow_part
 
-        borrow_amount: uint256  = self.to_elastic(_total_borrow, borrow_part, False)
+        borrow_amount: uint256 = self.to_elastic(
+            _total_borrow, borrow_part, False
+        )
 
         collateral_share: uint256 = (
-            (borrow_amount
-            * LIQUIDATION_MULTIPLIER
-            * exchange_rate)
+            (borrow_amount * LIQUIDATION_MULTIPLIER * exchange_rate)
             / (LIQUIDATION_MULTIPLIER_PRECISION * EXCHANGE_RATE_PRECISION)
         )
 
@@ -1266,9 +1388,9 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
             self.user_collateral_share[user] - collateral_share
         )
 
-        all_collateral_share += + collateral_share
+        all_collateral_share += +collateral_share
         all_borrow_amount += borrow_amount
-        all_borrow_part += borrow_part 
+        all_borrow_part += borrow_part
 
     assert all_borrow_amount != 0, "CogPair: all are solvent"
 
@@ -1279,16 +1401,68 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
         all_borrow_part, uint128
     )
 
-    self.total_collateral_share = self.total_collateral_share - all_collateral_share
+    self.total_collateral_share = (
+        self.total_collateral_share - all_collateral_share
+    )
 
     assert ERC20(collateral).transfer(
-        to, all_collateral_share,
-    default_return_value=True) # dev: Transfer failed
+        to, all_collateral_share, default_return_value=True
+    )  # dev: Transfer failed
 
     assert ERC20(asset).transferFrom(
-        msg.sender, self, all_borrow_part
-    , default_return_value=True) # dev: Transfer failed
-    
+        msg.sender, self, all_borrow_part, default_return_value=True
+    )  # dev: Transfer failed
+
     self.total_asset.elastic = self.total_asset.elastic + convert(
         all_borrow_part, uint128
     )
+
+
+# ///////////////////////////////////////////////////// #
+# 				Tinkermaster Control Panel				#
+# ///////////////////////////////////////////////////// #
+
+@external
+def update_borrow_fee(newFee: uint256):
+    assert (msg.sender == factory)
+    assert (
+        newFee <= BORROW_OPENING_FEE_PRECISION / 2
+    )  # Prevent rugging via borrow fee
+    self.BORROW_OPENING_FEE = newFee
+
+
+@external
+def update_default_protocol_fee(newFee: uint256):
+    assert (msg.sender == factory)
+    assert (newFee <= PROTOCOL_FEE_DIVISOR)
+    self.DEFAULT_PROTOCOL_FEE = newFee
+
+
+@external
+def pause():
+    assert (msg.sender == factory)
+    self.paused = True
+
+
+@external
+def unpause():
+    assert (msg.sender == factory)
+    self.paused = False
+
+@external
+def roll_over_pol():
+    """
+    @dev Withdraws protocol fees and deposits them into the pool on behalf of the tinkermaster address
+    """
+    assert (msg.sender == factory)
+    _fee_to: address = ICogFactory(factory).fee_to()
+    _accrue_info: AccrueInfo = self.accrue_info
+
+    # Withdraw protocol fees
+    fees_earned_fraction: uint256 = convert(_accrue_info.fees_earned_fraction, uint256)
+    self.balanceOf[_fee_to] = self.balanceOf[_fee_to] + fees_earned_fraction
+    self.accrue_info.fees_earned_fraction = 0
+
+    log Transfer(convert(0, address), _fee_to, fees_earned_fraction)
+
+    

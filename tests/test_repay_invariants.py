@@ -19,7 +19,8 @@ from tests.fixtures import (
     cog_pair
 )
 
-def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset):
+def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset, chain):
+    snap = chain.snapshot()
     amount = 10000 * 10 ** 18
     # Initial setup
     account = accounts[0]
@@ -58,9 +59,10 @@ def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset):
     assert new_total_borrow.base == old_total_borrow.base - amount - fee
     assert new_borrow_part == old_borrow_part - amount - fee
 
-    # Can't overpay with repay
+    # Test Can't overpay with repay
     asset.mint(account, amount*100, sender=account)
     asset.approve(cog_pair, amount*100, sender=account)
-    #with ape.reverts():
-    #    cog_pair.repay(account, amount*100, sender=account)
-    
+    with ape.reverts():
+        cog_pair.repay(account, amount*100, sender=account)
+
+    #chain.restore(snap)
