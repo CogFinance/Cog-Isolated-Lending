@@ -31,7 +31,7 @@ def oracle(account, project):
 
 @pytest.fixture(scope="session")
 def cog_pair_blueprint(account, project):
-    bytecode = project.cog_pair.contract_type.deployment_bytecode.bytecode
+    bytecode = project.cog_medium_pair.contract_type.deployment_bytecode.bytecode
     cog_pair_blueprint = construct_blueprint_deploy_bytecode(bytecode)
     return deploy_blueprint(account, cog_pair_blueprint)
 

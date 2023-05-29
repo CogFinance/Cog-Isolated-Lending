@@ -10,6 +10,10 @@
 
 from vyper.interfaces import ERC20
 from vyper.interfaces import ERC20Detailed
+from vyper.interfaces import ERC4626
+
+implements: ERC20
+implements: ERC4626
 
 # ///////////////////////////////////////////////////// #
 #                  Rebase Math Helpers                  #
@@ -1389,7 +1393,7 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
             self.user_collateral_share[user] - collateral_share
         )
 
-        all_collateral_share += +collateral_share
+        all_collateral_share += collateral_share
         all_borrow_amount += borrow_amount
         all_borrow_part += borrow_part
 

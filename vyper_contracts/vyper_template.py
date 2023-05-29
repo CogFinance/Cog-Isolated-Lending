@@ -55,7 +55,7 @@ class StablePair:
 pair_configurations = [HighPair(), MediumPair(), LowPair(), StablePair()]
 
 environment = Environment(loader=FileSystemLoader("templates/"))
-template = environment.get_template("cog_pair.template.vy")
+template = environment.get_template("cog_pair.template")
 
 for pair in pair_configurations:
     filename = f"cog_{str(pair).lower()}.vy"
