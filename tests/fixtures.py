@@ -37,7 +37,7 @@ def cog_pair_blueprint(account, project):
 
 @pytest.fixture(scope="session")
 def cog_factory(account, project, cog_pair_blueprint):
-    return project.cog_factory.deploy(cog_pair_blueprint, sender=account)
+    return project.cog_factory.deploy(cog_pair_blueprint, account, sender=account)
 
 
 @pytest.fixture(scope="session")

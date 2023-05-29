@@ -17,6 +17,7 @@ def setPrice(_price: uint256):
 def setUpdated(_updated: bool):
     self.updated = _updated
 
+
 @view
 @external
 def get() -> (bool, uint256):
