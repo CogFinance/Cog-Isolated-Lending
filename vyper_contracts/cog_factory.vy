@@ -160,14 +160,14 @@ def update_default_protocol_fee(pair: address, newFee: uint256):
     self._check_owner()
     ICogPair(pair).update_default_protocol_fee(newFee)
 
+
 @external
 def change_fee_to(new_owner: address):
     """
-    @dev Returns the address to which protocol fees are sent.
+    @dev Returns the address to which protocol fees arema sent.
     """
     self._check_owner()
     self.fee_to = new_owner
-
 
 
 @external
@@ -180,5 +180,3 @@ def pause(pair: address):
 def unpause(pair: address):
     assert (self.priv_users[msg.sender] == True)
     ICogPair(pair).unpause()
-
-

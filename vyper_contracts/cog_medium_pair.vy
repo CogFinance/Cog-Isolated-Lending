@@ -10,6 +10,10 @@
 
 from vyper.interfaces import ERC20
 from vyper.interfaces import ERC20Detailed
+from vyper.interfaces import ERC4626
+
+implements: ERC20
+implements: ERC4626
 
 # ///////////////////////////////////////////////////// #
 #                  Rebase Math Helpers                  #
@@ -261,6 +265,7 @@ def mul_div(
 interface IOracle:
     def get() -> (bool, uint256): nonpayable
 
+
 # Factory Interface
 interface ICogFactory:
     def fee_to() -> address: view
@@ -358,7 +363,7 @@ factory: public(immutable(address))  # Address of the factory
 paused: public(bool)  # Status of if the pool is paused
 
 # ///////////////////////////////////////////////////// #
-#          Configuration Constants - (Medium)           #
+#          Configuration Constants - ()           #
 # ///////////////////////////////////////////////////// #
 EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
@@ -379,13 +384,13 @@ PROTOCOL_SURGE_THRESHOLD: constant(
 ) = 36701  # If IR surges ~10% in 1 day then Protocol begins accuring PoL
 
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
-MINIMUM_TARGET_UTILIZATION: constant(uint256) = 600000000000000000  # 60%
-MAXIMUM_TARGET_UTILIZATION: constant(uint256) = 800000000000000000  # 80%
+MINIMUM_TARGET_UTILIZATION: constant(uint256) = 600000000000000000
+MAXIMUM_TARGET_UTILIZATION: constant(uint256) = 800000000000000000  
 FACTOR_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
-STARTING_INTEREST_PER_SECOND: constant(uint64) = 317097920  # 1% APR
-MINIMUM_INTEREST_PER_SECOND: constant(uint64) = 79274480  # Aprox 0.25% APR
-MAXIMUM_INTEREST_PER_SECOND: constant(uint64) = 317097920000  # Aprox 1000% APR
+STARTING_INTEREST_PER_SECOND: constant(uint64) = 317097920
+MINIMUM_INTEREST_PER_SECOND: constant(uint64) = 79274480
+MAXIMUM_INTEREST_PER_SECOND: constant(uint64) = 31709792000 
 INTEREST_ELASTICITY: constant(
     uint256
 ) = 28800000000000000000000000000000000000000  # 2.88e40
@@ -1388,7 +1393,7 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
             self.user_collateral_share[user] - collateral_share
         )
 
-        all_collateral_share += +collateral_share
+        all_collateral_share += collateral_share
         all_borrow_amount += borrow_amount
         all_borrow_part += borrow_part
 
@@ -1449,6 +1454,7 @@ def unpause():
     assert (msg.sender == factory)
     self.paused = False
 
+
 @external
 def roll_over_pol():
     """
@@ -1459,10 +1465,10 @@ def roll_over_pol():
     _accrue_info: AccrueInfo = self.accrue_info
 
     # Withdraw protocol fees
-    fees_earned_fraction: uint256 = convert(_accrue_info.fees_earned_fraction, uint256)
+    fees_earned_fraction: uint256 = convert(
+        _accrue_info.fees_earned_fraction, uint256
+    )
     self.balanceOf[_fee_to] = self.balanceOf[_fee_to] + fees_earned_fraction
     self.accrue_info.fees_earned_fraction = 0
 
     log Transfer(convert(0, address), _fee_to, fees_earned_fraction)
-
-    

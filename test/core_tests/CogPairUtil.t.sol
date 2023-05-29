@@ -23,7 +23,7 @@ contract CogPairTest is DSTest {
         collateral = new MockERC20("collateral", "TKB", 18);
         oracle = new MockOracle();
 
-        address pair_blueprint = vyperDeployer.deployBlueprint("cog_pair");
+        address pair_blueprint = vyperDeployer.deployBlueprint("cog_medium_pair");
         address pair_factory = vyperDeployer.deployContract("cog_factory", abi.encode(pair_blueprint));
         pair = ICogPair(ICogFactory(pair_factory).deploy_medium_risk_pair(address(asset), address(collateral), address(oracle)));
         
