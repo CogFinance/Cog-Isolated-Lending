@@ -65,4 +65,4 @@ def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset, chain):
     with ape.reverts():
         cog_pair.repay(account, amount*100, sender=account)
 
-    #chain.restore(snap)
+    chain.restore(snap)
