@@ -92,6 +92,9 @@ def test_can_liquidate(cog_pair, accounts, chain, collateral, asset, oracle):
     asset.mint(account, 90000000000000000000000000000, sender=account)
     asset.approve(cog_pair, 90000000000000000000000000000, sender=account)
 
-    print(cog_pair.user_collateral_share(accounts[2]))
-
-    cog_pair.liquidate(accounts[2],157563025210084033613445370,accounts[1],sender=accounts[1])
+    cog_pair.liquidate(
+        accounts[2],
+        157563024000000000000000000,
+        accounts[1],
+        sender=accounts[1]
+    )

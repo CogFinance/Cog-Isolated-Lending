@@ -261,6 +261,7 @@ def mul_div(
 interface IOracle:
     def get() -> (bool, uint256): nonpayable
 
+
 # Factory Interface
 interface ICogFactory:
     def fee_to() -> address: view
@@ -358,7 +359,7 @@ factory: public(immutable(address))  # Address of the factory
 paused: public(bool)  # Status of if the pool is paused
 
 # ///////////////////////////////////////////////////// #
-#          Configuration Constants - (Medium)           #
+#          Configuration Constants - ()           #
 # ///////////////////////////////////////////////////// #
 EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
@@ -379,13 +380,13 @@ PROTOCOL_SURGE_THRESHOLD: constant(
 ) = 36701  # If IR surges ~10% in 1 day then Protocol begins accuring PoL
 
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
-MINIMUM_TARGET_UTILIZATION: constant(uint256) = 600000000000000000  # 60%
-MAXIMUM_TARGET_UTILIZATION: constant(uint256) = 800000000000000000  # 80%
+MINIMUM_TARGET_UTILIZATION: constant(uint256) = 600000000000000000
+MAXIMUM_TARGET_UTILIZATION: constant(uint256) = 800000000000000000  
 FACTOR_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
-STARTING_INTEREST_PER_SECOND: constant(uint64) = 317097920  # 1% APR
-MINIMUM_INTEREST_PER_SECOND: constant(uint64) = 79274480  # Aprox 0.25% APR
-MAXIMUM_INTEREST_PER_SECOND: constant(uint64) = 317097920000  # Aprox 1000% APR
+STARTING_INTEREST_PER_SECOND: constant(uint64) = 1585489600
+MINIMUM_INTEREST_PER_SECOND: constant(uint64) = 634195840
+MAXIMUM_INTEREST_PER_SECOND: constant(uint64) = 317097920000 
 INTEREST_ELASTICITY: constant(
     uint256
 ) = 28800000000000000000000000000000000000000  # 2.88e40
@@ -1449,6 +1450,7 @@ def unpause():
     assert (msg.sender == factory)
     self.paused = False
 
+
 @external
 def roll_over_pol():
     """
@@ -1459,10 +1461,10 @@ def roll_over_pol():
     _accrue_info: AccrueInfo = self.accrue_info
 
     # Withdraw protocol fees
-    fees_earned_fraction: uint256 = convert(_accrue_info.fees_earned_fraction, uint256)
+    fees_earned_fraction: uint256 = convert(
+        _accrue_info.fees_earned_fraction, uint256
+    )
     self.balanceOf[_fee_to] = self.balanceOf[_fee_to] + fees_earned_fraction
     self.accrue_info.fees_earned_fraction = 0
 
     log Transfer(convert(0, address), _fee_to, fees_earned_fraction)
-
-    
