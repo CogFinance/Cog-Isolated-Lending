@@ -53,7 +53,7 @@ def deploy(network):
         'nonce': account.nonce,
     }
 
-    cog_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_pair.contract_type.deployment_bytecode.bytecode)
+    cog_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_medium_pair.contract_type.deployment_bytecode.bytecode)
     blueprint_address = deploy_blueprint(account, cog_pair_blueprint)
     print(f"Deployed CogPair blueprint to {Fore.GREEN}{blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
 
@@ -66,7 +66,7 @@ def deploy(network):
     }
 
     # Deploy Factory
-    factory = account.deploy(project.cog_factory, blueprint_address, network=network, **kw)
+    factory = account.deploy(project.cog_factory, blueprint_address, blueprint_address, network=network, **kw)
     print(f"Deployed CogFactory to {Fore.GREEN}{factory.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
 
     kw['nonce'] = account.nonce
@@ -87,4 +87,4 @@ def deploy(network):
     kw['nonce'] = account.nonce
 
     receipt = factory.deploy_medium_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    print(f"Deployed CogPair to {Fore.GREEN}{receipt.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed CogPair to {Fore.GREEN}{receipt.to}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
