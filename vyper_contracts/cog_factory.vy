@@ -2,12 +2,15 @@
 
 """
 @title Cog Factory
+
 @license GNU Affero General Public License v3.0
 @author Cog Finance
 @notice A privledged factory for creating Cog Pairs and managing their protocol-owned liquidity
 """
 
-# Ty snekmate for the ownership code
+# ///////////////////////////////////////////////////// #
+#                  2Step Ownership                      #
+# ///////////////////////////////////////////////////// #
 
 # @dev Returns the address of the current owner.
 owner: public(address)
@@ -104,6 +107,10 @@ interface ICogPair:
     def update_default_protocol_fee(newFee: uint256): nonpayable
     def pause(): nonpayable
     def unpause(): nonpayable
+
+# ///////////////////////////////////////////////////// #
+#                       Events                          #
+# ///////////////////////////////////////////////////// #
 
 event StablePairCreated:
     asset: indexed(address)
