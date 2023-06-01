@@ -105,58 +105,78 @@ interface ICogPair:
     def pause(): nonpayable
     def unpause(): nonpayable
 
-
-event PairCreated:
+event StablePairCreated:
     asset: indexed(address)
     collateral: indexed(address)
     pair: indexed(address)
 
+event LowPairCreated:
+    asset: indexed(address)
+    collateral: indexed(address)
+    pair: indexed(address)
 
+event MediumPairCreated:
+    asset: indexed(address)
+    collateral: indexed(address)
+    pair: indexed(address)
+
+event HighPairCreated:
+    asset: indexed(address)
+    collateral: indexed(address)
+    pair: indexed(address)
+
+event CustomPairCreated:
+    blueprint: indexed(address)
+    pair: indexed(address)
+    asset: address
+    collateral: address
+
+stable_blueprint: immutable(address)
+low_blueprint: immutable(address)
 medium_blueprint: immutable(address)
+high_blueprint: immutable(address)
 
 priv_users: public(HashMap[address, bool])
 
 fee_to: public(address)
 
 
-@external
-def __init__(_medium_blueprint: address, fee_to: address):
-    """
-    Initialize the contract
-    """
-    medium_blueprint = _medium_blueprint
-    self.fee_to = fee_to
-    self._transfer_ownership(msg.sender)
-
-
-@external
-def deploy_medium_risk_pair(
-    asset: address, collateral: address, oracle: address
-) -> address:
-    """
-    Deploy a medium risk pair
-    """
-    pair: address = create_from_blueprint(
-        medium_blueprint, asset, collateral, oracle, code_offset=3
-    )
-    log PairCreated(asset, collateral, pair)
-    return pair
-
+# ///////////////////////////////////////////////////// #
+#                     Ownership Functions               #
+# ///////////////////////////////////////////////////// #
 
 @external
 def setPrivUserStatus(user: address, status: bool):
+    """
+    @dev Sets the status of a privledged user
+
+    @param user The address of the user
+    @param status The status to set the user to
+    """
     self._check_owner()
     self.priv_users[user] = status
 
 
 @external
 def update_borrow_fee(pair: address, newFee: uint256):
+    """
+    @dev Sets the status of a privledged user
+
+    @param pair The address of the pair to change the fee of
+    @param newFee The fee to change the borrow fee to
+    """
     self._check_owner()
     ICogPair(pair).update_borrow_fee(newFee)
 
 
 @external
 def update_default_protocol_fee(pair: address, newFee: uint256):
+    """
+    @dev Sets the default protocol fee on a given pair
+
+    @param pair The address of the pair to change the fee of
+    @param newFee The fee to change the default protocol fee to for the given pair
+    """
     self._check_owner()
     ICogPair(pair).update_default_protocol_fee(newFee)
 
@@ -165,6 +185,8 @@ def update_default_protocol_fee(pair: address, newFee: uint256):
 def change_fee_to(new_owner: address):
     """
     @dev Returns the address to which protocol fees arema sent.
+
+    @param new_owner The address to which protocol fees are sent
     """
     self._check_owner()
     self.fee_to = new_owner
@@ -172,11 +194,141 @@ def change_fee_to(new_owner: address):
 
 @external
 def pause(pair: address):
+    """
+    @dev Pauses a given pair
+
+    @param pair The address of the pair to pause
+    """
     assert (self.priv_users[msg.sender] == True)
     ICogPair(pair).pause()
 
 
 @external
 def unpause(pair: address):
+    """
+    @dev Unpauses a given pair
+
+    @param pair The address of the pair to unpause
+    """
     assert (self.priv_users[msg.sender] == True)
     ICogPair(pair).unpause()
+
+@external
+def __init__(_stable_blueprint: address, _low_blueprint: address, _medium_blueprint: address, _high_blueprint: address, fee_to: address):
+    """
+    @dev Initializes the factory
+
+    @param _stable_blueprint The address of the stable risk pair blueprint
+    @param _low_blueprint The address of the low risk pair blueprint
+    @param _medium_blueprint The address of the medium risk pair blueprint
+    @param _high_blueprint The address of the high risk pair blueprint
+
+    @param fee_to The address to which protocol fees are sent
+    """
+    stable_blueprint = _stable_blueprint
+    low_blueprint = _low_blueprint
+    medium_blueprint = _medium_blueprint
+    high_blueprint = _high_blueprint
+    self.fee_to = fee_to
+    self._transfer_ownership(msg.sender)
+
+# ///////////////////////////////////////////////////// #
+#               Pair Deployment Functions               #
+# ///////////////////////////////////////////////////// #
+
+@external
+def deploy_stable_risk_pair(
+    asset: address, collateral: address, oracle: address
+) -> address:
+    """
+    @dev Deploy a stable risk pair
+
+    @param asset The address of the asset token
+    @param collateral The address of the collateral token
+    @param oracle The address of the oracle to use for the pair
+
+    @return pair The address of the deployed pair
+    """
+    pair: address = create_from_blueprint(
+        stable_blueprint, asset, collateral, oracle, code_offset=3
+    )
+    log StablePairCreated(asset, collateral, pair)
+    return pair
+
+@external
+def deploy_low_risk_pair(
+    asset: address, collateral: address, oracle: address
+) -> address:
+    """
+    @dev Deploy a low risk pair
+    
+    @param asset The address of the asset token
+    @param collateral The address of the collateral token
+    @param oracle The address of the oracle to use for the pair
+
+    @return pair The address of the deployed pair
+    """
+    pair: address = create_from_blueprint(
+        low_blueprint, asset, collateral, oracle, code_offset=3
+    )
+    log LowPairCreated(asset, collateral, pair)
+    return pair
+
+@external
+def deploy_medium_risk_pair(
+    asset: address, collateral: address, oracle: address
+) -> address:
+    """
+    @dev Deploy a medium risk pair
+
+    @param asset The address of the asset token
+    @param collateral The address of the collateral token
+    @param oracle The address of the oracle to use for the pair
+
+    @return pair The address of the deployed pair
+    """
+    pair: address = create_from_blueprint(
+        medium_blueprint, asset, collateral, oracle, code_offset=3
+    )
+    log MediumPairCreated(asset, collateral, pair)
+    return pair
+
+@external
+def deploy_high_risk_pair(
+    asset: address, collateral: address, oracle: address
+) -> address:
+    """
+    @dev Deploy a high risk pair
+    
+    @param asset The address of the asset token
+    @param collateral The address of the collateral token
+    @param oracle The address of the oracle to use for the pair
+
+    @return pair The address of the deployed pair
+    """
+    pair: address = create_from_blueprint(
+        high_blueprint, asset, collateral, oracle, code_offset=3
+    )
+    log HighPairCreated(asset, collateral, pair)
+    return pair
+
+@external
+def deploy_custom_risk_pair(
+    asset: address, collateral: address, oracle: address, blueprint: address, code_offset: uint256
+) -> address:
+    """
+    @dev Deploy a custom pair with a different set of parameters
+
+    @param asset The address of the asset token
+    @param collateral The address of the collateral token
+    @param oracle The address of the oracle to use for the pair
+    @param blueprint The address of the blueprint to use for the pair
+    @param code_offset The offset of the code to use for the given blueprint
+
+    @return pair The address of the deployed pair
+    """
+    pair: address = create_from_blueprint(
+        blueprint, asset, collateral, oracle, code_offset=code_offset
+    )
+    log CustomPairCreated(blueprint, pair, asset, collateral)
+    return pair
