@@ -224,26 +224,15 @@ interface UniswapV3Pool:
 
 @internal
 def fetch_uniswap_twap(oracle: address) -> uint256:
-
-     #           uint32[] memory secondsAgos = new uint32[](2);
-    #        secondsAgos[0] = twapInterval; // from (before)
-    #        secondsAgos[1] = 0; // to (now)
-
-     #       (int56[] memory tickCumulatives, ) = IUniswapV3Pool(uniswapV3Pool).observe(secondsAgos);
-
-    #        // tick(imprecise as it's an integer) to price
-    #        sqrtPriceX96 = TickMath.getSqrtRatioAtTick(
-    #            int24((tickCumulatives[1] - tickCumulatives[0]) / twapInterval)
-    #        );
     seconds_ago: uint32[2] = [twap_interval, 0]
 
     tick_cumulatives: int56[2] = [0, 0]
     seconds_per_liquidity_cumulative_x128s: uint160[2] = [0, 0]
 
     tick_cumulatives, seconds_per_liquidity_cumulative_x128s  = UniswapV3Pool(oracle).observe(seconds_ago)
+    sqrt_price_x96: uint160 = self.get_sqrt_ratio_at_tick(convert(((tick_cumulatives[1] - tick_cumulatives[0]) / convert(twap_interval, int56)), int24))
 
+    price: uint256 = convert(sqrt_price_x96, uint256) * convert(sqrt_price_x96, uint256) / convert(2**96, uint256)
 
+    return price
 
-
-
-    return 0
