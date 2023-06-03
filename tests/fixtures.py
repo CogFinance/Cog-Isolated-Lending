@@ -44,3 +44,8 @@ def cog_factory(account, project, cog_pair_blueprint):
 def cog_pair(account, project, cog_factory, collateral, asset, oracle):
     pair_address = cog_factory.deploy_medium_risk_pair(asset, collateral, oracle, sender=account).events[0].pair
     return project.cog_pair.at(pair_address)
+
+@pytest.fixture(scope="session")
+def tick_math(account, project):
+    math = account.deploy(project.mock_tick_math)
+    return math

@@ -1,5 +1,5 @@
 name: Cog
-contracts_folder: vyper_contracts   
+contracts_folder: vyper_contracts
 
 plugins:
   - name: vyper
