@@ -10,10 +10,6 @@
 
 from vyper.interfaces import ERC20
 from vyper.interfaces import ERC20Detailed
-from vyper.interfaces import ERC4626
-
-implements: ERC20
-implements: ERC4626
 
 # ///////////////////////////////////////////////////// #
 #                  Rebase Math Helpers                  #
@@ -832,7 +828,7 @@ def withdraw(
 
     @return - The amount of shares burned
     """
-    self._accrue()
+    self.efficient_accrue()
     shares_to_withdraw: uint256 = self._convertToShares(assets)
     shares: uint256 = self._remove_asset(receiver, owner, shares_to_withdraw)
     log Withdraw(msg.sender, receiver, owner, assets, shares)
@@ -877,7 +873,7 @@ def redeem(
 
     @return - The amount of assets returned
     """
-    self._accrue()
+    self.efficient_accrue()
     assets_out: uint256 = self._convertToAssets(
         self._remove_asset(receiver, owner, shares)
     )
@@ -893,9 +889,8 @@ def redeem(
 def _isPaused():
     assert (not self.paused)
 
-
 @internal
-def _accrue():
+def efficient_accrue():
     _accrue_info: AccrueInfo = self.accrue_info
     elapsed_time: uint256 = block.timestamp - convert(
         _accrue_info.last_accrued, uint256
@@ -903,7 +898,11 @@ def _accrue():
     if elapsed_time == 0:
         # Prevents re-executing this logic if multiple actions are taken in the same block
         return
+        
+    self._accrue(_accrue_info, elapsed_time)
 
+@internal
+def _accrue(_accrue_info: AccrueInfo, elapsed_time: uint256):
     _accrue_info.last_accrued = convert(block.timestamp, uint64)
 
     _total_borrow: Rebase = self.total_borrow
@@ -1004,12 +1003,6 @@ def _accrue():
 
         _accrue_info.interest_per_second = new_interest_per_second
 
-    self.check_surge(_accrue_info)
-
-    self.accrue_info = _accrue_info
-
-@internal
-def check_surge(_accrue_info: AccrueInfo):
     dt: uint64 = (
         convert(block.timestamp, uint64) - self.surge_info.last_elapsed_time
     )
@@ -1036,6 +1029,7 @@ def check_surge(_accrue_info: AccrueInfo):
         else:
             # Reset protocol fee elsewise
             self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10% Protocol Fee
+    self.accrue_info = _accrue_info
 
 @internal
 def _add_collateral(to: address, amount: uint256):
@@ -1299,7 +1293,7 @@ def accrue():
     """
     @dev Accrues interest and updates the exchange rate if needed
     """
-    self._accrue()
+    self.efficient_accrue()
 
 
 @external
@@ -1308,7 +1302,7 @@ def add_collateral(to: address, amount: uint256):
     @param to The address to add collateral for
     @param amount The amount of collateral to add, in tokens
     """
-    self._accrue()
+    self.efficient_accrue()
     self._add_collateral(to, amount)
 
 
@@ -1318,7 +1312,7 @@ def remove_collateral(to: address, amount: uint256):
     @param to The address to remove collateral for
     @param amount The amount of collateral to remove, in tokens
     """
-    self._accrue()
+    self.efficient_accrue()
     self._remove_collateral(to, amount)
     assert self._is_solvent(
         msg.sender, self.exchange_rate
@@ -1333,12 +1327,14 @@ def borrow(to: address, amount: uint256) -> uint256:
     @return The amount of tokens borrowed
     """
     self._isPaused()
-    self._accrue()
+    self.efficient_accrue()
     borrowed: uint256 = self._borrow(to, amount)
-    self.check_surge(self.accrue_info)
     assert self._is_solvent(
         msg.sender, self.exchange_rate
     ), "Insufficient Collateral"
+    accrue_info: AccrueInfo = self.accrue_info
+    # Now that utilization has changed, interest must be accrued to trigger any surge which now may be occuring
+    self._accrue(self.accrue_info, 0)
     return borrowed
 
 
@@ -1349,7 +1345,7 @@ def repay(to: address, payment: uint256) -> uint256:
     @param payment The amount of asset to repay, in tokens
     @return The amount of tokens repaid in shares
     """
-    self._accrue()
+    self.efficient_accrue()
     return self._repay(to, payment)
 
 
@@ -1373,7 +1369,7 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
     exchange_rate: uint256 = 0
     updated: bool = False  # Never used
     updated, exchange_rate = self._update_exchange_rate()
-    self._accrue()
+    self.efficient_accrue()
 
     all_collateral_share: uint256 = 0
     all_borrow_amount: uint256 = 0

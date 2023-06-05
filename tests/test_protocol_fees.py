@@ -83,15 +83,9 @@ def test_surge_fee_enacts(chain, accounts, collateral, asset, oracle, cog_pair):
     collateral.approve(cog_pair, AMOUNT*100, sender=account)
     cog_pair.add_collateral(account, AMOUNT*100, sender=account)
 
-    surge_info = cog_pair.surge_info()
-
     cog_pair.accrue(sender=account)
 
-    surge_info = cog_pair.surge_info()
-
     cog_pair.borrow(account, (AMOUNT // 60), sender=account)
-
-    surge_info = cog_pair.surge_info()
 
     # Protocol fee is at 100% during surge
     assert cog_pair.protocol_fee() == 1000000
