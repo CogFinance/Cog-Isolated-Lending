@@ -17,7 +17,7 @@ from tests.fixtures import *
     amount=st.integers(min_value=100000, max_value=2**128),
 )
 @settings(max_examples=5, deadline=timedelta(milliseconds=1000))
-def test_borrow_invariants(cog_pair, amount, collateral, accounts, asset, oracle):
+def test_borrow_medium_invariants(cog_pair, amount, collateral, accounts, asset, oracle):
     # Initial setup
     account = accounts[0]
     asset_one_coin_price = 1000000000000000000
@@ -53,5 +53,3 @@ def test_borrow_invariants(cog_pair, amount, collateral, accounts, asset, oracle
 
     # Test Invariant `total_borrow` is set equal to `total_borrow + amount`.
     assert cog_pair.total_borrow().base == old_total_borrow.base + amount + fee
-
-    # elastic parts of total borrow should be measured in accrue tests

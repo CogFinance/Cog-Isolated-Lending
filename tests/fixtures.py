@@ -65,3 +65,23 @@ def cog_factory(account, project, cog_stable_pair_blueprint, cog_low_pair_bluepr
 def cog_pair(account, project, cog_factory, collateral, asset, oracle):
     pair_address = cog_factory.deploy_medium_risk_pair(asset, collateral, oracle, sender=account).events[0].pair
     return project.cog_medium_pair.at(pair_address)
+
+@pytest.fixture(scope="session")
+def cog_pair_stable(account, project, cog_factory, collateral, asset, oracle):
+    pair_address = cog_factory.deploy_stable_risk_pair(asset, collateral, oracle, sender=account).events[0].pair
+    return project.cog_stable_pair.at(pair_address)
+
+@pytest.fixture(scope="session")
+def cog_pair_low(account, project, cog_factory, collateral, asset, oracle):
+    pair_address = cog_factory.deploy_low_risk_pair(asset, collateral, oracle, sender=account).events[0].pair
+    return project.cog_low_pair.at(pair_address)
+
+@pytest.fixture(scope="session")
+def cog_medium_pair(account, project, cog_factory, collateral, asset, oracle):
+    pair_address = cog_factory.deploy_medium_risk_pair(asset, collateral, oracle, sender=account).events[0].pair
+    return project.cog_medium_pair.at(pair_address)
+
+@pytest.fixture(scope="session")
+def cog_pair_high(account, project, cog_factory, collateral, asset, oracle):
+    pair_address = cog_factory.deploy_high_risk_pair(asset, collateral, oracle, sender=account).events[0].pair
+    return project.cog_high_pair.at(pair_address)
