@@ -9,15 +9,8 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import (
-    account,
-    collateral,
-    asset,
-    oracle,
-    cog_pair_blueprint,
-    cog_factory,
-    cog_pair
-)
+from tests.fixtures import *
+
 
 # Invariants found from https://eips.ethereum.org/EIPS/eip-20
 

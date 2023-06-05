@@ -221,7 +221,7 @@ def unpause(pair: address):
     ICogPair(pair).unpause()
 
 @external
-def __init__(_stable_blueprint: address, _low_blueprint: address, _medium_blueprint: address, _high_blueprint: address, fee_to: address):
+def __init__(_stable_blueprint: address, _low_blueprint: address, _medium_blueprint: address, _high_blueprint: address, _fee_to: address):
     """
     @dev Initializes the factory
 
@@ -230,13 +230,13 @@ def __init__(_stable_blueprint: address, _low_blueprint: address, _medium_bluepr
     @param _medium_blueprint The address of the medium risk pair blueprint
     @param _high_blueprint The address of the high risk pair blueprint
 
-    @param fee_to The address to which protocol fees are sent
+    @param _fee_to The address to which protocol fees are sent
     """
     stable_blueprint = _stable_blueprint
     low_blueprint = _low_blueprint
     medium_blueprint = _medium_blueprint
     high_blueprint = _high_blueprint
-    self.fee_to = fee_to
+    self.fee_to = _fee_to
     self._transfer_ownership(msg.sender)
 
 # ///////////////////////////////////////////////////// #

@@ -9,15 +9,7 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import (
-    account,
-    collateral,
-    asset,
-    oracle,
-    cog_pair_blueprint,
-    cog_factory,
-    cog_pair
-)
+from tests.fixtures import *
 
 # Most mission critical logic for borrow actually exists in accrue, and is best tested there
 

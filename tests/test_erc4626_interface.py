@@ -9,15 +9,8 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import (
-    account,
-    collateral,
-    asset,
-    oracle,
-    cog_pair_blueprint,
-    cog_factory,
-    cog_pair
-)
+from tests.fixtures import *
+
 
 # Invariants from https://eips.ethereum.org/EIPS/eip-4626, ensures compliance against the spec
 # Ty @fubuloubu for the reference as well at https://github.com/fubuloubu/ERC4626/blob/main/tests/test_methods.py

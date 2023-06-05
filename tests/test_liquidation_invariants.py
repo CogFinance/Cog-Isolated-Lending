@@ -6,15 +6,8 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import (
-    account,
-    collateral,
-    asset,
-    oracle,
-    cog_pair_blueprint,
-    cog_factory,
-    cog_pair
-)
+from tests.fixtures import *
+
 
 def test_cannot_liquidate(cog_pair, accounts, chain, collateral, asset, oracle):
     snap = chain.snapshot()

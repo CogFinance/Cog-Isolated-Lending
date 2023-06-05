@@ -1004,6 +1004,12 @@ def _accrue():
 
         _accrue_info.interest_per_second = new_interest_per_second
 
+    self.check_surge(_accrue_info)
+
+    self.accrue_info = _accrue_info
+
+@internal
+def check_surge(_accrue_info: AccrueInfo):
     dt: uint64 = (
         convert(block.timestamp, uint64) - self.surge_info.last_elapsed_time
     )
@@ -1030,8 +1036,6 @@ def _accrue():
         else:
             # Reset protocol fee elsewise
             self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10% Protocol Fee
-    self.accrue_info = _accrue_info
-
 
 @internal
 def _add_collateral(to: address, amount: uint256):
@@ -1331,6 +1335,7 @@ def borrow(to: address, amount: uint256) -> uint256:
     self._isPaused()
     self._accrue()
     borrowed: uint256 = self._borrow(to, amount)
+    self.check_surge(self.accrue_info)
     assert self._is_solvent(
         msg.sender, self.exchange_rate
     ), "Insufficient Collateral"
