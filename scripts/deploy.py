@@ -39,52 +39,63 @@ def deploy(network):
     colorama_init()
 
     # Deployer address
-    #if ':local:' in network:
-    #account = accounts.test_accounts[0]
-    # else:
-    account = accounts.load('alfa')
-    account.set_autosign(True)
+    if ':local' in network:
+        account = accounts.test_accounts[0]
+    else:
+        account = accounts.load('alfa')
+        account.set_autosign(True)
 
     kw = {
         'max_fee': project.provider.base_fee * 2,
         'max_priority_fee': int(0.5e9),
         'chain_id': project.provider.chain_id,
         'gas_price': project.provider.gas_price,
-        'nonce': account.nonce,
     }
 
-    cog_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_medium_pair.contract_type.deployment_bytecode.bytecode)
-    blueprint_address = deploy_blueprint(account, cog_pair_blueprint)
-    print(f"Deployed CogPair blueprint to {Fore.GREEN}{blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    cog_low_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_low_pair.contract_type.deployment_bytecode.bytecode)
+    cog_medium_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_medium_pair.contract_type.deployment_bytecode.bytecode)
+    cog_high_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_high_pair.contract_type.deployment_bytecode.bytecode)
 
-    kw = {
-        'max_fee': project.provider.base_fee * 2,
-        'max_priority_fee': int(0.5e9),
-        'chain_id': project.provider.chain_id,
-        'gas_price': project.provider.gas_price,
-        'nonce': account.nonce,
-    }
+    cog_stable_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_stable_pair.contract_type.deployment_bytecode.bytecode)
+
+    low_pair_blueprint_address = deploy_blueprint(account, cog_low_pair_blueprint)
+    medium_pair_blueprint_address = deploy_blueprint(account, cog_medium_pair_blueprint)
+    high_pair_blueprint_address = deploy_blueprint(account, cog_high_pair_blueprint)
+
+    stable_pair_blueprint_address = deploy_blueprint(account, cog_stable_pair_blueprint)
 
     # Deploy Factory
-    factory = account.deploy(project.cog_factory, blueprint_address, blueprint_address, network=network, **kw)
-    print(f"Deployed CogFactory to {Fore.GREEN}{factory.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-
-    kw['nonce'] = account.nonce
+    factory = account.deploy(project.cog_factory, stable_pair_blueprint_address, low_pair_blueprint_address, medium_pair_blueprint_address, high_pair_blueprint_address, account, network=network, **kw)
 
     token_0 = account.deploy(project.mock_erc20, "CogToken0", "CT0", 18, 1000000000000, network=network, **kw)
-    print(f"Deployed CogToken0 to {Fore.GREEN}{token_0.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-
-    kw['nonce'] = account.nonce
 
     token_1 = account.deploy(project.mock_erc20, "CogToken1", "CT1", 18, 1000000000000, network=network, **kw)
-    print(f"Deployed CogToken1 to {Fore.GREEN}{token_1.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-
-    kw['nonce'] = account.nonce
 
     oracle = account.deploy(project.mock_oracle, network=network, **kw)
-    print(f"Deployed CogOracle to {Fore.GREEN}{oracle.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
 
-    kw['nonce'] = account.nonce
+    receipt = factory.deploy_stable_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
+    stable_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
+
+    receipt = factory.deploy_low_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
+    low_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
 
     receipt = factory.deploy_medium_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    print(f"Deployed CogPair to {Fore.GREEN}{receipt.to}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    medium_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
+
+    receipt = factory.deploy_high_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
+    high_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
+
+    print(f"Deployed the Low Risk Cog Pair Blueprint to {Fore.BLUE}{low_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed the Medium Risk Cog Pair Blueprint to {Fore.BLUE}{medium_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed the High Risk Cog Pair Blueprint to {Fore.BLUE}{high_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed the Stable Cog Pair Blueprint to {Fore.BLUE}{stable_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+
+    print(f"Deployed CogFactory to {Fore.GREEN}{factory.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed CogToken0 to {Fore.GREEN}{token_0.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed CogToken1 to {Fore.GREEN}{token_1.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed CogOracle to {Fore.GREEN}{oracle.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+
+    print(f"Deployed Stable Risk CogPair to {Fore.GREEN}{stable_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed Low Risk CogPair to {Fore.GREEN}{low_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed Medium Risk CogPair to {Fore.GREEN}{medium_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed High Risk CogPair to {Fore.GREEN}{high_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
