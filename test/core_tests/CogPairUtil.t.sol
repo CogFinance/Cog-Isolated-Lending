@@ -18,7 +18,7 @@ contract CogPairTest is DSTest {
     MockOracle oracle;
     Vm vm;
 
-    function setUp() public {
+    function setUp() virtual public {
         asset = new MockERC20("asset", "TKA", 18);
         collateral = new MockERC20("collateral", "TKB", 18);
         oracle = new MockOracle();

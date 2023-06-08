@@ -1,5 +1,6 @@
 import ape
 import pytest
+from eth_account.messages import encode_defunct
 
 from datetime import timedelta
 
@@ -38,7 +39,11 @@ def test_totalSupply(cog_pair, accounts, asset):
 
     assert cog_pair.totalSupply() == AMOUNT * 2
 
-def test_balanceOf(cog_pair, accounts, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**128-1),
+)
+@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+def test_balanceOf(cog_pair, accounts, chain, asset, amount):
     """"
     Invariants Tested
     -----------------
@@ -46,8 +51,8 @@ def test_balanceOf(cog_pair, accounts, asset):
     2. `balanceOf[to]` is set equal to `balanceOf[to] + amount` after a transfer
     3. `balanceOf[msg.sender]` is set equal to `balanceOf[msg.sender] + amount` after a deposit
     """
-
-    AMOUNT = 1000000000000000000
+    snap = chain.snapshot()
+    AMOUNT = amount
 
     account = accounts[0]
 
@@ -57,11 +62,18 @@ def test_balanceOf(cog_pair, accounts, asset):
     cog_pair.deposit(AMOUNT, account, sender=account)
     assert cog_pair.balanceOf(account) == AMOUNT
 
-    cog_pair.transfer(accounts[1], int(AMOUNT/2), sender=account)
+    partial = int(AMOUNT/2)
 
-    assert cog_pair.balanceOf(account) == int(AMOUNT/2)
+    cog_pair.transfer(accounts[1], partial, sender=account)
 
-def test_transfer(cog_pair, accounts, asset):
+    assert cog_pair.balanceOf(account) == AMOUNT - partial
+    chain.restore(snap)
+
+@given(
+    amount=st.integers(min_value=100000, max_value=2**128-1),
+)
+@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+def test_transfer(cog_pair, accounts, chain, asset, amount):
     """"
     Invariants Tested
     -----------------
@@ -69,7 +81,8 @@ def test_transfer(cog_pair, accounts, asset):
     2. `balanceOf[to]` is set equal to `balanceOf[to] + amount`.
     3. Cannot transfer more funds than they own
     """
-    AMOUNT = 1000000000000000000
+    snap = chain.snapshot()
+    AMOUNT = amount
 
     account = accounts[0]
 
@@ -77,14 +90,21 @@ def test_transfer(cog_pair, accounts, asset):
     asset.approve(cog_pair, AMOUNT, sender=account)
     cog_pair.deposit(AMOUNT, account, sender=account)
 
-    cog_pair.transfer(accounts[1], int(AMOUNT/2), sender=account)
-    assert cog_pair.balanceOf(account) == int(AMOUNT/2)
-    assert cog_pair.balanceOf(accounts[1]) == int(AMOUNT/2)
+    partial = int(AMOUNT/2)
+
+    cog_pair.transfer(accounts[1], partial, sender=account)
+    assert cog_pair.balanceOf(account) == AMOUNT - partial
+    assert cog_pair.balanceOf(accounts[1]) == partial
 
     with ape.reverts():
         cog_pair.transfer(accounts[1], AMOUNT, sender=account)
+    chain.restore(snap)
 
-def test_transferFrom(cog_pair, accounts, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**128-1),
+)
+@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+def test_transferFrom(cog_pair, accounts, chain, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -96,7 +116,8 @@ def test_transferFrom(cog_pair, accounts, asset):
 
     Also tests approve and allowance implicitly
     """
-    AMOUNT = 1000000000000000000
+    snap = chain.snapshot()
+    AMOUNT = amount
 
     account = accounts[0]
 
@@ -104,30 +125,37 @@ def test_transferFrom(cog_pair, accounts, asset):
     asset.approve(cog_pair, AMOUNT, sender=account)
     cog_pair.deposit(AMOUNT, account, sender=account)
 
-    cog_pair.approve(accounts[1], int(AMOUNT/2), sender=account)
+    partial = int(AMOUNT/2)
 
-    cog_pair.transferFrom(account, accounts[1], int(AMOUNT/2), sender=accounts[1])
+    cog_pair.approve(accounts[1], partial, sender=account)
+
+    cog_pair.transferFrom(account, accounts[1], partial, sender=accounts[1])
 
     # `balanceOf[from]` is set equal to `balanceOf[from] - amount`.
-    assert cog_pair.balanceOf(account) == int(AMOUNT/2)
+    assert cog_pair.balanceOf(account) == AMOUNT - partial
 
     # `balanceOf[to]` is set equal to `balanceOf[to] + amount`.
-    assert cog_pair.balanceOf(accounts[1]) == int(AMOUNT/2)
+    assert cog_pair.balanceOf(accounts[1]) == partial
 
     # `allowance[from][msg.sender]` is set equal to `allowance[from][msg.sender] - amount`.
     assert cog_pair.allowance(account, accounts[1]) == 0
 
     with ape.reverts():
         # 5. Cannot transfer more funds than they are allowed to
-        cog_pair.transferFrom(account, accounts[1], int(AMOUNT/2), sender=accounts[1])
+        cog_pair.transferFrom(account, accounts[1], partial, sender=accounts[1])
     
-    cog_pair.transfer(accounts[0], int(AMOUNT/2), sender=accounts[1])
+    cog_pair.transfer(accounts[0], partial, sender=accounts[1])
     with ape.reverts():
         # 4. Cannot transfer more funds than they own 
         cog_pair.transferFrom(account, accounts[1], AMOUNT, sender=accounts[1])
 
+    chain.restore(snap)
 
-def test_approve_allowance(cog_pair, accounts, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**128-1),
+)
+@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+def test_approve_allowance(cog_pair, accounts, chain, asset, amount):
     """
     Invairants Tested
     -----------------
@@ -136,7 +164,8 @@ def test_approve_allowance(cog_pair, accounts, asset):
     3. `allowance[msg.sender][spender]` is set equal to `0` after a second approve with amount 0
     4. `allowance[msg.sender][spender]` decreased after a transferFrom
     """
-    AMOUNT = 1000000000000000000
+    snap = chain.snapshot()
+    AMOUNT = amount
 
     account = accounts[0]
 
@@ -144,10 +173,12 @@ def test_approve_allowance(cog_pair, accounts, asset):
     asset.approve(cog_pair, AMOUNT, sender=account)
     cog_pair.deposit(AMOUNT, account, sender=account)
 
-    cog_pair.approve(accounts[1], int(AMOUNT/2), sender=account)
+    partial = int(AMOUNT/2)
+
+    cog_pair.approve(accounts[1], partial, sender=account)
 
     # 1. `allowance[msg.sender][spender]` is set equal to `amount`.
-    assert cog_pair.allowance(account, accounts[1]) == int(AMOUNT/2)
+    assert cog_pair.allowance(account, accounts[1]) == partial
 
     cog_pair.approve(accounts[1], 2**256-1, sender=account)
 
@@ -159,9 +190,10 @@ def test_approve_allowance(cog_pair, accounts, asset):
     # 3. `allowance[msg.sender][spender]` is set equal to `0` after a second approve with amount 0
     assert cog_pair.allowance(account, accounts[1]) == 0
 
-    cog_pair.approve(accounts[1], int(AMOUNT/2), sender=account)
+    cog_pair.approve(accounts[1], partial, sender=account)
 
-    cog_pair.transferFrom(account, accounts[1], int(AMOUNT/2), sender=accounts[1])
+    cog_pair.transferFrom(account, accounts[1], partial, sender=accounts[1])
 
     # 4. `allowance[msg.sender][spender]` decreased after a transferFrom
     assert cog_pair.allowance(account, accounts[1]) == 0
+    chain.restore(snap)
