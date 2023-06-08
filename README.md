@@ -60,6 +60,45 @@ The factory which handles the deployment of the Cog Pairs. The factory works by 
 
 To allow the most flexible deployment of Cog, this repo prepares several integrations in mind, primarily [Bunni](https://github.com/zeframlou/bunni) for leveraged liquidity provision, and [Uniswap V3 TWAP](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol#L236).
 
-### Testing Design
+## Testing Design
 
-Testing is designed to make use of [Jade](https://github.com/ControlCplusControlV/Jade) for mutation testing, and Foundry for fuzzing.
+### Coverage
+
+**ERC20 Functions**
+
+- [totalSupply](./tests/test_erc20_interface.py#L18)
+- [balanceOf](./tests/test_erc20_interface.py#L46)
+- [transfer](./tests/test_erc20_interface.py#76)
+- [transferFrom](./tests/test_erc20_interface.py#107)
+- [approve](./tests/test_erc20_interface.py#158)
+- [allowance](./tests/test_erc20_interface.py#158)
+
+**ERC 2612 Functions**
+
+- [permit](./test//core_tests/Permit.t.sol)
+
+**ERC 4626**
+- [asset](./tests/test_erc4626_interface.py#18)
+- [totalAssets](./tests/test_erc4626_interface.py#21)
+- [convertToShares](./tests/test_erc4626_interface.py#87)
+- [convertToAssets](./tests/test_erc4626_interface.py#145)
+- [maxDeposit](./tests/test_erc4626_interface.py#193)
+- [previewDeposit](./tests/test_erc4626_interface.py#205)
+- [deposit](./tests/test_erc4626_interface.py#249)
+- [maxMint](./tests/test_erc4626_interface.py#285)
+- [previewMint](./tests/test_erc4626_interface.py#293)
+- [mint](./tests/test_erc4626_interface.py#347)
+- [maxWithdraw](./tests/test_erc4626_interface.py#406)
+- [previewWithdraw](./tests/test_erc4626_interface.py#444)
+- [withdraw](./tests/test_erc4626_interface.py#486)
+- [maxRedeem](./tests/test_erc4626_interface.py#549)
+- [previewRedeem](./tests/test_erc4626_interface.py#599)
+- [redeem](./tests/test_erc4626_interface.py#639)
+
+**General Functions**
+- [liquidate](./tests/test_liquidation_invariants.py)
+- [borrow](./tests/test_borrow_invariants.py)
+- [repay](./tests/test_repay_invariants.py)
+- [add_collateral](./tests/test_collateral_invariants.py#19)
+- [remove_collateral](./tests/test_collateral_invariants.py#83)
+- [Fee Logic for Pol](./tests/test_protocol_fees.py)
