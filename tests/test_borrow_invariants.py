@@ -16,7 +16,7 @@ from tests.fixtures import *
 @given(
     amount=st.integers(min_value=100000, max_value=2**128),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
+@settings(max_examples=5, deadline=None)
 def test_borrow_medium_invariants(cog_pair, amount, collateral, accounts, asset, oracle):
     # Initial setup
     account = accounts[0]

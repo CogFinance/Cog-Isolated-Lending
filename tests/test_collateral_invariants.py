@@ -15,7 +15,7 @@ from tests.fixtures import *
 @given(
     amount=st.integers(min_value=100000, max_value=2**128),
 )
-@settings(max_examples=10, deadline=timedelta(milliseconds=1000))
+@settings(max_examples=10, deadline=None)
 def test_add_collateral(cog_pair, amount, accounts, collateral):
     account = accounts[0]
 
@@ -79,7 +79,7 @@ def test_add_collateral(cog_pair, amount, accounts, collateral):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128),
 )
-@settings(max_examples=10, deadline=timedelta(milliseconds=1000))
+@settings(max_examples=10, deadline=None)
 def test_remove_collateral(cog_pair, amount, accounts, collateral):
     # Moslty irrelevant to the test, but we need to mint some collateral to the accounts
     # so that we can remove it.

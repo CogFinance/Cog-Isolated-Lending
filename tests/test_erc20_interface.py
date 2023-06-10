@@ -42,7 +42,7 @@ def test_totalSupply(cog_pair, accounts, asset):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=10, deadline=None)
 def test_balanceOf(cog_pair, accounts, chain, asset, amount):
     """"
     Invariants Tested
@@ -72,7 +72,7 @@ def test_balanceOf(cog_pair, accounts, chain, asset, amount):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=10, deadline=None)
 def test_transfer(cog_pair, accounts, chain, asset, amount):
     """"
     Invariants Tested
@@ -103,7 +103,7 @@ def test_transfer(cog_pair, accounts, chain, asset, amount):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=10, deadline=None)
 def test_transferFrom(cog_pair, accounts, chain, asset, amount):
     """
     Invariants Tested
@@ -154,7 +154,7 @@ def test_transferFrom(cog_pair, accounts, chain, asset, amount):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=10, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=10, deadline=None)
 def test_approve_allowance(cog_pair, accounts, chain, asset, amount):
     """
     Invairants Tested

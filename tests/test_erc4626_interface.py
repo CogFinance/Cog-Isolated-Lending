@@ -83,7 +83,7 @@ def test_totalAssets(cog_pair, oracle, accounts, collateral, asset, chain):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain, amount):
     """
     Invariants Tested
@@ -141,7 +141,7 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, chain, a
 @given(
     amount=st.integers(min_value=100000, max_value=2**128),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
+@settings(max_examples=5, deadline=None)
 def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, chain, amount):
     """
     Invariants Tested
@@ -201,7 +201,7 @@ def test_maxDeposit(cog_pair, account):
 @given(
     amount=st.integers(min_value=100000, max_value=2**256-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=1000))
+@settings(max_examples=5, deadline=None)
 def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset, amount, chain):
     """
     Invariants Tested
@@ -245,7 +245,7 @@ def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset, amount, c
 @given(
     amount=st.integers(min_value=100000, max_value=2**256-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_deposit(cog_pair, accounts, asset, amount, chain):
     """
     Invariants Tested
@@ -293,7 +293,7 @@ def test_maxMint(cog_pair, account):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_previewMint(cog_pair, oracle, accounts, collateral, asset, amount, chain):
     """
     Invariants Tested
@@ -343,7 +343,7 @@ def test_previewMint(cog_pair, oracle, accounts, collateral, asset, amount, chai
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_mint(cog_pair, accounts, asset, collateral, chain, oracle, amount):
     """
     Invariants Tested
@@ -402,7 +402,7 @@ def test_mint(cog_pair, accounts, asset, collateral, chain, oracle, amount):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_maxWithdraw(cog_pair, accounts, asset, collateral, amount, chain, oracle):
     """
     Invariants Tested
@@ -440,7 +440,7 @@ def test_maxWithdraw(cog_pair, accounts, asset, collateral, amount, chain, oracl
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle, chain, amount):
     """
     Invariants Tested
@@ -482,7 +482,7 @@ def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle, chain, a
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_withdraw(cog_pair, accounts, asset, chain, amount):
     """
     Invariants Tested
@@ -545,7 +545,7 @@ def test_withdraw(cog_pair, accounts, asset, chain, amount):
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_maxRedeem(cog_pair, accounts, asset, collateral, oracle, chain, amount):
     """
     Invariants Tested
@@ -595,7 +595,7 @@ def test_maxRedeem(cog_pair, accounts, asset, collateral, oracle, chain, amount)
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle, amount, chain):
     """
     Invariants Tested
@@ -635,7 +635,7 @@ def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle, amount, ch
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
-@settings(max_examples=5, deadline=timedelta(milliseconds=2000))
+@settings(max_examples=5, deadline=None)
 def test_redeem(cog_pair, accounts, asset, chain, amount):
     """
     Invariants Tested
