@@ -369,16 +369,15 @@ COLLATERIZATION_RATE: constant(uint256) = 75000  # 75%
 BORROW_OPENING_FEE: public(uint256)
 BORROW_OPENING_FEE_PRECISION: constant(uint256) = 100000
 
-protocol_fee: public(
-    uint256
-)  # Starts at 10%, raised when PoL only mode is activated to PROTOCOL_FEE_DIVISOR or 100%
+# Starts at 10%, raised when PoL only mode is activated to PROTOCOL_FEE_DIVISOR or 100%
+protocol_fee: public(uint256)
+
 DEFAULT_PROTOCOL_FEE: public(uint256)
 PROTOCOL_FEE_DIVISOR: constant(uint256) = 1000000
-# dr/dt, where dt = 1 day (86400), and dr is change in interest_rate per second or 3170979200 (10% interest rate)
-PROTOCOL_SURGE_THRESHOLD: constant(
-    uint64
-) = 36701  # If IR surges ~10% in 1 day then Protocol begins accuring PoL
 
+# If IR surges ~10% in 1 day then Protocol begins accuring PoL
+# dr/dt, where dt = 1 day (86400), and dr is change in interest_rate per second or 3170979200 (10% interest rate)
+PROTOCOL_SURGE_THRESHOLD: constant(uint64) = 36701  
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 MINIMUM_TARGET_UTILIZATION: immutable(uint256)
 MAXIMUM_TARGET_UTILIZATION: immutable(uint256) 
