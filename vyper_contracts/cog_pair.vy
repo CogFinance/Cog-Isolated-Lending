@@ -294,7 +294,7 @@ event Approval:
     allowance: uint256
 
 
-# ERC4646 Events
+# ERC4626 Events
 
 event Deposit:
     depositor: indexed(address)
