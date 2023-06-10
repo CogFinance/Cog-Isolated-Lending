@@ -368,5 +368,5 @@ def deploy_custom_risk_pair(
     pair: address = create_from_blueprint(
         _blueprint, asset, collateral, oracle, minimum_target_utilization, maximum_target_utilization, starting_interest_per_second, minimum_interest_per_second, maximum_interest_per_second, code_offset=code_offset
     )
-    log CustomPairCreated(blueprint, pair, asset, collateral)
+    log CustomPairCreated(_blueprint, pair, asset, collateral)
     return pair
