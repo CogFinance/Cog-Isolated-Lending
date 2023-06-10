@@ -360,8 +360,13 @@ def deploy_custom_risk_pair(
     @param asset The address of the asset token
     @param collateral The address of the collateral token
     @param oracle The address of the oracle to use for the pair
-    @param blueprint The address of the blueprint to use for the pair
+    @param _blueprint The address of the blueprint to use for the pair
     @param code_offset The offset of the code to use for the given blueprint
+    @param minimum_target_utilization The minimum target utilization for the pair
+    @param maximum_target_utilization The maximum target utilization for the pair
+    @param starting_interest_per_second The starting interest per second for the pair
+    @param minimum_interest_per_second The minimum interest per second for the pair
+    @param maximum_interest_per_second The maximum interest per second for the pair
 
     @return pair The address of the deployed pair
     """
