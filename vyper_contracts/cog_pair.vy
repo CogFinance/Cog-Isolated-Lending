@@ -572,21 +572,9 @@ def _to_typed_data_hash(
     """
     return keccak256(concat(b"\x19\x01", domain_separator, struct_hash))
 
-
 @internal
 @pure
-def _recover_vrs(hash: bytes32, v: uint256, r: uint256, s: uint256) -> address:
-    """
-    @dev Sourced from {ECDSA-_recover_vrs}.
-    @notice See {ECDSA-_recover_vrs} for the
-            function docstring.
-    """
-    return self._try_recover_vrs(hash, v, r, s)
-
-
-@internal
-@pure
-def _try_recover_vrs(
+def _recover_vrs(
     hash: bytes32, v: uint256, r: uint256, s: uint256
 ) -> address:
     """
