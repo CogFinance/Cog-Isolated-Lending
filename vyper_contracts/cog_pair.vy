@@ -359,7 +359,7 @@ factory: public(immutable(address))  # Address of the factory
 paused: public(bool)  # Status of if the pool is paused
 
 # ///////////////////////////////////////////////////// #
-#          Configuration Constants - ()           #
+#                  Configuration Constants              #
 # ///////////////////////////////////////////////////// #
 EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
@@ -380,13 +380,13 @@ PROTOCOL_SURGE_THRESHOLD: constant(
 ) = 36701  # If IR surges ~10% in 1 day then Protocol begins accuring PoL
 
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
-MINIMUM_TARGET_UTILIZATION: constant(uint256) = 600000000000000000
-MAXIMUM_TARGET_UTILIZATION: constant(uint256) = 800000000000000000  
+MINIMUM_TARGET_UTILIZATION: immutable(uint256)
+MAXIMUM_TARGET_UTILIZATION: immutable(uint256) 
 FACTOR_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
-STARTING_INTEREST_PER_SECOND: constant(uint64) = 1585489600
-MINIMUM_INTEREST_PER_SECOND: constant(uint64) = 634195840
-MAXIMUM_INTEREST_PER_SECOND: constant(uint64) = 317097920000 
+STARTING_INTEREST_PER_SECOND: immutable(uint64)
+MINIMUM_INTEREST_PER_SECOND: immutable(uint64)
+MAXIMUM_INTEREST_PER_SECOND: immutable(uint64)
 INTEREST_ELASTICITY: constant(
     uint256
 ) = 28800000000000000000000000000000000000000  # 2.88e40
@@ -1258,7 +1258,7 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
 # 				External Implementations				#
 # ///////////////////////////////////////////////////// #
 @external
-def __init__(_asset: address, _collateral: address, _oracle: address):
+def __init__(_asset: address, _collateral: address, _oracle: address, min_target_utilization: uint256, max_target_utilization: uint256, starting_interest_per_second: uint64, min_interest: uint64, max_interest: uint64):
     assert (
         _collateral != 0x0000000000000000000000000000000000000000
     ), "Invalid Collateral"
@@ -1283,6 +1283,11 @@ def __init__(_asset: address, _collateral: address, _oracle: address):
     _CACHED_DOMAIN_SEPARATOR = self._build_domain_separator(
         type_hash, hashed_name, hashed_version
     )
+    MINIMUM_TARGET_UTILIZATION = min_target_utilization
+    MAXIMUM_TARGET_UTILIZATION = max_target_utilization
+    STARTING_INTEREST_PER_SECOND = starting_interest_per_second
+    MINIMUM_INTEREST_PER_SECOND = min_interest
+    MAXIMUM_INTEREST_PER_SECOND = max_interest
     self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10%
     self.BORROW_OPENING_FEE = 50
     factory = msg.sender

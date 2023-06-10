@@ -138,10 +138,7 @@ event CustomPairCreated:
     asset: address
     collateral: address
 
-stable_blueprint: immutable(address)
-low_blueprint: immutable(address)
-medium_blueprint: immutable(address)
-high_blueprint: immutable(address)
+blueprint: immutable(address)
 
 priv_users: public(HashMap[address, bool])
 
@@ -221,21 +218,14 @@ def unpause(pair: address):
     ICogPair(pair).unpause()
 
 @external
-def __init__(_stable_blueprint: address, _low_blueprint: address, _medium_blueprint: address, _high_blueprint: address, _fee_to: address):
+def __init__(_blueprint: address, _fee_to: address):
     """
     @dev Initializes the factory
 
-    @param _stable_blueprint The address of the stable risk pair blueprint
-    @param _low_blueprint The address of the low risk pair blueprint
-    @param _medium_blueprint The address of the medium risk pair blueprint
-    @param _high_blueprint The address of the high risk pair blueprint
-
+    @param _blueprint The address of the blueprint to use for pair deployment
     @param _fee_to The address to which protocol fees are sent
     """
-    stable_blueprint = _stable_blueprint
-    low_blueprint = _low_blueprint
-    medium_blueprint = _medium_blueprint
-    high_blueprint = _high_blueprint
+    blueprint = _blueprint
     self.fee_to = _fee_to
     self._transfer_ownership(msg.sender)
 
@@ -256,8 +246,18 @@ def deploy_stable_risk_pair(
 
     @return pair The address of the deployed pair
     """
+
+    # 10% minimum utilization, 65% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 100000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 650000000000000000
+
+    # 0.25% minimum interest per second, 0.25% starting interest per second, 25% maximum interest per second
+    STARTING_INTEREST_PER_SECOND: uint64 = 158548960
+    MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = 7927448000
+
     pair: address = create_from_blueprint(
-        stable_blueprint, asset, collateral, oracle, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
     )
     log StablePairCreated(asset, collateral, pair)
     return pair
@@ -275,8 +275,18 @@ def deploy_low_risk_pair(
 
     @return pair The address of the deployed pair
     """
+
+    # 40% minimum utilization, 80% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 400000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 800000000000000000
+
+    # 0.25% minimum interest per second, 2% starting interest per second, 50% maximum interest per second
+    STARTING_INTEREST_PER_SECOND: uint64 = 634195840
+    MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = 15854896000
+
     pair: address = create_from_blueprint(
-        low_blueprint, asset, collateral, oracle, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
     )
     log LowPairCreated(asset, collateral, pair)
     return pair
@@ -294,8 +304,18 @@ def deploy_medium_risk_pair(
 
     @return pair The address of the deployed pair
     """
+
+    # 60% minimum utilization, 80% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 600000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 800000000000000000
+
+    # 0.25% minimum interest per second, 1% starting interest per second, 100% maximum interest per second
+    STARTING_INTEREST_PER_SECOND: uint64 = 317097920
+    MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = 31709792000
+
     pair: address = create_from_blueprint(
-        medium_blueprint, asset, collateral, oracle, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
     )
     log MediumPairCreated(asset, collateral, pair)
     return pair
@@ -313,15 +333,26 @@ def deploy_high_risk_pair(
 
     @return pair The address of the deployed pair
     """
+
+    # 60% minimum utilization, 80% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 600000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 800000000000000000
+
+    # 0.25% minimum interest per second, 5% starting interest per second, 1000% maximum interest per second
+    STARTING_INTEREST_PER_SECOND: uint64 = 1585489600
+    MINIMUM_INTEREST_PER_SECOND: uint64 = 634195840
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = 317097920000
+
     pair: address = create_from_blueprint(
-        high_blueprint, asset, collateral, oracle, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
     )
     log HighPairCreated(asset, collateral, pair)
     return pair
 
 @external
 def deploy_custom_risk_pair(
-    asset: address, collateral: address, oracle: address, blueprint: address, code_offset: uint256
+    asset: address, collateral: address, oracle: address, _blueprint: address, code_offset: uint256,
+    minimum_target_utilization: uint256, maximum_target_utilization: uint256, starting_interest_per_second: uint64, minimum_interest_per_second: uint64, maximum_interest_per_second: uint64
 ) -> address:
     """
     @dev Deploy a custom pair with a different set of parameters
@@ -335,7 +366,7 @@ def deploy_custom_risk_pair(
     @return pair The address of the deployed pair
     """
     pair: address = create_from_blueprint(
-        blueprint, asset, collateral, oracle, code_offset=code_offset
+        _blueprint, asset, collateral, oracle, minimum_target_utilization, maximum_target_utilization, starting_interest_per_second, minimum_interest_per_second, maximum_interest_per_second, code_offset=code_offset
     )
     log CustomPairCreated(blueprint, pair, asset, collateral)
     return pair

@@ -52,20 +52,13 @@ def deploy(network):
         'gas_price': project.provider.gas_price,
     }
 
-    cog_low_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_low_pair.contract_type.deployment_bytecode.bytecode)
-    cog_medium_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_medium_pair.contract_type.deployment_bytecode.bytecode)
-    cog_high_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_high_pair.contract_type.deployment_bytecode.bytecode)
+    cog_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_low_pair.contract_type.deployment_bytecode.bytecode)
 
-    cog_stable_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_stable_pair.contract_type.deployment_bytecode.bytecode)
 
-    low_pair_blueprint_address = deploy_blueprint(account, cog_low_pair_blueprint)
-    medium_pair_blueprint_address = deploy_blueprint(account, cog_medium_pair_blueprint)
-    high_pair_blueprint_address = deploy_blueprint(account, cog_high_pair_blueprint)
-
-    stable_pair_blueprint_address = deploy_blueprint(account, cog_stable_pair_blueprint)
+    cog_pair_blueprint_address = deploy_blueprint(account, cog_pair_blueprint)
 
     # Deploy Factory
-    factory = account.deploy(project.cog_factory, stable_pair_blueprint_address, low_pair_blueprint_address, medium_pair_blueprint_address, high_pair_blueprint_address, account, network=network, **kw)
+    factory = account.deploy(project.cog_factory, cog_pair_blueprint_address, account, network=network, **kw)
 
     token_0 = account.deploy(project.mock_erc20, "CogToken0", "CT0", 18, 1000000000000, network=network, **kw)
 
@@ -85,10 +78,7 @@ def deploy(network):
     receipt = factory.deploy_high_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
     high_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
 
-    print(f"Deployed the Low Risk Cog Pair Blueprint to {Fore.BLUE}{low_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed the Medium Risk Cog Pair Blueprint to {Fore.BLUE}{medium_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed the High Risk Cog Pair Blueprint to {Fore.BLUE}{high_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed the Stable Cog Pair Blueprint to {Fore.BLUE}{stable_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    print(f"Deployed the Cog Pair Blueprint to {Fore.BLUE}{cog_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
 
     print(f"Deployed CogFactory to {Fore.GREEN}{factory.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
     print(f"Deployed CogToken0 to {Fore.GREEN}{token_0.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")

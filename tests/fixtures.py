@@ -30,34 +30,15 @@ def oracle(account, project):
     return oracle
 
 @pytest.fixture(scope="session")
-def cog_high_pair_blueprint(account, project):
-    bytecode = project.cog_high_pair.contract_type.deployment_bytecode.bytecode
+def cog_pair_blueprint(account, project):
+    bytecode = project.cog_pair.contract_type.deployment_bytecode.bytecode
     cog_pair_blueprint = construct_blueprint_deploy_bytecode(bytecode)
     return deploy_blueprint(account, cog_pair_blueprint)
 
 
 @pytest.fixture(scope="session")
-def cog_medium_pair_blueprint(account, project):
-    bytecode = project.cog_medium_pair.contract_type.deployment_bytecode.bytecode
-    cog_pair_blueprint = construct_blueprint_deploy_bytecode(bytecode)
-    return deploy_blueprint(account, cog_pair_blueprint)
-
-@pytest.fixture(scope="session")
-def cog_low_pair_blueprint(account, project):
-    bytecode = project.cog_low_pair.contract_type.deployment_bytecode.bytecode
-    cog_pair_blueprint = construct_blueprint_deploy_bytecode(bytecode)
-    return deploy_blueprint(account, cog_pair_blueprint)
-
-@pytest.fixture(scope="session")
-def cog_stable_pair_blueprint(account, project):
-    bytecode = project.cog_stable_pair.contract_type.deployment_bytecode.bytecode
-    cog_pair_blueprint = construct_blueprint_deploy_bytecode(bytecode)
-    return deploy_blueprint(account, cog_pair_blueprint)
-
-
-@pytest.fixture(scope="session")
-def cog_factory(account, project, cog_stable_pair_blueprint, cog_low_pair_blueprint, cog_medium_pair_blueprint, cog_high_pair_blueprint):
-    factory = account.deploy(project.cog_factory, cog_stable_pair_blueprint, cog_low_pair_blueprint, cog_medium_pair_blueprint, cog_high_pair_blueprint, account)
+def cog_factory(account, project, cog_pair_blueprint):
+    factory = account.deploy(project.cog_factory, cog_pair_blueprint, account)
     return factory
 
 
