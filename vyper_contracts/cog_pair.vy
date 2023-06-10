@@ -1089,36 +1089,36 @@ def _add_asset(to: address, amount: uint256) -> uint256:
 
 
 @internal
-def _remove_asset(to: address, owner: address, amount: uint256) -> uint256:
+def _remove_asset(to: address, owner: address, share: uint256) -> uint256:
     """
     @param to The address to remove asset for
-    @param amount The amount of asset to remove, in tokens
-    @return The amount of shares burned
+    @param share The amount of asset to remove, in shares
+    @return The amount of assets removed
     """
     if owner != msg.sender:
         assert (
-            self.allowance[owner][msg.sender] >= amount
+            self.allowance[owner][msg.sender] >= share
         ), "Insufficient Allowance"
-        self.allowance[owner][msg.sender] -= amount
+        self.allowance[owner][msg.sender] -= share
 
     _total_asset: Rebase = self.total_asset
     all_share: uint256 = convert(
         _total_asset.elastic + self.total_borrow.elastic, uint256
     )
-    share: uint256 = (amount * all_share) / convert(_total_asset.base, uint256)
+    amount: uint256 = (share * all_share) / convert(_total_asset.base, uint256)
 
     _total_asset.elastic -= convert(amount, uint128)
-    _total_asset.base -= convert(amount, uint128)
+    _total_asset.base -= convert(share, uint128)
     assert _total_asset.base >= 1000, "Below Minimum"
     self.total_asset = _total_asset
 
-    new_balance: uint256 = self.balanceOf[owner] - amount
+    new_balance: uint256 = self.balanceOf[owner] - share
     self.balanceOf[owner] = new_balance
     assert ERC20(asset).transfer(
         to, amount, default_return_value=True
     )  # dev: Transfer Failed
 
-    return share
+    return amount
 
 
 @internal
