@@ -8,9 +8,11 @@ from hypothesis import (
 
 from tests.fixtures import *
 
-@pytest.mark.profile
-def test_add_asset_profile(cog_pair, accounts, chain, collateral, asset, oracle):
+def test_add_asset_profile(cog_pair, cog_factory, accounts, chain, collateral, asset, oracle):
     account = accounts[0]
+    reciept = cog_factory.deploy_medium_risk_pair(asset, collateral, oracle, sender=account)
+    print("Deploy Gas Used {used}".format(used=reciept.gas_used))
+
 
     oracle.setPrice(5000000000000000000, sender=account)
     oracle.setUpdated(True, sender=account)
