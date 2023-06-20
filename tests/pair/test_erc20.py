@@ -1,6 +1,5 @@
-import ape
+import boa
 import pytest
-from eth_account.messages import encode_defunct
 
 from datetime import timedelta
 
@@ -43,7 +42,7 @@ def test_totalSupply(cog_pair, accounts, asset):
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
 @settings(max_examples=10, deadline=None)
-def test_balanceOf(cog_pair, accounts, chain, asset, amount):
+def test_balanceOf(cog_pair, accounts, asset, amount):
     """"
     Invariants Tested
     -----------------
@@ -51,7 +50,6 @@ def test_balanceOf(cog_pair, accounts, chain, asset, amount):
     2. `balanceOf[to]` is set equal to `balanceOf[to] + amount` after a transfer
     3. `balanceOf[msg.sender]` is set equal to `balanceOf[msg.sender] + amount` after a deposit
     """
-    snap = chain.snapshot()
     AMOUNT = amount
 
     account = accounts[0]
@@ -67,13 +65,12 @@ def test_balanceOf(cog_pair, accounts, chain, asset, amount):
     cog_pair.transfer(accounts[1], partial, sender=account)
 
     assert cog_pair.balanceOf(account) == AMOUNT - partial
-    chain.restore(snap)
 
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
 @settings(max_examples=10, deadline=None)
-def test_transfer(cog_pair, accounts, chain, asset, amount):
+def test_transfer(cog_pair, accounts, asset, amount):
     """"
     Invariants Tested
     -----------------
@@ -81,7 +78,6 @@ def test_transfer(cog_pair, accounts, chain, asset, amount):
     2. `balanceOf[to]` is set equal to `balanceOf[to] + amount`.
     3. Cannot transfer more funds than they own
     """
-    snap = chain.snapshot()
     AMOUNT = amount
 
     account = accounts[0]
@@ -96,15 +92,14 @@ def test_transfer(cog_pair, accounts, chain, asset, amount):
     assert cog_pair.balanceOf(account) == AMOUNT - partial
     assert cog_pair.balanceOf(accounts[1]) == partial
 
-    with ape.reverts():
+    with boa.reverts():
         cog_pair.transfer(accounts[1], AMOUNT, sender=account)
-    chain.restore(snap)
 
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
 @settings(max_examples=10, deadline=None)
-def test_transferFrom(cog_pair, accounts, chain, asset, amount):
+def test_transferFrom(cog_pair, accounts, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -116,7 +111,6 @@ def test_transferFrom(cog_pair, accounts, chain, asset, amount):
 
     Also tests approve and allowance implicitly
     """
-    snap = chain.snapshot()
     AMOUNT = amount
 
     account = accounts[0]
@@ -140,22 +134,21 @@ def test_transferFrom(cog_pair, accounts, chain, asset, amount):
     # `allowance[from][msg.sender]` is set equal to `allowance[from][msg.sender] - amount`.
     assert cog_pair.allowance(account, accounts[1]) == 0
 
-    with ape.reverts():
+    with boa.reverts():
         # 5. Cannot transfer more funds than they are allowed to
         cog_pair.transferFrom(account, accounts[1], partial, sender=accounts[1])
     
     cog_pair.transfer(accounts[0], partial, sender=accounts[1])
-    with ape.reverts():
+    with boa.reverts():
         # 4. Cannot transfer more funds than they own 
         cog_pair.transferFrom(account, accounts[1], AMOUNT, sender=accounts[1])
 
-    chain.restore(snap)
 
 @given(
     amount=st.integers(min_value=100000, max_value=2**128-1),
 )
 @settings(max_examples=10, deadline=None)
-def test_approve_allowance(cog_pair, accounts, chain, asset, amount):
+def test_approve_allowance(cog_pair, accounts, asset, amount):
     """
     Invairants Tested
     -----------------
@@ -164,7 +157,6 @@ def test_approve_allowance(cog_pair, accounts, chain, asset, amount):
     3. `allowance[msg.sender][spender]` is set equal to `0` after a second approve with amount 0
     4. `allowance[msg.sender][spender]` decreased after a transferFrom
     """
-    snap = chain.snapshot()
     AMOUNT = amount
 
     account = accounts[0]
@@ -196,4 +188,3 @@ def test_approve_allowance(cog_pair, accounts, chain, asset, amount):
 
     # 4. `allowance[msg.sender][spender]` decreased after a transferFrom
     assert cog_pair.allowance(account, accounts[1]) == 0
-    chain.restore(snap)

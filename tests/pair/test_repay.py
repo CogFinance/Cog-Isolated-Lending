@@ -1,4 +1,4 @@
-import ape
+import boa
 import pytest
 
 from datetime import timedelta
@@ -12,8 +12,7 @@ from hypothesis import (
 from tests.fixtures import *
 
 
-def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset, chain):
-    snap = chain.snapshot()
+def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset):
     amount = 10000 * 10 ** 18
     # Initial setup
     account = accounts[0]
@@ -36,7 +35,7 @@ def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset, chain):
     cog_pair.borrow(account, amount, sender=account)
 
     # Repay
-    old_total_borrow = cog_pair.total_borrow()
+    (elastic, old_base) = cog_pair.total_borrow()
     old_borrow_part = cog_pair.user_borrow_part(account)
 
     # REPAY_BORROW_FEE and REPAY_BORROW_FEE_PRECISION both respectively
@@ -46,16 +45,15 @@ def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset, chain):
     asset.approve(cog_pair, amount+fee, sender=account)
     cog_pair.repay(account, amount+fee, sender=account)
 
-    new_total_borrow = cog_pair.total_borrow()
+    (new_elastic, new_base) = cog_pair.total_borrow()
     new_borrow_part = cog_pair.user_borrow_part(account)
 
-    assert new_total_borrow.base == old_total_borrow.base - amount - fee
+    assert new_base == old_base - amount - fee
     assert new_borrow_part == old_borrow_part - amount - fee
 
     # Test Can't overpay with repay
     asset.mint(account, amount*100, sender=account)
     asset.approve(cog_pair, amount*100, sender=account)
-    with ape.reverts():
-        cog_pair.repay(account, amount*100, sender=account)
 
-    chain.restore(snap)
+    with boa.reverts():
+        cog_pair.repay(account, amount*100, sender=account)

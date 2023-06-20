@@ -1,4 +1,4 @@
-# @version 0.3.7
+# @version 0.3.9
 
 """
 @title CogPair
@@ -81,17 +81,18 @@ def to_elastic(total: Rebase, base: uint256, round_up: bool) -> uint256:
 
 
 @internal
-def add(total: Rebase, elastic: uint256, round_up: bool) -> (Rebase, uint256):
+def add(_total: Rebase, elastic: uint256, round_up: bool) -> (Rebase, uint256):
     """
     @notice Add `elastic` to `total` and doubles `total.base`
 
-    @param total - The current total
+    @param _total - The current total
     @param elastic - The elastic value to add to the rebase
     @param round_up - Self explanatory
 
     @return - The new Rebase total
     @return - The base in relationship to the elastic value
     """
+    total: Rebase = _total
     base: uint256 = self.to_base(total, elastic, round_up)
     total.elastic += convert(elastic, uint128)
     total.base += convert(base, uint128)
@@ -99,15 +100,16 @@ def add(total: Rebase, elastic: uint256, round_up: bool) -> (Rebase, uint256):
 
 
 @internal
-def sub(total: Rebase, base: uint256, round_up: bool) -> (Rebase, uint256):
+def sub(_total: Rebase, base: uint256, round_up: bool) -> (Rebase, uint256):
     """
-    @param total - The current total
+    @param _total - The current total
     @param base - The base value to subtract from the rebase total
     @param round_up - Self explanatory
 
     @return - The new Rebase total
     @return - The elastic in relationship to the base value
     """
+    total: Rebase = _total
     elastic: uint256 = self.to_elastic(total, base, round_up)
     total.elastic -= convert(elastic, uint128)
     total.base -= convert(base, uint128)
@@ -889,7 +891,8 @@ def efficient_accrue():
     self._accrue(_accrue_info, elapsed_time)
 
 @internal
-def _accrue(_accrue_info: AccrueInfo, elapsed_time: uint256):
+def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
+    _accrue_info: AccrueInfo = accrue_info
     _accrue_info.last_accrued = convert(block.timestamp, uint64)
 
     _total_borrow: Rebase = self.total_borrow

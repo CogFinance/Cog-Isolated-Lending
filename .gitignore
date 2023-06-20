@@ -1,4 +1,7 @@
 .build/
 tests/__pycache__/
 utils/__pycache__/
-
+tests/__pycache__/
+/out
+/cache
+.hypothesis

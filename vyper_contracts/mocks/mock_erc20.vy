@@ -39,16 +39,12 @@ minter: address
 
 @external
 def __init__(
-    _name: String[32], _symbol: String[32], _decimals: uint8, _supply: uint256
+    _name: String[32], _symbol: String[32], _decimals: uint8
 ):
-    init_supply: uint256 = _supply * 10**convert(_decimals, uint256)
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.balanceOf[msg.sender] = init_supply
-    self.totalSupply = init_supply
     self.minter = msg.sender
-    log Transfer(empty(address), msg.sender, init_supply)
 
 
 @external

@@ -1,4 +1,4 @@
-import ape
+import boa
 import pytest
 from hypothesis import (
     given,
@@ -9,8 +9,7 @@ from hypothesis import (
 from tests.fixtures import *
 
 
-def test_cannot_liquidate(cog_pair, accounts, chain, collateral, asset, oracle):
-    snap = chain.snapshot()
+def test_cannot_liquidate(cog_pair, accounts, collateral, asset, oracle):
     account = accounts[0]
     oracle.setPrice(5000000000000000000, sender=account)
     oracle.setUpdated(True, sender=account)
@@ -40,7 +39,7 @@ def test_cannot_liquidate(cog_pair, accounts, chain, collateral, asset, oracle):
     asset.mint(account, 90000000000000000000000000000, sender=account)
     asset.approve(cog_pair, 90000000000000000000000000000, sender=account)
     
-    with ape.reverts():
+    with boa.reverts():
         cog_pair.liquidate(
             account,
             157563025210084033613445378,
@@ -48,9 +47,7 @@ def test_cannot_liquidate(cog_pair, accounts, chain, collateral, asset, oracle):
             sender=account
         )
 
-    chain.restore(snap)
-
-def test_can_liquidate(cog_pair, accounts, chain, collateral, asset, oracle):
+def test_can_liquidate(cog_pair, accounts, collateral, asset, oracle):
     account = accounts[0]
     oracle.setPrice(5000000000000000000, sender=account)
     oracle.setUpdated(True, sender=account)

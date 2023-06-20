@@ -1,4 +1,4 @@
-import ape
+import boa
 import pytest
 
 from datetime import timedelta
@@ -9,21 +9,18 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import (
-    account,
-    tick_math
-)
+from tests.fixtures import *
 
 MIN_TICK = -887272
 MAX_TICK = 887272
 
 
 def test_throws_for_too_low(tick_math):
-    with ape.reverts("T"):
+    with boa.reverts("T"):
         tick_math.get_sqrt_ratio_at_tick(MIN_TICK-1)
 
 def test_throws_for_too_high(tick_math):
-    with ape.reverts("T"):
+    with boa.reverts("T"):
         tick_math.get_sqrt_ratio_at_tick(MAX_TICK+1)
 
 

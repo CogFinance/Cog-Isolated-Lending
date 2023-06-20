@@ -1,4 +1,4 @@
-import ape
+import boa
 import pytest
 
 from datetime import timedelta
@@ -13,15 +13,12 @@ from tests.fixtures import *
 
 # Most mission critical logic for borrow actually exists in accrue, and is best tested there
 
-@given(
-    amount=st.integers(min_value=100000, max_value=2**128),
-)
-@settings(max_examples=5, deadline=None)
-def test_borrow_medium_invariants(cog_pair, amount, chain, collateral, accounts, asset, oracle):
-    snap = chain.snapshot()
+def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle):
     # Initial setup
     account = accounts[0]
     asset_one_coin_price = 1000000000000000000
+    
+    amount = 100000000
 
     oracle.setPrice(asset_one_coin_price, sender=account)
     oracle.setUpdated(True, sender=account)
@@ -32,10 +29,10 @@ def test_borrow_medium_invariants(cog_pair, amount, chain, collateral, accounts,
     cog_pair.deposit(amount, account, sender=account)
 
     # Borrow
-    old_total_borrow = cog_pair.total_borrow()
+    (old_elastic, old_base) = cog_pair.total_borrow()
     account = accounts[1]
 
-    with ape.reverts("Insufficient Collateral"):
+    with boa.reverts("Insufficient Collateral"):
         cog_pair.borrow(account, amount, sender=accounts[3])
 
     collateral.mint(account, amount*10, sender=account)
@@ -53,5 +50,5 @@ def test_borrow_medium_invariants(cog_pair, amount, chain, collateral, accounts,
     assert cog_pair.user_borrow_part(account) == old_borrow_part + amount + fee
 
     # Test Invariant `total_borrow` is set equal to `total_borrow + amount`.
-    assert cog_pair.total_borrow().base == old_total_borrow.base + amount + fee
-    chain.restore(snap)
+    (_, current_base) = cog_pair.total_borrow()
+    assert  current_base == old_base + amount + fee

@@ -1,4 +1,4 @@
-# @version 0.3.7
+# @version 0.3.9
 
 """
 @title Cog Factory
@@ -286,8 +286,8 @@ def deploy_low_risk_pair(
     MAXIMUM_INTEREST_PER_SECOND: uint64 = 15854896000
 
     pair: address = create_from_blueprint(
-        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
-    )
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3)
+
     log LowPairCreated(asset, collateral, pair)
     return pair
 

@@ -8,6 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "~3.10.6"
 colorama = "^0.4.6"
+titanoboa = "^0.1.7"
+pytest = "^7.3.2"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,4 +1,4 @@
-# @version 0.3.7
+# @version 0.3.9
 """
 @title Fuse Box
 @author cog.finance
@@ -240,7 +240,7 @@ interface PoolSharksRangePool:
 
 @internal
 def fetch_poolsharks_twap(oracle: address) -> uint256:
-    seconds_ago: uint32[5] = [twap_interval, 0, 0, 0, 0]
+    seconds_ago: uint32[5] = [0, twap_interval, twap_interval*2, twap_interval*3, twap_interval*4]
 
     tick_seconds_accum: int56[5] = [0, 0, 0, 0, 0]
 
