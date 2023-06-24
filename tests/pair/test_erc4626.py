@@ -46,7 +46,6 @@ def test_totalAssets(cog_pair, oracle, accounts, collateral, asset):
     # Kind of weird because shares and assets are still 1:1 due to no interest being accrued
     cog_pair.mint(1000000000000000000, account, sender=account)
 
-    print(asset.balanceOf(cog_pair))
     assert cog_pair.totalAssets() == 2000000000000000000
 
     # totalAssets reflects decreases in assets via withdraw correctly
