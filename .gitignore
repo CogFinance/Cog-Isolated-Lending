@@ -1,5 +1,5 @@
 .build/
-tests/__pycache__/
+tests/pair/__pycache__/
 utils/__pycache__/
 tests/__pycache__/
 /out
