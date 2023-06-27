@@ -14,6 +14,11 @@ from tests.fixtures import *
 
 # Invariants found from https://eips.ethereum.org/EIPS/eip-20
 
+def test_metadata(cog_pair):
+    assert cog_pair.name() == "Cog Pool LP Token"
+    assert cog_pair.symbol() == "CLP"
+    assert cog_pair.decimals() == 18
+
 def test_totalSupply(cog_pair, accounts, asset):
     """
     Invariants Tested

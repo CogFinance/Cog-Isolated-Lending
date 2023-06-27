@@ -150,7 +150,7 @@ fee_to: public(address)
 # ///////////////////////////////////////////////////// #
 
 @external
-def setPrivUserStatus(user: address, status: bool):
+def set_priv_user_status(user: address, status: bool):
     """
     @dev Sets the status of a privledged user
 

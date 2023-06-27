@@ -22,7 +22,7 @@ struct Rebase:
 
 @pure
 @internal
-def to_base(total: Rebase, elastic: uint256, round_up: bool) -> uint256:
+def to_base_round_up(total: Rebase, elastic: uint256) -> uint256:
     """
     @param total - The Rebase value which should be used to dervie the relative base value
     @param elastic - The elastic value to convert to a relative base value
@@ -38,7 +38,7 @@ def to_base(total: Rebase, elastic: uint256, round_up: bool) -> uint256:
         )
 
         # mamushi: Exhibit 1
-        if round_up and (
+        if (
             (
                 (base * convert(total.elastic, uint256))
                 / convert(total.base, uint256)
@@ -81,7 +81,7 @@ def to_elastic(total: Rebase, base: uint256, round_up: bool) -> uint256:
 
 
 @internal
-def add(_total: Rebase, elastic: uint256, round_up: bool) -> (Rebase, uint256):
+def add_round_up(_total: Rebase, elastic: uint256) -> (Rebase, uint256):
     """
     @notice Add `elastic` to `total` and doubles `total.base`
 
@@ -93,7 +93,7 @@ def add(_total: Rebase, elastic: uint256, round_up: bool) -> (Rebase, uint256):
     @return - The base in relationship to the elastic value
     """
     total: Rebase = _total
-    base: uint256 = self.to_base(total, elastic, round_up)
+    base: uint256 = self.to_base_round_up(total, elastic)
     total.elastic += convert(elastic, uint128)
     total.base += convert(base, uint128)
     return (total, base)
@@ -412,20 +412,18 @@ def totalSupply() -> uint256:
 
 allowance: public(HashMap[address, HashMap[address, uint256]])
 
-# TODO : Make this composed of the asset and collateral names + Cog Pair
-NAME: constant(String[26]) = "Cog Medium Risk Pool Token"
-
+NAME: constant(String[17]) = "Cog Pool LP Token"
 
 @view
 @external
-def name() -> String[26]:
+def name() -> String[17]:
     """
     @return The name for the ERC4626 Vault Token
     """
     return NAME
 
 
-SYMBOL: constant(String[3]) = "COG"
+SYMBOL: constant(String[3]) = "CLP"
 
 
 @view
@@ -472,178 +470,8 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
     log Transfer(sender, receiver, amount)
     return True
 
-
-# //////////////////////////////////////////////////////////////// #
-#                             EIP712                               #
-# //////////////////////////////////////////////////////////////// #
-# Ty snekmate for this code
-
-# @dev Returns the current on-chain tracked nonce
-# of `address`.
-nonces: public(HashMap[address, uint256])
-
-# @dev The 32-byte type hash of the `permit` function.
-_PERMIT_TYPE_HASH: constant(bytes32) = keccak256(
-    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-)
-
-
-# @dev Constant used as part of the ECDSA recovery function.
-_MALLEABILITY_THRESHOLD: constant(
-    bytes32
-) = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
-
-
-# @dev Caches the domain separator as an `immutable`
-# value, but also stores the corresponding chain id
-# to invalidate the cached domain separator if the
-# chain id changes.
-_CACHED_CHAIN_ID: immutable(uint256)
-_CACHED_SELF: immutable(address)
-_CACHED_DOMAIN_SEPARATOR: immutable(bytes32)
-
-
-# @dev `immutable` variables to store the name,
-# version, and type hash during contract creation.
-_HASHED_NAME: immutable(bytes32)
-_HASHED_VERSION: immutable(bytes32)
-_TYPE_HASH: immutable(bytes32)
-
-
-@internal
-@view
-def _domain_separator_v4() -> bytes32:
-    """
-    @dev Sourced from {EIP712DomainSeparator-domain_separator_v4}.
-    @notice See {EIP712DomainSeparator-domain_separator_v4}
-            for the function docstring.
-    """
-    if self == _CACHED_SELF and chain.id == _CACHED_CHAIN_ID:
-        return _CACHED_DOMAIN_SEPARATOR
-    else:
-        return self._build_domain_separator(
-            _TYPE_HASH, _HASHED_NAME, _HASHED_VERSION
-        )
-
-
-@internal
-@view
-def _build_domain_separator(
-    type_hash: bytes32, name_hash: bytes32, version_hash: bytes32
-) -> bytes32:
-    """
-    @dev Sourced from {EIP712DomainSeparator-_build_domain_separator}.
-    @notice See {EIP712DomainSeparator-_build_domain_separator}
-            for the function docstring.
-    """
-    return keccak256(
-        _abi_encode(type_hash, name_hash, version_hash, chain.id, self)
-    )
-
-
-@external
-@view
-def DOMAIN_SEPARATOR() -> bytes32:
-    """
-    @dev Returns the domain separator for the current chain.
-    @return bytes32 The 32-byte domain separator.
-    """
-    return self._domain_separator_v4()
-
-
-@internal
-@view
-def _hash_typed_data_v4(struct_hash: bytes32) -> bytes32:
-    """
-    @dev Sourced from {EIP712DomainSeparator-hash_typed_data_v4}.
-    @notice See {EIP712DomainSeparator-hash_typed_data_v4}
-            for the function docstring.
-    """
-    return self._to_typed_data_hash(self._domain_separator_v4(), struct_hash)
-
-
-@internal
-@pure
-def _to_typed_data_hash(
-    domain_separator: bytes32, struct_hash: bytes32
-) -> bytes32:
-    """
-    @dev Sourced from {ECDSA-to_typed_data_hash}.
-    @notice See {ECDSA-to_typed_data_hash} for the
-            function docstring.
-    """
-    return keccak256(concat(b"\x19\x01", domain_separator, struct_hash))
-
-@internal
-@pure
-def _recover_vrs(
-    hash: bytes32, v: uint256, r: uint256, s: uint256
-) -> address:
-    """
-    @dev Sourced from {ECDSA-_try_recover_vrs}.
-    @notice See {ECDSA-_try_recover_vrs} for the
-            function docstring.
-    """
-    if s > convert(_MALLEABILITY_THRESHOLD, uint256):
-        raise "ECDSA: invalid signature 's' value"
-
-    signer: address = ecrecover(hash, v, r, s)
-    if signer == empty(address):
-        raise "ECDSA: invalid signature"
-
-    return signer
-
-
-@external
-def permit(
-    owner: address,
-    spender: address,
-    amount: uint256,
-    deadline: uint256,
-    v: uint8,
-    r: bytes32,
-    s: bytes32,
-):
-    """
-    @dev Sets `amount` as the allowance of `spender`
-         over `owner`'s tokens, given `owner`'s signed
-         approval.
-    @notice Note that `spender` cannot be the zero address.
-            Also, `deadline` must be a block timestamp in
-            the future. `v`, `r`, and `s` must be a valid
-            secp256k1 signature from `owner` over the
-            EIP-712-formatted function arguments. Eventually,
-            the signature must use `owner`'s current nonce.
-    @param owner The 20-byte owner address.
-    @param spender The 20-byte spender address.
-    @param amount The 32-byte token amount that is
-           allowed to be spent by the `spender`.
-    @param deadline The 32-byte block timestamp up
-           which the `spender` is allowed to spend `amount`.
-    @param v The secp256k1 1-byte signature parameter `v`.
-    @param r The secp256k1 32-byte signature parameter `r`.
-    @param s The secp256k1 32-byte signature parameter `s`.
-    """
-    assert block.timestamp <= deadline, "ERC20Permit: expired deadline"
-
-    current_nonce: uint256 = self.nonces[owner]
-    self.nonces[owner] = unsafe_add(current_nonce, 1)
-
-    struct_hash: bytes32 = keccak256(
-        _abi_encode(
-            _PERMIT_TYPE_HASH, owner, spender, amount, current_nonce, deadline
-        )
-    )
-    hash: bytes32 = self._hash_typed_data_v4(struct_hash)
-
-    signer: address = self._recover_vrs(
-        hash, convert(v, uint256), convert(r, uint256), convert(s, uint256)
-    )
-    assert signer == owner, "ERC20Permit: invalid signature"
-
-    self.allowance[owner][spender] = amount
-    log Approval(owner, spender, amount)
-
+# @t11s said I didn't need to support permit (https://twitter.com/transmissions11/status/1673478816168296450), so I removed it, if you need permit for something make a wrapper contract
+# that kind of sounds like you problem tbh, its just an LP token, make your users use 2 clicks its not that hard
 
 # ///////////////////////////////////////////////////// #
 #		            ERC4626 Compatibility	        	#
@@ -1164,8 +992,8 @@ def _borrow(to: address, amount: uint256) -> uint256:
     )
     part: uint256 = 0
 
-    temp_total_borrow, part = self.add(
-        self.total_borrow, (amount + fee_amount), True
+    temp_total_borrow, part = self.add_round_up(
+        self.total_borrow, (amount + fee_amount)
     )
     self.total_borrow = temp_total_borrow
     self.user_borrow_part[msg.sender] = self.user_borrow_part[msg.sender] + part
@@ -1257,22 +1085,6 @@ def __init__(_asset: address, _collateral: address, _oracle: address, min_target
     oracle = _oracle
     self.DEFAULT_PROTOCOL_FEE = 100000
     self.protocol_fee = 100000  # 10%
-    hashed_name: bytes32 = keccak256(convert(NAME, Bytes[50]))
-    hashed_version: bytes32 = keccak256(convert("1", Bytes[20]))
-    type_hash: bytes32 = keccak256(
-        convert(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)",
-            Bytes[82],
-        )
-    )
-    _HASHED_NAME = hashed_name
-    _HASHED_VERSION = hashed_version
-    _TYPE_HASH = type_hash
-    _CACHED_CHAIN_ID = chain.id
-    _CACHED_SELF = self
-    _CACHED_DOMAIN_SEPARATOR = self._build_domain_separator(
-        type_hash, hashed_name, hashed_version
-    )
     MINIMUM_TARGET_UTILIZATION = min_target_utilization
     MAXIMUM_TARGET_UTILIZATION = max_target_utilization
     STARTING_INTEREST_PER_SECOND = starting_interest_per_second
@@ -1456,7 +1268,6 @@ def roll_over_pol():
     """
     @dev Withdraws protocol fees and deposits them into the pool on behalf of the tinkermaster address
     """
-    assert (msg.sender == factory)
     _fee_to: address = ICogFactory(factory).fee_to()
     _accrue_info: AccrueInfo = self.accrue_info
 
