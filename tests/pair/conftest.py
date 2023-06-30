@@ -16,32 +16,19 @@ def account(accounts) -> Any:
     return accounts[0]
 
 @pytest.fixture(scope="session")
-def get_collateral_token(account) -> Callable[[int], Any]:
-    def f(digits):
-        with boa.env.prank(account):
-            return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Collateral", "CTL", digits)
-    return f
+def collateral():
+    with boa.env.prank(account):
+        return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Collateral", "CTL", 18)
 
 @pytest.fixture(scope="session")
-def get_asset_token(account) -> Callable[[int], Any]:
-    def f(digits):
-        with boa.env.prank(account):
-            return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Asset", "ASS", digits)
-    return f
-
-@pytest.fixture(scope="session")
-def collateral(get_collateral_token):
-    return get_collateral_token(18)
-
-@pytest.fixture(scope="session")
-def asset(get_asset_token):
-    return get_asset_token(18)
+def asset():
+    with boa.env.prank(account):
+        return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Asset", "ASS", 18)
 
 @pytest.fixture(scope="session")
 def oracle(account):
     with boa.env.prank(account):
-        oracle = boa.load('vyper_contracts/mocks/mock_oracle.vy')
-        return oracle
+        return boa.load('vyper_contracts/mocks/mock_oracle.vy')
     
 @pytest.fixture(scope="session")
 def cog_pair_blueprint(account):
@@ -52,8 +39,7 @@ def cog_pair_blueprint(account):
 @pytest.fixture(scope="session")
 def cog_factory(account, cog_pair_blueprint):
     with boa.env.prank(account):
-        factory = boa.load('vyper_contracts/cog_factory.vy', cog_pair_blueprint, account)
-        return factory
+        return boa.load('vyper_contracts/cog_factory.vy', cog_pair_blueprint, account)
 
 @pytest.fixture(scope="session")
 def cog_pair(account, cog_factory, oracle, asset, collateral):
@@ -64,5 +50,4 @@ def cog_pair(account, cog_factory, oracle, asset, collateral):
 @pytest.fixture(scope="session")
 def tick_math(account):
     with boa.env.prank(account):
-        math = boa.load('vyper_contracts/mocks/mock_tick_math.vy')
-        return math
+        return boa.load('vyper_contracts/mocks/mock_tick_math.vy')
