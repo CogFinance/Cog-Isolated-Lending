@@ -11,17 +11,18 @@ from hypothesis import settings
 def accounts() -> List[Any]:
     return [boa.env.generate_address() for _ in range(10)]
 
+# TODO: rename to admin and (probably) don't put it in accounts
 @pytest.fixture(scope="session")
 def account(accounts) -> Any:
     return accounts[0]
 
 @pytest.fixture(scope="session")
-def collateral():
+def collateral(account):
     with boa.env.prank(account):
         return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Collateral", "CTL", 18)
 
 @pytest.fixture(scope="session")
-def asset():
+def asset(account):
     with boa.env.prank(account):
         return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Asset", "ASS", 18)
 
