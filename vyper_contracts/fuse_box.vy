@@ -139,6 +139,10 @@ def activate_source(source_index: uint256):
 
 @external
 def get() -> (bool, uint256):
+    """
+    @return bool Whether or not the oracle updated
+    @return uint256 the price of the asset
+    """
     fuses: FuseBox = self.fuse_box
 
     total_price: uint256 = 0
