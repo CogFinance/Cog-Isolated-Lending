@@ -61,30 +61,31 @@ def test_borrow_fee_accumulates(accounts, collateral, asset, oracle, cog_pair):
     assert fees >= (expected_fee * 95) / 100 and fees <= (expected_fee * 105) / 100
 
 def test_surge_fee_enacts(accounts, collateral, asset, oracle, cog_pair):
-    account = accounts[0]
-    oracle.setPrice(5000000000000000000, sender=account)
-    oracle.setUpdated(True, sender=account)
-    cog_pair.get_exchange_rate(sender=account)
+    with boa.env.prank(accounts[0]):
+        oracle.setPrice(5000000000000000000)
+        oracle.setUpdated(True)
+        cog_pair.get_exchange_rate()
 
-    AMOUNT = 10 * 10 ** 18
+        AMOUNT = 10 * 10 ** 18
 
-    # Fill the pool with some assets
-    asset.mint(account, AMOUNT, sender=account)
-    asset.approve(cog_pair, AMOUNT, sender=account)
-    cog_pair.deposit(AMOUNT, account, sender=account)
+        # Fill the pool with some assets
+        asset.mint(account, AMOUNT)
+        asset.approve(cog_pair, AMOUNT)
+        cog_pair.deposit(AMOUNT, account)
 
     # Borrow some assets
-    account = accounts[1]
-    collateral.mint(account, AMOUNT*100, sender=account)
-    collateral.approve(cog_pair, AMOUNT*100, sender=account)
-    cog_pair.add_collateral(account, AMOUNT*100, sender=account)
+    with boa.env.prank(accounts[1]
+        collateral.mint(account, AMOUNT*100)
+        collateral.approve(cog_pair, AMOUNT*100)
+        cog_pair.add_collateral(account, AMOUNT*100)
 
-    cog_pair.accrue(sender=account)
+        cog_pair.accrue()
 
-    cog_pair.borrow(account, (AMOUNT // 60), sender=account)
+        cog_pair.borrow(account, (AMOUNT // 60))
 
     # Protocol fee is at 100% during surge
     assert cog_pair.protocol_fee() == 1000000
+
 
 def test_roll_over_pol(accounts, collateral, asset, oracle, cog_pair):
     account = accounts[3]
