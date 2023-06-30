@@ -7,8 +7,6 @@ import boa
 import pytest
 from hypothesis import settings
 
-boa.reset_env()
-
 @pytest.fixture(scope="session")
 def accounts() -> List[Any]:
     return [boa.env.generate_address() for _ in range(10)]
