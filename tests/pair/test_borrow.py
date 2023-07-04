@@ -33,7 +33,7 @@ def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle)
     account = accounts[1]
 
     with boa.reverts("Insufficient Collateral"):
-        cog_pair.borrow(account, amount, sender=accounts[3])
+        cog_pair.borrow(amount, accounts[3], account, sender=accounts[3])
 
     collateral.mint(account, amount*10, sender=account)
     collateral.approve(cog_pair, amount*10, sender=account)

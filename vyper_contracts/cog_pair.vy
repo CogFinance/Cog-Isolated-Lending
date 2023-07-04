@@ -978,7 +978,7 @@ def _update_exchange_rate() -> (bool, uint256):
 
 
 @internal
-def _borrow(to: address, amount: uint256) -> uint256:
+def _borrow(amount: uint256, _from: address, to: address) -> uint256:
     """
     @param to: The address to send the borrowed tokens to
     @param amount: The amount of asset to borrow, in tokens
@@ -1001,7 +1001,7 @@ def _borrow(to: address, amount: uint256) -> uint256:
         self.total_borrow, (amount + fee_amount)
     )
     self.total_borrow = temp_total_borrow
-    self.user_borrow_part[msg.sender] = self.user_borrow_part[msg.sender] + part
+    self.user_borrow_part[_from] = self.user_borrow_part[_from] + part
 
     _total_asset: Rebase = self.total_asset
     assert _total_asset.base >= 1000, "Below Minimum"
@@ -1130,9 +1130,16 @@ def remove_collateral(to: address, amount: uint256):
         msg.sender, self.exchange_rate
     ), "Insufficient Collateral"
 
+borrow_approvals : public(HashMap[address, HashMap[address, uint256]])
 
 @external
-def borrow(to: address, amount: uint256) -> uint256:
+def approve_borrow(borrower: address, amount: uint256) -> bool:
+    self.borrow_approvals[msg.sender][borrower] = amount
+    log Approval(msg.sender, borrower, amount)
+    return True
+
+@external
+def borrow(amount: uint256, _from: address = msg.sender, to: address = msg.sender) -> uint256:
     """
     @param to The address to send the borrowed tokens to
     @param amount The amount of asset to borrow, in tokens
@@ -1140,7 +1147,9 @@ def borrow(to: address, amount: uint256) -> uint256:
     """
     self._isPaused()
     self.efficient_accrue()
-    borrowed: uint256 = self._borrow(to, amount)
+    if _from != msg.sender:
+        self.borrow_approvals[_from][msg.sender] -= amount
+    borrowed: uint256 = self._borrow(amount, _from, to)
     assert self._is_solvent(
         msg.sender, self.exchange_rate
     ), "Insufficient Collateral"
