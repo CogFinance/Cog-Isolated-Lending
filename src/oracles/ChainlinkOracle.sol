@@ -12,6 +12,16 @@ interface IAggregator {
 contract ChainlinkOracle is IOracle {
     using BoringMath for uint256; // Keep everything in uint256
 
+    uint256 immutable multiply;
+    uint256 immutable divide;
+    uint256 immutable decimals;
+
+    constructor(uint256 _mul, uint256 _div, uint256 _dec) {
+        multiply = _mul;
+        divide = _div;
+        decimals = _dec;
+    }
+
     // Calculates the lastest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
     function _get(
@@ -43,15 +53,13 @@ contract ChainlinkOracle is IOracle {
 
     // Get the latest exchange rate
     /// @inheritdoc IOracle
-    function get(bytes calldata data) public override returns (bool, uint256) {
-        (address multiply, address divide, uint256 decimals) = abi.decode(data, (address, address, uint256));
+    function get() public override returns (bool, uint256) {
         return (true, _get(multiply, divide, decimals));
     }
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
     function peek(bytes calldata data) public view override returns (bool, uint256) {
-        (address multiply, address divide, uint256 decimals) = abi.decode(data, (address, address, uint256));
         return (true, _get(multiply, divide, decimals));
     }
 

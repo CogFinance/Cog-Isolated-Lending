@@ -19,6 +19,17 @@ contract CompoundOracle is IOracle {
 
     mapping(string => PriceInfo) public prices;
 
+
+    string immutable public collateralSymbol;
+    string immutable public assetSymbol;
+    uint256 immutable public division;
+
+    constructor(string calldata _collateralSymbol, string memory _assetSymbol, uint256 div) {
+        collateralSymbol = _collateralSymbol;
+        assetSymbol = _assetSymbol;
+        divsion = div;
+    }
+
     function _peekPrice(string memory symbol) internal view returns (uint256) {
         if (bytes(symbol).length == 0) {
             return 1000000;
@@ -53,15 +64,13 @@ contract CompoundOracle is IOracle {
 
     // Get the latest exchange rate
     /// @inheritdoc IOracle
-    function get(bytes calldata data) public override returns (bool, uint256) {
-        (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+    function get() public override returns (bool, uint256) {
         return (true, uint256(1e36).mul(_getPrice(assetSymbol)) / _getPrice(collateralSymbol) / division);
     }
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peek(bytes calldata data) public view override returns (bool, uint256) {
-        (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
+    function peek() public view override returns (bool, uint256) {
         return (true, uint256(1e36).mul(_peekPrice(assetSymbol)) / _peekPrice(collateralSymbol) / division);
     }
 
