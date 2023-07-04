@@ -281,6 +281,11 @@ event RemoveCollateral:
     amount: indexed(uint256)
     user_collateral_share: indexed(uint256)
 
+event Paused:
+    time: indexed(uint256)
+
+event UnPaused:
+    time: indexed(uint256)
 
 # ERC20 Events
 
@@ -1255,13 +1260,13 @@ def update_default_protocol_fee(newFee: uint256):
 def pause():
     assert (msg.sender == factory)
     self.paused = True
-
+    log Paused(block.timestamp)
 
 @external
 def unpause():
     assert (msg.sender == factory)
     self.paused = False
-
+    log UnPaused(block.timestamp)
 
 @external
 def roll_over_pol():
