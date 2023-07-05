@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
-import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
+import "../libraries/BoringMath.sol";
 import "../interfaces/IOracle.sol";
 
 // Chainlink Aggregator
@@ -16,7 +16,7 @@ contract ChainlinkOracle is IOracle {
     uint256 immutable divide;
     uint256 immutable decimals;
 
-    constructor(uint256 _mul, uint256 _div, uint256 _dec) {
+    constructor(uint256 _mul, uint256 _div, uint256 _dec) public {
         multiply = _mul;
         divide = _div;
         decimals = _dec;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
-import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
+import "../libraries/BoringMath.sol";
 import "../interfaces/IOracle.sol";
 
 interface IUniswapAnchoredView {
@@ -20,14 +20,14 @@ contract CompoundOracle is IOracle {
     mapping(string => PriceInfo) public prices;
 
 
-    string immutable public collateralSymbol;
-    string immutable public assetSymbol;
+    string public collateralSymbol;
+    string public assetSymbol;
     uint256 immutable public division;
 
-    constructor(string calldata _collateralSymbol, string memory _assetSymbol, uint256 div) {
+    constructor(string memory _collateralSymbol, string memory _assetSymbol, uint256 div) public {
         collateralSymbol = _collateralSymbol;
         assetSymbol = _assetSymbol;
-        divsion = div;
+        division = div;
     }
 
     function _peekPrice(string memory symbol) internal view returns (uint256) {
@@ -81,12 +81,12 @@ contract CompoundOracle is IOracle {
     }
 
     /// @inheritdoc IOracle
-    function name(bytes calldata) public view override returns (string memory) {
+    function name() public view override returns (string memory) {
         return "Compound";
     }
 
     /// @inheritdoc IOracle
-    function symbol(bytes calldata) public view override returns (string memory) {
+    function symbol() public view override returns (string memory) {
         return "COMP";
     }
 }
