@@ -29,7 +29,7 @@ def test_borrow_fee_accumulates(accounts, collateral, asset, oracle, cog_pair):
 
     cog_pair.accrue(sender=account)
 
-    cog_pair.borrow(account, AMOUNT // 2, sender=account)
+    cog_pair.borrow(AMOUNT // 2, sender=account)
 
     (interest_per_second, last_accrued, fees_earned_fraction) = cog_pair.accrue_info()
     
@@ -83,7 +83,7 @@ def test_surge_fee_enacts(accounts, collateral, asset, oracle, cog_pair):
 
         cog_pair.accrue()
 
-        cog_pair.borrow(test_user, (AMOUNT // 60))
+        cog_pair.borrow((AMOUNT // 60))
 
     # Protocol fee is at 100% during surge
     assert cog_pair.protocol_fee() == 1000000
@@ -110,7 +110,7 @@ def test_roll_over_pol(accounts, collateral, asset, oracle, cog_pair):
 
     cog_pair.accrue(sender=account)
 
-    cog_pair.borrow(account, AMOUNT // 2, sender=account)
+    cog_pair.borrow(AMOUNT // 2, sender=account)
 
     (interest_per_second, last_accrued, fees_earned_fraction) = cog_pair.accrue_info()
     

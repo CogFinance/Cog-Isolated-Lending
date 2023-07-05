@@ -44,7 +44,7 @@ def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle)
     # BORROW_OPENING_FEE and BORROW_OPENING_FEE_PRECISION both respectively
     fee = int((amount * 50) / 100000)
 
-    cog_pair.borrow(account, amount, sender=account)    
+    cog_pair.borrow(amount, sender=account)    
 
     # Test Invariant `user_borrow_part[account]` is set equal to `user_borrow_part[account] + amount`.
     assert cog_pair.user_borrow_part(account) == old_borrow_part + amount + fee

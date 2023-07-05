@@ -28,7 +28,7 @@ def test_cannot_liquidate(cog_pair, accounts, collateral, asset, oracle):
     collateral.approve(cog_pair, 90000000000000000000000000000, sender=account)
     cog_pair.add_collateral(account, 90000000000000000000000000000, sender=account)
 
-    cog_pair.borrow(account, 1340000000000000000000000000, sender=account)
+    cog_pair.borrow(1340000000000000000000000000, sender=account)
 
     assert asset.balanceOf(account) == 1340000000000000000000000000
 
@@ -67,7 +67,7 @@ def test_can_liquidate(cog_pair, accounts, collateral, asset, oracle):
     collateral.approve(cog_pair, 90000000000000000000000000000, sender=account)
     cog_pair.add_collateral(account, 90000000000000000000000000000, sender=account)
 
-    cog_pair.borrow(account, 1340000000000000000000000000, sender=account)
+    cog_pair.borrow(1340000000000000000000000000, sender=account)
 
     assert asset.balanceOf(account) == 1340000000000000000000000000
 

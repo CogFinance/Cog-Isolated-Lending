@@ -32,7 +32,7 @@ def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset):
     collateral.approve(cog_pair, amount*10, sender=account)
     cog_pair.add_collateral(account, amount*10, sender=account)
 
-    cog_pair.borrow(account, amount, sender=account)
+    cog_pair.borrow(amount, sender=account)
 
     # Repay
     (elastic, old_base) = cog_pair.total_borrow()

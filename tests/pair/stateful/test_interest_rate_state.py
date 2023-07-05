@@ -44,7 +44,7 @@ class StateMachine(RuleBasedStateMachine):
             return
 
         with boa.env.prank(user):
-            self.cog_pair.borrow(user, to_borrow)
+            self.cog_pair.borrow(to_borrow)
 
         self.last_action = BORROW
         self.last_interest_info = self.cog_pair.accrue_info()

@@ -136,7 +136,7 @@ def test_cannot_remove_when_insolvent(cog_pair, accounts, collateral, asset, ora
     collateral.approve(cog_pair, asset_one_coin_price, sender=account)
     cog_pair.add_collateral(account, asset_one_coin_price, sender=account)
 
-    cog_pair.borrow(account, 740000000000000000, sender=account)
+    cog_pair.borrow(740000000000000000, sender=account)
 
     with boa.reverts():
         cog_pair.remove_collateral(account, asset_one_coin_price-1000000, sender=account)

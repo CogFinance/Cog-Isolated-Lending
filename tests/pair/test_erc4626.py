@@ -61,7 +61,7 @@ def test_totalAssets(cog_pair, oracle, accounts, collateral, asset):
     collateral.mint(account, 500 * 10 ** 18, sender=account)
     collateral.approve(cog_pair, 500 * 10 ** 18, sender=account)
     cog_pair.add_collateral(account, 500 * 10 ** 18, sender=account)
-    cog_pair.borrow(account, 250000000000000000, sender=account)
+    cog_pair.borrow(250000000000000000, sender=account)
 
     boa.env.time_travel(seconds=86000)
 
@@ -114,7 +114,7 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset):
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
 
-    cog_pair.borrow(account, AMOUNT, sender=account)
+    cog_pair.borrow(AMOUNT, sender=account)
     amt = cog_pair.user_borrow_part(account)
     boa.env.time_travel(seconds=86000)
     # Borrow has caused total_asset to decrease, and total borrow to increase
@@ -162,7 +162,7 @@ def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, AMOUNT, sender=account)
+    cog_pair.borrow(AMOUNT, sender=account)
     amt = cog_pair.user_borrow_part(account)
     boa.env.time_travel(seconds=86000)    
     # Borrow has caused total_asset to decrease, and total borrow to increase
@@ -213,7 +213,7 @@ def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, AMOUNT, sender=account)
+    cog_pair.borrow(AMOUNT, sender=account)
 
     boa.env.time_travel(seconds=86000)    
     expected_shares = cog_pair.previewDeposit(AMOUNT)
@@ -295,7 +295,7 @@ def test_previewMint(cog_pair, oracle, accounts, collateral, asset):
     collateral.mint(account, AMOUNT_IN_ASSETS * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT_IN_ASSETS * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT_IN_ASSETS * 100, sender=account)
-    cog_pair.borrow(account, AMOUNT_IN_ASSETS, sender=account)
+    cog_pair.borrow(AMOUNT_IN_ASSETS, sender=account)
 
     boa.env.time_travel(seconds=86000)
     expected_assets = cog_pair.previewMint(AMOUNT_IN_SHARES)
@@ -349,7 +349,7 @@ def test_mint(cog_pair, accounts, asset, collateral, oracle):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, int(AMOUNT/2), sender=account)
+    cog_pair.borrow(int(AMOUNT/2), sender=account)
     boa.env.time_travel(seconds=86000)    
     amt = cog_pair.user_borrow_part(account)
 
@@ -386,7 +386,7 @@ def test_maxWithdraw(cog_pair, accounts, asset, collateral, oracle):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, int(AMOUNT/2), sender=account)
+    cog_pair.borrow(int(AMOUNT/2), sender=account)
 
     account = accounts[0]
 
@@ -424,7 +424,7 @@ def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, int(AMOUNT/2), sender=account)
+    cog_pair.borrow(int(AMOUNT/2), sender=account)
 
     account = accounts[0]
 
@@ -511,7 +511,7 @@ def test_maxRedeem(cog_pair, accounts, asset, collateral, oracle):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, AMOUNT, sender=account)
+    cog_pair.borrow(AMOUNT, sender=account)
 
     account = accounts[0]
     assert cog_pair.maxRedeem(account) == 0
@@ -556,7 +556,7 @@ def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle):
     collateral.mint(account, AMOUNT * 100, sender=account)
     collateral.approve(cog_pair, AMOUNT * 100, sender=account)
     cog_pair.add_collateral(account,AMOUNT * 100, sender=account)
-    cog_pair.borrow(account, int(AMOUNT/2), sender=account)
+    cog_pair.borrow(int(AMOUNT/2), sender=account)
 
     account = accounts[0]
 
