@@ -31,7 +31,6 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def borrow(self, user_id, amount):
-        return
         user = self.accounts[user_id]
         collateral_amount = self.cog_pair.user_collateral_share(user)
         borrowed_amount = self.cog_pair.user_borrow_part(user)
@@ -61,6 +60,8 @@ class StateMachine(RuleBasedStateMachine):
         self.last_interest_info = self.cog_pair.accrue_info()
 
         with boa.env.prank(user):
+            self.asset.mint(user, to_repay)
+            self.asset.approve(self.cog_pair, to_repay)
             self.cog_pair.repay(user, to_repay)
 
 
