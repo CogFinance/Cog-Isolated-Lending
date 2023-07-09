@@ -1,0 +1,25 @@
+Collecting git+https://github.com/python-poetry/poetry.git@master
+  Cloning https://github.com/python-poetry/poetry.git (to revision master) to /private/var/folders/qm/_3fj5qls1jngkghlcmdq3tjw0000gn/T/pip-req-build-7fl83h4r
+  Running command git clone -q https://github.com/python-poetry/poetry.git /private/var/folders/qm/_3fj5qls1jngkghlcmdq3tjw0000gn/T/pip-req-build-7fl83h4r
+  Resolved https://github.com/python-poetry/poetry.git to commit 8437d541b15ee7a8de48e10f547c8e4e8630a054
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'error'
+  ERROR: Command errored out with exit status 1:
+   command: '/Users/zodiacdev/Library/Application Support/pypoetry/venv/bin/python' '/Users/zodiacdev/Library/Application Support/pypoetry/venv/lib/python3.6/site-packages/pip' install --ignore-installed --no-user --prefix /private/var/folders/qm/_3fj5qls1jngkghlcmdq3tjw0000gn/T/pip-build-env-2hgoptsg/overlay --no-warn-script-location --no-binary :none: --only-binary :none: -i https://pypi.org/simple -- 'poetry-core>=1.5.0'
+       cwd: None
+  Complete output (2 lines):
+  ERROR: Could not find a version that satisfies the requirement poetry-core>=1.5.0 (from versions: 1.0.0a0, 1.0.0a1, 1.0.0a2, 1.0.0a3, 1.0.0a4, 1.0.0a5, 1.0.0a6, 1.0.0a7, 1.0.0a8, 1.0.0a9, 1.0.0b1, 1.0.0rc1, 1.0.0rc2, 1.0.0rc3, 1.0.0, 1.0.1, 1.0.2, 1.0.3, 1.0.4, 1.0.5, 1.0.6, 1.0.7, 1.0.8, 1.1.0a1, 1.1.0a2, 1.1.0a3, 1.1.0a4, 1.1.0a5, 1.1.0a6)
+  ERROR: No matching distribution found for poetry-core>=1.5.0
+  ----------------------------------------
+WARNING: Discarding git+https://github.com/python-poetry/poetry.git@master. Command errored out with exit status 1: '/Users/zodiacdev/Library/Application Support/pypoetry/venv/bin/python' '/Users/zodiacdev/Library/Application Support/pypoetry/venv/lib/python3.6/site-packages/pip' install --ignore-installed --no-user --prefix /private/var/folders/qm/_3fj5qls1jngkghlcmdq3tjw0000gn/T/pip-build-env-2hgoptsg/overlay --no-warn-script-location --no-binary :none: --only-binary :none: -i https://pypi.org/simple -- 'poetry-core>=1.5.0' Check the logs for full command output.
+ERROR: Command errored out with exit status 1: '/Users/zodiacdev/Library/Application Support/pypoetry/venv/bin/python' '/Users/zodiacdev/Library/Application Support/pypoetry/venv/lib/python3.6/site-packages/pip' install --ignore-installed --no-user --prefix /private/var/folders/qm/_3fj5qls1jngkghlcmdq3tjw0000gn/T/pip-build-env-2hgoptsg/overlay --no-warn-script-location --no-binary :none: --only-binary :none: -i https://pypi.org/simple -- 'poetry-core>=1.5.0' Check the logs for full command output.
+
+Traceback:
+
+  File "<stdin>", line 923, in main
+  File "<stdin>", line 560, in run
+  File "<stdin>", line 582, in install
+  File "<stdin>", line 685, in install_poetry
+  File "<stdin>", line 375, in pip
+  File "<stdin>", line 372, in python
+  File "<stdin>", line 367, in run
