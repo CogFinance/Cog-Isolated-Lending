@@ -76,8 +76,8 @@ contract CompoundOracle is IOracle {
 
     // Check the current spot exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peekSpot(bytes calldata data) external view override returns (uint256 rate) {
-        (, rate) = peek(data);
+    function peekSpot() external view override returns (uint256 rate) {
+        (, rate) = peek();
     }
 
     /// @inheritdoc IOracle

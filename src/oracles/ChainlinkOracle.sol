@@ -59,23 +59,23 @@ contract ChainlinkOracle is IOracle {
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peek(bytes calldata data) public view override returns (bool, uint256) {
+    function peek() public view override returns (bool, uint256) {
         return (true, _get(multiply, divide, decimals));
     }
 
     // Check the current spot exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peekSpot(bytes calldata data) external view override returns (uint256 rate) {
-        (, rate) = peek(data);
+    function peekSpot() external view override returns (uint256 rate) {
+        (, rate) = peek();
     }
 
     /// @inheritdoc IOracle
-    function name(bytes calldata) public view override returns (string memory) {
+    function name() public view override returns (string memory) {
         return "Chainlink";
     }
 
     /// @inheritdoc IOracle
-    function symbol(bytes calldata) public view override returns (string memory) {
+    function symbol() public view override returns (string memory) {
         return "LINK";
     }
 }
