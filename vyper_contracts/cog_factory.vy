@@ -5,7 +5,7 @@
 
 @license GNU Affero General Public License v3.0
 @author Cog Finance
-@notice A privledged factory for creating Cog Pairs and managing their protocol-owned liquidity
+@notice A priviledged factory for creating Cog Pairs and managing their protocol-owned liquidity
 """
 
 # ///////////////////////////////////////////////////// #
@@ -152,7 +152,7 @@ fee_to: public(address)
 @external
 def set_priv_user_status(user: address, status: bool):
     """
-    @dev Sets the status of a privledged user
+    @dev Sets the status of a priviledged user
 
     @param user The address of the user
     @param status The status to set the user to
@@ -164,7 +164,7 @@ def set_priv_user_status(user: address, status: bool):
 @external
 def update_borrow_fee(pair: address, newFee: uint256):
     """
-    @dev Sets the status of a privledged user
+    @dev Sets the status of a priviledged user
 
     @param pair The address of the pair to change the fee of
     @param newFee The fee to change the borrow fee to
