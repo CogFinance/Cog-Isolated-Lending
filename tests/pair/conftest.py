@@ -19,36 +19,36 @@ def account(accounts) -> Any:
 @pytest.fixture(scope="session")
 def collateral(account):
     with boa.env.prank(account):
-        return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Collateral", "CTL", 18)
+        return boa.load('src/mocks/mock_erc20.vy', "Collateral", "CTL", 18)
 
 @pytest.fixture(scope="session")
 def asset(account):
     with boa.env.prank(account):
-        return boa.load('vyper_contracts/mocks/mock_erc20.vy', "Asset", "ASS", 18)
+        return boa.load('src/mocks/mock_erc20.vy', "Asset", "ASS", 18)
 
 @pytest.fixture(scope="session")
 def oracle(account):
     with boa.env.prank(account):
-        return boa.load('vyper_contracts/mocks/mock_oracle.vy')
+        return boa.load('src/mocks/mock_oracle.vy')
     
 @pytest.fixture(scope="session")
 def cog_pair_blueprint(account):
-    pair = boa.load_partial('vyper_contracts/cog_pair.vy')
+    pair = boa.load_partial('src/cog_pair.vy')
     with boa.env.prank(account):
         return pair.deploy_as_blueprint()
 
 @pytest.fixture(scope="session")
 def cog_factory(account, cog_pair_blueprint):
     with boa.env.prank(account):
-        return boa.load('vyper_contracts/cog_factory.vy', cog_pair_blueprint, account)
+        return boa.load('src/cog_factory.vy', cog_pair_blueprint, account)
 
 @pytest.fixture(scope="session")
 def cog_pair(account, cog_factory, oracle, asset, collateral):
     with boa.env.prank(account):
-        pair = boa.load_partial('vyper_contracts/cog_pair.vy')
+        pair = boa.load_partial('src/cog_pair.vy')
         return pair.at(cog_factory.deploy_medium_risk_pair(asset, collateral, oracle))
 
 @pytest.fixture(scope="session")
 def tick_math(account):
     with boa.env.prank(account):
-        return boa.load('vyper_contracts/mocks/mock_tick_math.vy')
+        return boa.load('src/mocks/mock_tick_math.vy')

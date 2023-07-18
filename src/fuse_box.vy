@@ -143,38 +143,38 @@ def get() -> (bool, uint256):
     @return bool Whether or not the oracle updated
     @return uint256 the price of the asset
     """
-    fuses: FuseBox = self.fuse_box
+    fuses: DataSource[4] = self.fuse_box
 
     total_price: uint256 = 0
-    active_oracles: uint8 = 0
+    active_oracles: uint256 = 0
 
     if fuses[0].active:
-        success: bool
-        price: uint256
+        success: bool = False
+        price: uint256 = 0
         (success, price) = IOracle(fuses[0].oracle_address).get()
         assert success, "Oracle 0 Didnt Work"
         total_price += price
         active_oracles += 1
 
     if fuses[1].active:
-        success: bool
-        price: uint256
+        success: bool = False
+        price: uint256 = 0
         (success, price) = IOracle(fuses[1].oracle_address).get()
         assert success, "Oracle 1 Didnt Work"
         total_price += price
         active_oracles += 1
 
     if fuses[2].active:
-        success: bool
-        price: uint256
+        success: bool = False
+        price: uint256 = 0
         (success, price) = IOracle(fuses[2].oracle_address).get()
         assert success, "Oracle 2 Didnt Work"
         total_price += price
         active_oracles += 1
 
     if fuses[3].active:
-        success: bool
-        price: uint256
+        success: bool = False
+        price: uint256 = 0
         (success, price) = IOracle(fuses[2].oracle_address).get()
         assert success, "Oracle 3 Didnt Work"
         total_price += price

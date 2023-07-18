@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
-import "@boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol";
+import "../libraries/BoringMath.sol";
 import "../interfaces/IOracle.sol";
 
 // Chainlink Aggregator
@@ -16,7 +16,7 @@ contract ChainlinkOracle is IOracle {
     uint256 immutable divide;
     uint256 immutable decimals;
 
-    constructor(uint256 _mul, uint256 _div, uint256 _dec) {
+    constructor(uint256 _mul, uint256 _div, uint256 _dec) public {
         multiply = _mul;
         divide = _div;
         decimals = _dec;
@@ -59,23 +59,23 @@ contract ChainlinkOracle is IOracle {
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peek(bytes calldata data) public view override returns (bool, uint256) {
+    function peek() public view override returns (bool, uint256) {
         return (true, _get(multiply, divide, decimals));
     }
 
     // Check the current spot exchange rate without any state changes
     /// @inheritdoc IOracle
-    function peekSpot(bytes calldata data) external view override returns (uint256 rate) {
-        (, rate) = peek(data);
+    function peekSpot() external view override returns (uint256 rate) {
+        (, rate) = peek();
     }
 
     /// @inheritdoc IOracle
-    function name(bytes calldata) public view override returns (string memory) {
+    function name() public view override returns (string memory) {
         return "Chainlink";
     }
 
     /// @inheritdoc IOracle
-    function symbol(bytes calldata) public view override returns (string memory) {
+    function symbol() public view override returns (string memory) {
         return "LINK";
     }
 }
