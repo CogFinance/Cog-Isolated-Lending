@@ -31,6 +31,7 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def borrow(self, user_id, amount):
+        return
         user = self.accounts[user_id]
         collateral_amount = self.cog_pair.user_collateral_share(user)
         borrowed_amount = self.cog_pair.user_borrow_part(user)
@@ -51,6 +52,7 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def repay(self, user_id, amount):
+        return
         user = self.accounts[user_id]
         borrowed_amount = self.cog_pair.user_borrow_part(user)
 
