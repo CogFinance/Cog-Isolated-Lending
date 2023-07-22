@@ -6,7 +6,16 @@ import "../interfaces/IOracle.sol";
 // Chainlink Aggregator
 
 interface IAggregator {
-    function latestAnswer() external view returns (int256 answer);
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 }
 
 contract ChainlinkOracle is IOracle {
@@ -31,13 +40,15 @@ contract ChainlinkOracle is IOracle {
     ) internal view returns (uint256) {
         uint256 price = uint256(1e36);
         if (multiply != address(0)) {
-            price = price.mul(uint256(IAggregator(multiply).latestAnswer()));
+            (, int256 mulPrice, , ,) = IAggregator(multiply).latestRoundData();
+            price = price.mul(uint256(mulPrice));
         } else {
             price = price.mul(1e18);
         }
 
         if (divide != address(0)) {
-            price = price / uint256(IAggregator(divide).latestAnswer());
+            (, int256 divPrice, , ,) = IAggregator(divide).latestRoundData();
+            price = price / uint256(divPrice);
         }
 
         return price / decimals;
