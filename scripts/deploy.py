@@ -5,25 +5,50 @@ import click
 from colorama import init as colorama_init
 from colorama import Fore
 from colorama import Style
-from utils.blueprint import (
-    construct_blueprint_deploy_bytecode,
-    deploy_blueprint,
-    verify_blueprint_deploy_preamble,
-    verify_eip522_blueprint,
-)
+from web3 import Web3, HTTPProvider
+from hexbytes import HexBytes
 
-def deploy_factory(deployer, deploy_code):
-    transaction = project.provider.network.ecosystem.create_transaction(
-        chain_id=project.provider.chain_id,
-        data=deploy_code,
-        gas_price=project.provider.gas_price,
-        nonce=deployer.nonce,
+EIP_5202_EXECUTION_HALT_BYTE = bytes.fromhex("fe")
+EIP_5202_BLUEPRINT_IDENTIFIER_BYTE = bytes.fromhex("71")
+EIP_5202_VERSION_BYTE = bytes.fromhex("00")
+
+# Bytecode preamble is not deployed on-chain
+# To properly deploy a blueprint contract, special deploy bytecode must be used.
+# The following preamble, prepended to regular deploy bytecode (output of vyper -f bytecode),
+# should deploy the blueprint in an ordinary contract creation transaction.
+# For more details: https://docs.vyperlang.org/en/stable/built-in-functions.html#create_from_blueprint
+# To check the deploy bytecode, run vyper -f blueprint_bytecode contracts/GateSeal.vy
+
+# OPERATIONS
+# deploy_preamble = "61" + bytecode len in 2 bytes + "3d81600a3d39f3"
+# 61  PUSH2 BYTECODE_LENGTH_2_BYTES: STACK 
+# 3D  RETURNDATASIZE
+# 81  DUP2
+# 60  PUSH1 0x0a
+# 3D  RETURNDATASIZE
+# 39  CODECOPY 
+# F3  *RETURN
+DEPLOY_PREAMBLE_BYTE_LENGTH = 10
+DEPLOY_PREAMBLE_INITIAL_BYTE = bytes.fromhex("61")
+DEPLOY_PREABLE_POST_LENGTH_BYTES = bytes.fromhex("3d81600a3d39f3")
+
+
+def construct_blueprint_deploy_bytecode(initial_gateseal_bytecode: str):
+    eip_5202_bytecode = (
+        EIP_5202_EXECUTION_HALT_BYTE
+        + EIP_5202_BLUEPRINT_IDENTIFIER_BYTE
+        + EIP_5202_VERSION_BYTE
+        + bytes.fromhex(initial_gateseal_bytecode[2:])
     )
 
-    transaction.gas_limit = project.provider.estimate_gas_cost(transaction)
-    signed_transaction = deployer.sign_transaction(transaction)
-    receipt = project.provider.send_transaction(signed_transaction)
-    return receipt.contract_address
+    with_deploy_preamble = (
+        DEPLOY_PREAMBLE_INITIAL_BYTE
+        + bytes.fromhex(len(eip_5202_bytecode).to_bytes(2, "big").hex())
+        + DEPLOY_PREABLE_POST_LENGTH_BYTES
+        + eip_5202_bytecode
+    )
+
+    return with_deploy_preamble
 
 @click.group()
 def cli():
@@ -45,47 +70,38 @@ def deploy(network):
         account = accounts.load('alfa')
         account.set_autosign(True)
 
-    kw = {
-        'max_fee': project.provider.base_fee * 2,
-        'max_priority_fee': int(0.5e9),
-        'chain_id': project.provider.chain_id,
-        'gas_price': project.provider.gas_price,
-    }
+    deployer = account.deploy(project.Deployer, type=0)
 
-    cog_pair_blueprint = construct_blueprint_deploy_bytecode(project.cog_low_pair.contract_type.deployment_bytecode.bytecode)
+    blueprint_bytecode = construct_blueprint_deploy_bytecode(project.cog_pair.contract_type.deployment_bytecode.bytecode)
+    blueprint_tx = deployer.deploy(blueprint_bytecode, type=0, network=network, sender=account)
+    blueprint_event = list(blueprint_tx.decode_logs(deployer.Deployed))
+    
+    blueprint_address = blueprint_event[0].addr
+
+    print(f"Deployed the vault Blueprint to {blueprint_address}")
 
 
-    cog_pair_blueprint_address = deploy_blueprint(account, cog_pair_blueprint)
+    print("==================================================")
+    print(" Deployed Cog Pair Blueprint to {0}".format(blueprint_address))
+    print("==================================================")
 
-    # Deploy Factory
-    factory = account.deploy(project.cog_factory, cog_pair_blueprint_address, account, network=network, **kw)
+    factory = account.deploy(project.cog_factory, blueprint_address, account, type=0, network=network)
 
-    token_0 = account.deploy(project.mock_erc20, "CogToken0", "CT0", 18, 1000000000000, network=network, **kw)
+    print("==================================================")
+    print(" Deployed Cog Factory to {0}".format(factory.address))
+    print("==================================================")
+    
+    # Ether/USD oracle
+    oracle = account.deploy(project.ChainlinkOracle, "0x33e87B12b4694DE88D8D2e033a3Cad1F532Db2fb", "0x0000000000000000000000000000000000000000", 18, type=0, network=network)
 
-    token_1 = account.deploy(project.mock_erc20, "CogToken1", "CT1", 18, 1000000000000, network=network, **kw)
+    mock_ether = account.deploy(project.mock_erc20, "Ether", "ETH", 18, type=0, network=network)
+    mock_stable = account.deploy(project.mock_erc20, "Stable", "USD", 18, type=0, network=network)
 
-    oracle = account.deploy(project.mock_oracle, network=network, **kw)
+    pair_tx = factory.deploy_medium_risk_pair(mock_ether.address, mock_stable.address, oracle.address, type=0, sender=account, network=network)
+    pair_addr = list(pair_tx.decode_logs(factory.MediumPairCreated))[0].pair
 
-    receipt = factory.deploy_stable_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    stable_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
+    print(pair_addr)
+    
+    pair_instance = project.cog_pair.at(pair_addr)
 
-    receipt = factory.deploy_low_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    low_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
-
-    receipt = factory.deploy_medium_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    medium_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
-
-    receipt = factory.deploy_high_risk_pair(token_0.address, token_1.address, oracle.address, network=network, sender=account, **kw)
-    high_address = "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
-
-    print(f"Deployed the Cog Pair Blueprint to {Fore.BLUE}{cog_pair_blueprint_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-
-    print(f"Deployed CogFactory to {Fore.GREEN}{factory.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed CogToken0 to {Fore.GREEN}{token_0.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed CogToken1 to {Fore.GREEN}{token_1.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed CogOracle to {Fore.GREEN}{oracle.address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-
-    print(f"Deployed Stable Risk CogPair to {Fore.GREEN}{stable_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed Low Risk CogPair to {Fore.GREEN}{low_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed Medium Risk CogPair to {Fore.GREEN}{medium_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
-    print(f"Deployed High Risk CogPair to {Fore.GREEN}{high_address}{Style.RESET_ALL} on network {Fore.MAGENTA}{network}{Style.RESET_ALL}")
+    result = pair_instance.get_exchange_rate(type=0, network=network, sender=account)

@@ -12,11 +12,11 @@ interface IAggregator {
 contract ChainlinkOracle is IOracle {
     using BoringMath for uint256; // Keep everything in uint256
 
-    uint256 immutable multiply;
-    uint256 immutable divide;
+    address immutable multiply;
+    address immutable divide;
     uint256 immutable decimals;
 
-    constructor(uint256 _mul, uint256 _div, uint256 _dec) public {
+    constructor(address _mul, address _div, uint256 _dec) public {
         multiply = _mul;
         divide = _div;
         decimals = _dec;
