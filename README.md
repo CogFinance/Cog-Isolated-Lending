@@ -41,7 +41,7 @@ ape run scripts/deploy.py deploy --network ethereum:local
 
 ### Cog Pair 
 
-Cog Pair is the main lending pool which powers Cog Finance. It is a relatively simple isolated lending pool which works to balance its interest rate to encourage utilization of the pool between a Minimum and Maximum utilization range. Asset shares are also implemented as an ERC20 for compatbility and composability. The contracts are implemented with emergency measures of both a 2 week timelock, and a pool deposit freeze mechanism. Cog Pools utilize interest rate epochs, directing fees earned to Protocol-Owned liquidity for 3 days after majors spikes in interest rates, this is done to discourage attacks which suddenly spike interest rates to liquidated borrowers at the gain of lenders. The ability to deposit is pausable through an EOA wallet with admin privledges, but upgradability is not possible.
+Cog Pair is the main lending pool which powers Cog Finance. It is a relatively simple isolated lending pool which works to balance its interest rate to encourage utilization of the pool between a Minimum and Maximum utilization range. Asset shares are also implemented as an ERC20 for compatibility and composability. The contracts are implemented with emergency measures of both a 2 week timelock, and a pool deposit freeze mechanism. Cog Pools utilize interest rate epochs, directing fees earned to Protocol-Owned liquidity for 3 days after majors spikes in interest rates, this is done to discourage attacks which suddenly spike interest rates to liquidated borrowers at the gain of lenders. The ability to deposit is pausable through an EOA wallet with admin priviledges, but upgradability is not possible.
 
 #### Supported Interfaces 
 - [ERC20](https://eips.ethereum.org/EIPS/eip-20)

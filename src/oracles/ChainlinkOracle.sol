@@ -22,7 +22,7 @@ contract ChainlinkOracle is IOracle {
         decimals = _dec;
     }
 
-    // Calculates the lastest exchange rate
+    // Calculates the latest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
     function _get(
         address multiply,
