@@ -801,7 +801,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
 
         if _accrue_info.interest_per_second < MINIMUM_INTEREST_PER_SECOND:
             _accrue_info.interest_per_second = (
-                MINIMUM_INTEREST_PER_SECOND  # 0.25% APR minimum
+                MINIMUM_INTEREST_PER_SECOND  
             )
     elif utilization > MAXIMUM_TARGET_UTILIZATION:
         over_factor: uint256 = (
@@ -821,7 +821,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
 
         if new_interest_per_second > MAXIMUM_INTEREST_PER_SECOND:
             _accrue_info.interest_per_second = (
-                MAXIMUM_INTEREST_PER_SECOND  # 100% APR maximum
+                MAXIMUM_INTEREST_PER_SECOND  
             )
 
         _accrue_info.interest_per_second = new_interest_per_second

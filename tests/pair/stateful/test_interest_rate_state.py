@@ -16,12 +16,13 @@ MINT_AMOUNT = 100*10**18
 BORROW = 1
 REPAY = 2
 COLLATERALIZATION_RATE_PCT = 75  # 75%
+NUM_STEPS = 100
 
 
 class StateMachine(RuleBasedStateMachine):
     # a strategy to generate a number which represents percent
     # of account to borrow or repay.
-    amount = st.floats(min_value=0, max_value=1)
+    amount = st.floats(min_value=0, max_value=0.99)
     user_id = st.integers(min_value=0, max_value=9)
 
     @initialize()
@@ -31,8 +32,8 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def borrow(self, user_id, amount):
-        return
         user = self.accounts[user_id]
+        self.cog_pair.accrue()
         collateral_amount = self.cog_pair.user_collateral_share(user)
         borrowed_amount = self.cog_pair.user_borrow_part(user)
 
@@ -43,6 +44,9 @@ class StateMachine(RuleBasedStateMachine):
         if to_borrow <= 0:  # could be <0 if user is insolvent
             return
 
+        if to_borrow > self.asset.balanceOf(self.cog_pair):
+            to_borrow = self.asset.balanceOf(self.cog_pair)
+
         with boa.env.prank(user):
             self.cog_pair.borrow(to_borrow)
 
@@ -52,11 +56,24 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def repay(self, user_id, amount):
-        return
         user = self.accounts[user_id]
+        self.cog_pair.accrue()
         borrowed_amount = self.cog_pair.user_borrow_part(user)
+        (elastic, base) = self.cog_pair.total_borrow()
 
-        to_repay = int(amount * borrowed_amount)
+        assert elastic >= base
+
+        # FWIW there are occasionally bugs where this amount is rounded
+        # up, and fails to overpay, so we subtract 1
+        to_repay = int((amount * borrowed_amount))
+        to_repay = int(to_repay - 1)
+        if to_repay <= 0:
+            return
+
+        if to_repay > base:
+            # Sometimes the float conversions for amount
+            # can cause some minor rounding issues and try to overpay
+            to_repay = base
 
         self.last_action = REPAY
         self.last_interest_info = self.cog_pair.accrue_info()
@@ -69,8 +86,6 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(percent=st.floats(min_value=-0.5, max_value=0.5))
     def nudge_oracle(self, percent):
-        return  # stub
-
         current_price = self.oracle.get()[1]
         new_price = int((1 + percent/100) * current_price)
         with boa.env.prank(self.accounts[0]):
@@ -114,7 +129,7 @@ def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
 
 
     StateMachine.settings = {
-        #"stateful_step_count": NUM_STEPS,
+        "stateful_step_count": NUM_STEPS,
         "suppress_health_check": list(HealthCheck),
     }
     run_state_machine_as_test(StateMachine)
