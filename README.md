@@ -89,10 +89,10 @@ To allow the most flexible deployment of Cog, this repo prepares several integra
 - [previewMint](./tests/test_erc4626_interface.py#293)
 - [mint](./tests/test_erc4626_interface.py#347)
 - [maxWithdraw](./tests/test_erc4626_interface.py#406)
-- [previewWithdraw](./tests/test_erc4626_interface.py#444) FIXME: Should not account for contract balance at the time, ideal situations only
+- [previewWithdraw](./tests/test_erc4626_interface.py#444) 
 - [withdraw](./tests/test_erc4626_interface.py#486)
 - [maxRedeem](./tests/test_erc4626_interface.py#549)
-- [previewRedeem](./tests/test_erc4626_interface.py#599) FIXME: Should not account for contract balance at the time, ideal situations only
+- [previewRedeem](./tests/test_erc4626_interface.py#599) 
 - [redeem](./tests/test_erc4626_interface.py#639)
 
 **General Functions**
