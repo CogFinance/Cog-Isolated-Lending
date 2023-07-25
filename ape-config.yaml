@@ -3,8 +3,10 @@ contracts_folder: src
 
 plugins:
   - name: vyper
-    evm_version: london
   - name: solidity
+
+vyper:
+  evm_version: berlin
 
 geth:
   scroll:

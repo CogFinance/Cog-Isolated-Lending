@@ -104,8 +104,6 @@ struct DataSource:
     active: bool
     oracle_address: address
 
-# 5 Minute interval
-twap_interval: constant(uint32) = 300000
 fuse_box: public(DataSource[4])
 
 @external
@@ -175,7 +173,7 @@ def get() -> (bool, uint256):
     if fuses[3].active:
         success: bool = False
         price: uint256 = 0
-        (success, price) = IOracle(fuses[2].oracle_address).get()
+        (success, price) = IOracle(fuses[3].oracle_address).get()
         assert success, "Oracle 3 Didnt Work"
         total_price += price
         active_oracles += 1

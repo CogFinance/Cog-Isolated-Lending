@@ -85,6 +85,24 @@ class StateMachine(RuleBasedStateMachine):
         
             self.cog_pair.accrue()
 
+    @rule(user_id=user_id, amount=amount)
+    def add_collateral(self, user_id, amount):
+        user = self.accounts[user_id]
+        amount = int(amount * 100 ** 18)
+        if amount + self.cog_pair.user_collateral_share(user) >= (2 ** 128):
+            return
+
+        with boa.env.prank(user):
+            self.collateral.mint(user, amount)
+            self.collateral.approve(self.cog_pair, amount)
+            self.cog_pair.add_collateral(user, amount)
+
+
+    @rule(user_id=user_id, amount=amount)
+    def remove_collateral(self, user_id, amount):
+        user = self.accounts[user_id]
+        share = self.cog_pair.user_collateral_share(user)
+
     @rule(percent=st.floats(min_value=-0.5, max_value=0.5))
     def nudge_oracle(self, percent):
         current_price = self.oracle.get()[1]
