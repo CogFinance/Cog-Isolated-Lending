@@ -4,37 +4,41 @@ The first implementation of the Cog Finance protocol, written primarily in Vyper
 
 # Installation
 
-To install the repo simply run the commands below (*assuming an install of foundry and python)
-
-- Install [Poetry](https://python-poetry.org/)
-
-```
-git submodule init
-git submodule update
-
-poetry shell
-
-pip3 install vyper
-pip3 install eth-ape
-
-ape plugins install .
-
-forge build
-forge test
-ape compile
-ape test
-```
-
 This repo makes full use of Vyper's Swiss Army Knife set of tools, to fully test and analyze the Cog Finance Contracts. The contracts are designed to be battle-hardened, with beyond standard security measures in place.
+
+## Testing
+
+Tests can be run from a fresh venv via the following commands
+```shell
+python3 -m venv deploy_env
+source deploy_env/bin/activate
+
+pip3 install titanoboa
+pip3 install hypothesis
+pip3 install pytest-cov
+pip3 install pytest
+
+pytest -s --cov=src/ tests/
+coverage html
+pytest . 
+```
 
 ## Deployment
 
-Contracts can be deployed using the deploy script, which will 
+Contracts can be deployed using the deploy script, which can run from a fresh venv via the follow commands
 
-Then in a seperate shell terminal via Deploy the Contracts via
+```shell
+python3 -m venv deploy_env
+source deploy_env/bin/activate
 
-```
-ape run scripts/deploy.py deploy --network ethereum:local
+pip3 install eth-ape
+pip3 install colorama
+pip3 install web3
+pip3 install click
+
+ape plugins install .
+ape compile
+ape run scripts/deploy.py deploy --network https://alpha-rpc.scroll.io/l2
 ```
 
 ## Contracts
