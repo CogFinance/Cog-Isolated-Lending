@@ -9,7 +9,11 @@ from hypothesis import settings
 
 @pytest.fixture(scope="session")
 def accounts() -> List[Any]:
-    return [boa.env.generate_address() for _ in range(10)]
+    return [boa.env.generate_address() for _ in range(11)]
+
+@pytest.fixture(scope="session")
+def liquidator(accounts) -> Any:
+    return accounts[10]
 
 # TODO: rename to admin and (probably) don't put it in accounts
 @pytest.fixture(scope="session")

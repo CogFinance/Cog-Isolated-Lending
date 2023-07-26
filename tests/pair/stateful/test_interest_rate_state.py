@@ -17,6 +17,7 @@ BORROW = 1
 REPAY = 2
 COLLATERALIZATION_RATE_PCT = 75  # 75%
 NUM_STEPS = 100
+COLLATERIZATION_RATE = 75000
 
 
 class StateMachine(RuleBasedStateMachine):
@@ -44,9 +45,9 @@ class StateMachine(RuleBasedStateMachine):
 
         # borrowing exactly AT the collateralization ratio leads to "too little collateral"
         collat_rate = COLLATERALIZATION_RATE_PCT - 1
-        to_borrow = int(amount * (collateral_amount * collat_rate // 100 - amount_owed))
+        to_borrow = int(amount * (collateral_amount * (collat_rate // 100) - amount_owed))
 
-        if to_borrow <= 0:  # could be <0 if user is insolvent
+        if to_borrow < 0:  # could be <0 if user is insolvent
             return
 
         if to_borrow > self.asset.balanceOf(self.cog_pair):
@@ -100,8 +101,26 @@ class StateMachine(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def remove_collateral(self, user_id, amount):
-        user = self.accounts[user_id]
-        share = self.cog_pair.user_collateral_share(user)
+        self.cog_pair.accrue()
+        user = self.accounts[user_id] 
+        collateral_amount = self.cog_pair.user_collateral_share(user)
+        share = collateral_amount - (collateral_amount * amount)
+        # Exchange Rate precision = 1e18, and collateralization_Rate_precision = 1e5
+        collateral_amt = share * (10 ** 18 / 10 ** 5) * COLLATERIZATION_RATE
+
+        (_, exchange_rate) = self.oracle.get()
+
+        (total_borrow_elastic, total_borrow_base) = self.cog_pair.total_borrow()
+        borrow_part = 0
+        if total_borrow_elastic > 0: 
+            borrow_part = self.cog_pair.user_borrow_part(user)
+            borrow_part = borrow_part * total_borrow_elastic * exchange_rate / total_borrow_base
+
+        if collateral_amt < borrow_part:
+            return
+
+        with boa.env.prank(user):
+            self.cog_pair.remove_collateral(user, int(collateral_amount * amount))
 
     @rule(percent=st.floats(min_value=-0.5, max_value=0.5))
     def nudge_oracle(self, percent):
@@ -113,6 +132,33 @@ class StateMachine(RuleBasedStateMachine):
     @rule(dt=time_shift)
     def time_travel(self, dt):
         boa.env.time_travel(dt)
+
+    @invariant()
+    def liquidate_insolvent_users(self):
+        self.cog_pair.accrue()
+        (total_borrow_elastic, total_borrow_base) = self.cog_pair.total_borrow()
+        if total_borrow_base == 0:
+            return
+
+        (_, exchange_rate) = self.oracle.get()
+
+        for i in range(10):
+            user = self.accounts[i]
+            share = self.cog_pair.user_collateral_share(user)
+            # Exchange Rate precision = 1e18, and collateralization_Rate_precision = 1e5
+            collateral_amt = share * (10 ** 18 / 10 ** 5) * COLLATERIZATION_RATE
+
+            (total_borrow_elastic, total_borrow_base) = self.cog_pair.total_borrow()
+
+            borrow_part = 0
+            if total_borrow_elastic > 0: 
+                borrow_part = self.cog_pair.user_borrow_part(user)
+                borrow_part = borrow_part * total_borrow_elastic * exchange_rate / total_borrow_base
+
+            if collateral_amt < borrow_part:
+                liquidator = self.accounts[10]
+                with boa.env.prank(user):
+                    self.cog_pair.liquidate(user, self.cog_pair.user_borrow_part(user), liquidate)
 
 
 def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):

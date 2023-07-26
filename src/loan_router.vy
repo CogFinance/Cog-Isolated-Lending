@@ -9,7 +9,6 @@
 from vyper.interfaces import ERC20
 
 interface CogPair:
-  # We can omit the `to` parameter because it defaults to msg.sender, which should be the router in this case
   def borrow(amount: uint256, _from: address, to: address) -> uint256 : nonpayable
 
   def add_collateral(to: address, amount: uint256) : nonpayable
@@ -25,13 +24,20 @@ struct Hop:
 @external
 def loanTokens(path: Hop[5], deadline: uint256):
   assert(block.timestamp < deadline)
-  for route in path:
+  
+  # Prefund initial hop
+  ERC20(collateral).transferFrom(msg.sender, self, route.collateral_added)
+
+  for index in range(5):
+    route: Hop = path[index]
     if route.pair != empty(address):
       collateral: address = CogPair(route.pair).collateral()
       asset: address = CogPair(route.pair).asset()
 
-      ERC20(collateral).transferFrom(msg.sender, self, route.collateral_added)
       ERC20(collateral).approve(route.pair, route.collateral_added)
       CogPair(route.pair).add_collateral(msg.sender, route.collateral_added)
- 
-      CogPair(route.pair).borrow(route.assets_to_borrow, msg.sender, msg.sender)
+      CogPair(route.pair).borrow(route.assets_to_borrow, msg.sender, self)
+    else:
+      final_asset: address =  
+      ERC20()
+      return
