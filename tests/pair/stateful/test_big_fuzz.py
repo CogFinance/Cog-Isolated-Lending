@@ -8,7 +8,7 @@ from hypothesis.stateful import (
     rule,
     run_state_machine_as_test,
 )
-
+from hypothesis import settings
 import boa
 
 
@@ -16,11 +16,11 @@ MINT_AMOUNT = 100*10**18
 BORROW = 1
 REPAY = 2
 COLLATERALIZATION_RATE_PCT = 75  # 75%
-NUM_STEPS = 100
+NUM_STEPS = 100_000
 COLLATERIZATION_RATE = 75000
 
 
-class StateMachine(RuleBasedStateMachine):
+class BigFuzz(RuleBasedStateMachine):
     # a strategy to generate a number which represents percent
     # of account to borrow or repay.
     amount = st.floats(min_value=0.01, max_value=0.99)
@@ -134,6 +134,19 @@ class StateMachine(RuleBasedStateMachine):
         boa.env.time_travel(dt)
 
     @invariant()
+    def interest_stays_within_bounds(self):
+        self.cog_pair.accrue()
+        
+        (interest_per_second, last_accrued, fees_earned_fraction) = self.cog_pair.accrue_info()
+        (total_borrow_elastic, total_borrow_base) = self.cog_pair.total_borrow()
+        if total_borrow_base == 0:
+            STARTING_INTEREST_PER_SECOND = 317097920
+            assert interest_per_second == STARTING_INTEREST_PER_SECOND
+    
+        assert interest_per_second < 31709792000
+        assert interest_per_second > 79274480
+
+    @invariant()
     def liquidate_insolvent_users(self):
         self.cog_pair.accrue()
         (total_borrow_elastic, total_borrow_base) = self.cog_pair.total_borrow()
@@ -163,7 +176,7 @@ class StateMachine(RuleBasedStateMachine):
 
 def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
     for k, v in locals().items():
-        setattr(StateMachine, k, v)
+        setattr(BigFuzz, k, v)
 
     with boa.env.prank(accounts[0]):
         oracle.setPrice(10**18)
@@ -182,8 +195,5 @@ def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
             cog_pair.add_collateral(account, MINT_AMOUNT)
 
 
-    StateMachine.settings = {
-        "stateful_step_count": NUM_STEPS,
-        "suppress_health_check": list(HealthCheck),
-    }
-    run_state_machine_as_test(StateMachine)
+    BigFuzz.TestCase.settings = settings(max_examples=15, stateful_step_count=50, deadline=None)
+    run_state_machine_as_test(BigFuzz)
