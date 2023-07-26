@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
+
 import "../libraries/BoringMath.sol";
 import "../interfaces/IOracle.sol";
 
@@ -19,10 +20,9 @@ contract CompoundOracle is IOracle {
 
     mapping(string => PriceInfo) public prices;
 
-
     string public collateralSymbol;
     string public assetSymbol;
-    uint256 immutable public division;
+    uint256 public immutable division;
 
     constructor(string memory _collateralSymbol, string memory _assetSymbol, uint256 div) public {
         collateralSymbol = _collateralSymbol;
@@ -54,11 +54,11 @@ contract CompoundOracle is IOracle {
         return info.price;
     }
 
-    function getDataParameter(
-        string memory collateralSymbol,
-        string memory assetSymbol,
-        uint256 division
-    ) public pure returns (bytes memory) {
+    function getDataParameter(string memory collateralSymbol, string memory assetSymbol, uint256 division)
+        public
+        pure
+        returns (bytes memory)
+    {
         return abi.encode(collateralSymbol, assetSymbol, division);
     }
 

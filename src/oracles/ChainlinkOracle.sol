@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
+
 import "../libraries/BoringMath.sol";
 import "../interfaces/IOracle.sol";
 
@@ -9,13 +10,7 @@ interface IAggregator {
     function latestRoundData()
         external
         view
-        returns (
-            uint80 roundId,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
+        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
 
 contract ChainlinkOracle is IOracle {
@@ -33,32 +28,24 @@ contract ChainlinkOracle is IOracle {
 
     // Calculates the lastest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
-    function _get(
-        address multiply,
-        address divide,
-        uint256 decimals
-    ) internal view returns (uint256) {
+    function _get(address multiply, address divide, uint256 decimals) internal view returns (uint256) {
         uint256 price = uint256(1e36);
         if (multiply != address(0)) {
-            (, int256 mulPrice, , ,) = IAggregator(multiply).latestRoundData();
+            (, int256 mulPrice,,,) = IAggregator(multiply).latestRoundData();
             price = price.mul(uint256(mulPrice));
         } else {
             price = price.mul(1e18);
         }
 
         if (divide != address(0)) {
-            (, int256 divPrice, , ,) = IAggregator(divide).latestRoundData();
+            (, int256 divPrice,,,) = IAggregator(divide).latestRoundData();
             price = price / uint256(divPrice);
         }
 
         return price / decimals;
     }
 
-    function getDataParameter(
-        address multiply,
-        address divide,
-        uint256 decimals
-    ) public pure returns (bytes memory) {
+    function getDataParameter(address multiply, address divide, uint256 decimals) public pure returns (bytes memory) {
         return abi.encode(multiply, divide, decimals);
     }
 

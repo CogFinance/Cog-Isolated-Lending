@@ -24,14 +24,7 @@ interface IAggregator {
 interface IUniswapV2Pair {
     function totalSupply() external view returns (uint256);
 
-    function getReserves()
-        external
-        view
-        returns (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint32 blockTimestampLast
-        );
+    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
 }
 
 /// @title LPChainlinkOracleV1
@@ -95,7 +88,7 @@ contract LPETHChainlinkOracleV1 is IAggregator {
 
     // Calculates the lastest exchange rate
     function latestAnswer() external view override returns (int256) {
-        (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(pair).getReserves();
+        (uint256 reserve0, uint256 reserve1,) = IUniswapV2Pair(pair).getReserves();
         uint256 totalSupply = pair.totalSupply();
         uint256 k = reserve0.mul(reserve1);
         uint256 ethValue = sqrt((k / 1e18).mul(uint256(tokenOracle.latestAnswer())));
