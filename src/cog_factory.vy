@@ -188,7 +188,7 @@ def update_default_protocol_fee(pair: address, newFee: uint256):
 @external
 def change_fee_to(new_owner: address):
     """
-    @dev Returns the address to which protocol fees arema sent.
+    @dev Returns the address to which protocol fees are sent.
 
     @param new_owner The address to which protocol fees are sent
     """
