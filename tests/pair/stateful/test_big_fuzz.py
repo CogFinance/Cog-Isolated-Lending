@@ -143,8 +143,8 @@ class BigFuzz(RuleBasedStateMachine):
             STARTING_INTEREST_PER_SECOND = 317097920
             assert interest_per_second == STARTING_INTEREST_PER_SECOND
     
-        assert interest_per_second < 31709792000
-        assert interest_per_second > 79274480
+        assert interest_per_second <= 31709792000
+        assert interest_per_second >= 79274480
 
     @invariant()
     def liquidate_insolvent_users(self):
