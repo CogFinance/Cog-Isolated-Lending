@@ -77,7 +77,7 @@ def test_add_collateral(cog_pair, amount, accounts, collateral):
 )
 @settings(max_examples=10, deadline=None)
 def test_remove_collateral(cog_pair, amount, accounts, collateral):
-    # Moslty irrelevant to the test, but we need to mint some collateral to the accounts
+    # Mostly irrelevant to the test, but we need to mint some collateral to the accounts
     # so that we can remove it.
     account = accounts[0]
     collateral.mint(account, amount, sender=account)
