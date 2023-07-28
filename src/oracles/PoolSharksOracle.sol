@@ -124,7 +124,7 @@ contract PoolSharksOracle is IOracle {
         uint256 currentPrice = calculatePrice();
         if (currentPrice != lastPrice) {
             lastPrice = currentPrice;
-            return (true, calculatePrice);
+            return (true, currentPrice);
         } else {
             // Cheaper than reading again from storage
             return (false, currentPrice);
@@ -136,7 +136,7 @@ contract PoolSharksOracle is IOracle {
     function peek() external view returns (bool success, uint256 rate) {
         uint256 currentPrice = calculatePrice();
         if (currentPrice != lastPrice) {
-            return (true, calculatePrice);
+            return (true, currentPrice);
         } else {
             // Cheaper than reading again from storage
             return (false, currentPrice);

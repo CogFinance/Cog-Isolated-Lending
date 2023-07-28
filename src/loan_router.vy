@@ -26,7 +26,8 @@ def loanTokens(path: Hop[5], deadline: uint256):
   assert(block.timestamp < deadline)
   early_return: bool = False
   # Prefund initial hop
-  ERC20(collateral).transferFrom(msg.sender, self, route.collateral_added)
+  first_route: Hop = path[0]
+  ERC20(CogPair(first_route.pair).collateral()).transferFrom(msg.sender, self, first_route.collateral_added)
 
   for index in range(5):
     route: Hop = path[index]
@@ -38,11 +39,11 @@ def loanTokens(path: Hop[5], deadline: uint256):
       CogPair(route.pair).add_collateral(msg.sender, route.collateral_added)
       CogPair(route.pair).borrow(route.assets_to_borrow, msg.sender, self)
     else:
-      final_asset: address = CogPair(path[index-1]).asset()
+      final_asset: address = CogPair(path[index-1].pair).asset()
       ERC20(final_asset).transfer(msg.sender, ERC20(final_asset).balanceOf(self))
       return
   if early_return:
     return
   else:
-    final_asset: address = CogPair(path[4]).asset()
+    final_asset: address = CogPair(path[4].pair).asset()
     ERC20(final_asset).transfer(msg.sender, ERC20(final_asset).balanceOf(self))
