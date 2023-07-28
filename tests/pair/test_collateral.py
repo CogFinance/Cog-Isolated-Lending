@@ -114,7 +114,6 @@ def test_remove_collateral(cog_pair, amount, accounts, collateral):
 
 def test_cannot_remove_when_insolvent(cog_pair, accounts, collateral, asset, oracle):
     # Invariant The function should revert if the user would become insolvent
-    # TODO: This should probably fuzz
     # This scenario is a little more tricky so requires its own test
     account = accounts[0]
     asset_one_coin_price = 1000000000000000000

@@ -76,7 +76,11 @@ def test_totalAssets(cog_pair, oracle, accounts, collateral, asset):
     assert cog_pair.totalAssets() > 500000000000000000
 
 
-def test_convertToShares(cog_pair, oracle, accounts, collateral, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -90,7 +94,7 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 100000000
+    AMOUNT = amount
 
     # convertToShares returns 1:1 if totalAssets is 0
     assert cog_pair.convertToShares(AMOUNT) == AMOUNT
@@ -128,8 +132,11 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset):
     # Once debt is repaid, and total_borrow is (0,0) shares mint 1:1 again, or atleast as close as possible, with rounding occuring downward
     assert cog_pair.convertToShares(AMOUNT) < AMOUNT and cog_pair.convertToShares(AMOUNT) > AMOUNT - (AMOUNT * 0.05)
 
-
-def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -143,7 +150,7 @@ def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 100000000
+    AMOUNT = amount
     AMOUNT_IN_SHARES = cog_pair.convertToShares(AMOUNT)
     
     # convertToAssets returns 1:1 if totalAssets is 0
@@ -185,7 +192,11 @@ def test_maxDeposit(cog_pair, account):
     """
     assert cog_pair.maxDeposit(account) == 2**256 - 1
 
-def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -198,7 +209,7 @@ def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 100000000
+    AMOUNT = amount
 
     # mirrors deposit before pool has accrued interest
     expected_shares = cog_pair.previewDeposit(AMOUNT)
@@ -225,7 +236,11 @@ def test_previewDeposit(cog_pair, oracle, accounts, collateral, asset):
     assert cog_pair.balanceOf(account) == expected_shares
 
 
-def test_deposit(cog_pair, accounts, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_deposit(cog_pair, accounts, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -235,7 +250,7 @@ def test_deposit(cog_pair, accounts, asset):
     Grants user shares for deposit
     """
 
-    AMOUNT = 100000000
+    AMOUNT = amount
     account = accounts[0]
     
     asset.mint(account, AMOUNT, sender=account)
@@ -247,15 +262,6 @@ def test_deposit(cog_pair, accounts, asset):
     # Supports EIP-20 approve / transferFrom on asset as a deposit flow
     assert asset.balanceOf(account) == 0
 
-    asset.mint(account, int(AMOUNT/2), sender=account)
-    asset.approve(cog_pair, AMOUNT, sender=account)
-    
-    #with boa.reverts():
-    #    # Reverts if all assets cannot be deposited
-    #    cog_pair.deposit(AMOUNT, account, sender=account)
-
-
-
 
 def test_maxMint(cog_pair, account):
     """
@@ -265,7 +271,12 @@ def test_maxMint(cog_pair, account):
     """
     assert cog_pair.maxMint(account) == 2**256 - 1
     
-def test_previewMint(cog_pair, oracle, accounts, collateral, asset):
+
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_previewMint(cog_pair, oracle, accounts, collateral, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -278,7 +289,7 @@ def test_previewMint(cog_pair, oracle, accounts, collateral, asset):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT_IN_ASSETS = 100000000
+    AMOUNT_IN_ASSETS = amount
     AMOUNT_IN_SHARES = cog_pair.convertToShares(AMOUNT_IN_ASSETS)
 
     # mirrors deposit before pool has accrued interest
@@ -309,7 +320,11 @@ def test_previewMint(cog_pair, oracle, accounts, collateral, asset):
     assert asset.balanceOf(account) == 0
 
 
-def test_mint(cog_pair, accounts, asset, collateral, oracle):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_mint(cog_pair, accounts, asset, collateral, oracle, amount):
     """
     Invariants Tested
     -----------------
@@ -324,7 +339,7 @@ def test_mint(cog_pair, accounts, asset, collateral, oracle):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 100000000
+    AMOUNT = amount
     AMOUNT_IN_SHARES = cog_pair.convertToShares(AMOUNT)
     account = accounts[0]
     
@@ -394,8 +409,11 @@ def test_maxWithdraw(cog_pair, accounts, asset, collateral, oracle):
     max = cog_pair.maxWithdraw(account)
     assert max == AMOUNT - int(AMOUNT/2)
 
-
-def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle, amount):
     """
     Invariants Tested
     -----------------
@@ -408,7 +426,7 @@ def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 100000000
+    AMOUNT = amount
 
     # mirrors withdraw before pool has accrued interest
     asset.mint(account, AMOUNT, sender=account)
@@ -433,7 +451,11 @@ def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle):
     assert preview == AMOUNT - int(AMOUNT/2)
 
 
-def test_withdraw(cog_pair, accounts, asset):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_withdraw(cog_pair, accounts, asset, amount):
     """
     Invariants Tested
     -----------------
@@ -452,7 +474,7 @@ def test_withdraw(cog_pair, accounts, asset):
     cog_pair.mint(1000000000000000000, account, sender=account)
     account = accounts[0]
 
-    AMOUNT = 100000000
+    AMOUNT = amount
 
     asset.mint(account, AMOUNT, sender=account)
     asset.approve(cog_pair, AMOUNT, sender=account)
@@ -528,7 +550,11 @@ def test_maxRedeem(cog_pair, accounts, asset, collateral, oracle):
     assert cog_pair.maxRedeem(account) <= cog_pair.balanceOf(account)
 
 
-def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle):
+@given(
+    amount=st.integers(min_value=100000, max_value=2**124-1),
+)
+@settings(max_examples=100, deadline=None)
+def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle, amount):
     """
     Invariants Tested
     -----------------
@@ -541,7 +567,7 @@ def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle):
     oracle.setUpdated(True, sender=account)
     cog_pair.get_exchange_rate(sender=account)
 
-    AMOUNT = 100000000
+    AMOUNT = amount
     AMOUNT_IN_SHARES = cog_pair.convertToShares(AMOUNT)
 
     # mirrors redeem before pool has accrued interest
