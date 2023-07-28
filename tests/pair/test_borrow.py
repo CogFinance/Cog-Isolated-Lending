@@ -18,7 +18,7 @@ def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle)
     account = accounts[0]
     asset_one_coin_price = 1000000000000000000
     
-    amount = 100000000
+    amount = 1000 * (10 ** 18)
 
     oracle.setPrice(asset_one_coin_price, sender=account)
     oracle.setUpdated(True, sender=account)
@@ -40,6 +40,33 @@ def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle)
     cog_pair.add_collateral(account, amount*10, sender=account)
 
     old_borrow_part = cog_pair.user_borrow_part(account)
+
+    amount = 100 * (10 ** 18)
+
+    # BORROW_OPENING_FEE and BORROW_OPENING_FEE_PRECISION both respectively
+    fee = int((amount * 50) / 100000)
+
+    cog_pair.borrow(amount, sender=account)    
+
+    # Test Invariant `user_borrow_part[account]` is set equal to `user_borrow_part[account] + amount`.
+    assert cog_pair.user_borrow_part(account) == old_borrow_part + amount + fee
+
+    # Test Invariant `total_borrow` is set equal to `total_borrow + amount`.
+    (_, current_base) = cog_pair.total_borrow()
+    assert  current_base == old_base + amount + fee
+
+    account = accounts[1]
+
+    (old_elastic, old_base) = cog_pair.total_borrow()
+    old_borrow_part = cog_pair.user_borrow_part(account)
+
+    collateral.mint(account, amount*10, sender=account)
+    collateral.approve(cog_pair, amount*10, sender=account)
+    cog_pair.add_collateral(account, amount*10, sender=account)
+
+    old_borrow_part = cog_pair.user_borrow_part(account)
+
+    amount = 100 * (10 ** 18)
 
     # BORROW_OPENING_FEE and BORROW_OPENING_FEE_PRECISION both respectively
     fee = int((amount * 50) / 100000)
