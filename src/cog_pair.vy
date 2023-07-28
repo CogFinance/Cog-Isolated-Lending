@@ -24,7 +24,7 @@ struct Rebase:
 @internal
 def to_base_round_up(total: Rebase, elastic: uint256) -> uint256:
     """
-    @param total - The Rebase value which should be used to dervie the relative base value
+    @param total - The Rebase value which should be used to derive the relative base value
     @param elastic - The elastic value to convert to a relative base value
     @param round_up - Self explanatory
     """
@@ -382,7 +382,7 @@ protocol_fee: public(uint256)
 DEFAULT_PROTOCOL_FEE: public(uint256)
 PROTOCOL_FEE_DIVISOR: constant(uint256) = 1000000
 
-# If IR surges ~10% in 1 day then Protocol begins accuring PoL
+# If IR surges ~10% in 1 day then Protocol begins accruing PoL
 # dr/dt, where dt = 1 day (86400), and dr is change in interest_rate per second or 3170979200 (10% interest rate)
 PROTOCOL_SURGE_THRESHOLD: constant(uint64) = 36701  
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
@@ -476,7 +476,7 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
     return True
 
 # @t11s said I didn't need to support permit (https://twitter.com/transmissions11/status/1673478816168296450), so I removed it, if you need permit for something make a wrapper contract
-# that kind of sounds like you problem tbh, its just an LP token, make your users use 2 clicks its not that hard
+# that kind of sounds like you problem tbh, it's just an LP token, make your users use 2 clicks it's not that hard
 
 # ///////////////////////////////////////////////////// #
 #		            ERC4626 Compatibility	        	#

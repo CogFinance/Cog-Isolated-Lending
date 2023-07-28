@@ -155,7 +155,7 @@ def test_transferFrom(cog_pair, accounts, asset, amount):
 @settings(max_examples=10, deadline=None)
 def test_approve_allowance(cog_pair, accounts, asset, amount):
     """
-    Invairants Tested
+    Invariants Tested
     -----------------
     1. `allowance[msg.sender][spender]` is set equal to `amount`.
     2. `allowance[msg.sender][spender]` is set equal to `amount` after a second approve
