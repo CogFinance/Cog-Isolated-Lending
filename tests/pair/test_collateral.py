@@ -31,7 +31,6 @@ def test_add_collateral(cog_pair, amount, accounts, collateral):
     cog_pair.add_collateral(account, amount, sender=account)
     after_balance_0 = cog_pair.user_collateral_share(account)
 
-
     new_balance = collateral.balanceOf(account)
 
     # Tokens from the user are transferred from the depositor equal to the amount they called with.

@@ -36,6 +36,31 @@ def oracle(account):
         return boa.load('src/mocks/mock_oracle.vy')
     
 @pytest.fixture(scope="session")
+def fuse_one(account):
+    with boa.env.prank(account):
+        return boa.load('src/mocks/mock_oracle.vy')
+
+@pytest.fixture(scope="session")
+def fuse_two(account):
+    with boa.env.prank(account):
+        return boa.load('src/mocks/mock_oracle.vy')
+
+@pytest.fixture(scope="session")
+def fuse_three(account):
+    with boa.env.prank(account):
+        return boa.load('src/mocks/mock_oracle.vy')
+
+@pytest.fixture(scope="session")
+def fuse_four(account):
+    with boa.env.prank(account):
+        return boa.load('src/mocks/mock_oracle.vy')
+
+@pytest.fixture(scope="session")
+def fuse_box(account, fuse_one, fuse_two, fuse_three, fuse_four):
+    with boa.env.prank(account):
+        return boa.load('src/fuse_box.vy', [(True, fuse_one.address), (True, fuse_two.address), (True, fuse_three.address), (True, fuse_four.address)])
+
+@pytest.fixture(scope="session")
 def cog_pair_blueprint(account):
     pair = boa.load_partial('src/cog_pair.vy')
     with boa.env.prank(account):
