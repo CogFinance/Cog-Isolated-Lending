@@ -13,7 +13,7 @@ Tests can be run from a fresh venv via the following commands
 python3 -m venv test_env
 source test_env/bin/activate
 
-pip3 install titanoboa
+pip install git+https://github.com/vyperlang/titanoboa
 pip3 install hypothesis
 pip3 install pytest-cov
 pip3 install pytest
