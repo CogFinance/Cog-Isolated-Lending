@@ -22,9 +22,8 @@ struct Hop:
   assets_to_borrow: uint256
 
 @external
-def loanTokens(path: Hop[5], deadline: uint256):
+def loan_tokens(path: Hop[5], deadline: uint256):
   assert(block.timestamp < deadline)
-  early_return: bool = False
   # Prefund initial hop
   first_route: Hop = path[0]
   ERC20(CogPair(first_route.pair).collateral()).transferFrom(msg.sender, self, first_route.collateral_added)
@@ -42,8 +41,5 @@ def loanTokens(path: Hop[5], deadline: uint256):
       final_asset: address = CogPair(path[index-1].pair).asset()
       ERC20(final_asset).transfer(msg.sender, ERC20(final_asset).balanceOf(self))
       return
-  if early_return:
-    return
-  else:
-    final_asset: address = CogPair(path[4].pair).asset()
-    ERC20(final_asset).transfer(msg.sender, ERC20(final_asset).balanceOf(self))
+  final_asset: address = CogPair(path[4].pair).asset()
+  ERC20(final_asset).transfer(msg.sender, ERC20(final_asset).balanceOf(self))
