@@ -178,29 +178,29 @@ class BigFuzz(RuleBasedStateMachine):
         assert interest_per_second <= 31709792000
         assert interest_per_second >= 79274480
 
-#def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
-    #for k, v in locals().items():
-        #    setattr(BigFuzz, k, v)
+def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
+    for k, v in locals().items():
+        setattr(BigFuzz, k, v)
 
-    #with boa.env.prank(accounts[0]):
-        #oracle.setPrice(10**18)
-        #oracle.setUpdated(True)
+    with boa.env.prank(accounts[0]):
+        oracle.setPrice(10**18)
+        oracle.setUpdated(True)
 
-        #asset.mint(boa.env.eoa, MINT_AMOUNT)
-        #asset.approve(cog_pair, MINT_AMOUNT)
-       # cog_pair.deposit(MINT_AMOUNT, boa.env.eoa)
+        asset.mint(boa.env.eoa, MINT_AMOUNT)
+        asset.approve(cog_pair, MINT_AMOUNT)
+        cog_pair.deposit(MINT_AMOUNT, boa.env.eoa)
 
-        #for account in accounts:
-            #    collateral.mint(account, MINT_AMOUNT)
+        for account in accounts:
+                collateral.mint(account, MINT_AMOUNT)
 
-    #for account in accounts:
-        #with boa.env.prank(account):
-            #            collateral.approve(cog_pair, MINT_AMOUNT)
-#            cog_pair.add_collateral(account, MINT_AMOUNT)
-#
-#
-#    BigFuzz.TestCase.settings = settings(max_examples=1, stateful_step_count=1, deadline=None)
-#    run_state_machine_as_test(BigFuzz)
+    for account in accounts:
+        with boa.env.prank(account):
+            collateral.approve(cog_pair, MINT_AMOUNT)
+            cog_pair.add_collateral(account, MINT_AMOUNT)
+
+
+    BigFuzz.TestCase.settings = settings(max_examples=5, stateful_step_count=15, deadline=None)
+    run_state_machine_as_test(BigFuzz)
 
 def test_user_gets_liquidated(accounts, collateral, asset, oracle, cog_pair):
     for k, v in locals().items():
