@@ -10,8 +10,8 @@ This repo makes full use of Vyper's Swiss Army Knife set of tools, to fully test
 
 Tests can be run from a fresh venv via the following commands
 ```shell
-python3 -m venv deploy_env
-source deploy_env/bin/activate
+python3 -m venv test_env
+source test_env/bin/activate
 
 pip3 install titanoboa
 pip3 install hypothesis
