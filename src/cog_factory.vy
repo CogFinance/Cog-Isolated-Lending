@@ -256,8 +256,10 @@ def deploy_stable_risk_pair(
     MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
     MAXIMUM_INTEREST_PER_SECOND: uint64 = 7927448000
 
+    INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
+
     pair: address = create_from_blueprint(
-        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, INTEREST_ELASTICITY, code_offset=3
     )
     log StablePairCreated(asset, collateral, pair)
     return pair
@@ -285,8 +287,10 @@ def deploy_low_risk_pair(
     MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
     MAXIMUM_INTEREST_PER_SECOND: uint64 = 15854896000
 
+    INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
+    
     pair: address = create_from_blueprint(
-        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3)
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, INTEREST_ELASTICITY, code_offset=3)
 
     log LowPairCreated(asset, collateral, pair)
     return pair
@@ -314,8 +318,10 @@ def deploy_medium_risk_pair(
     MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
     MAXIMUM_INTEREST_PER_SECOND: uint64 = 31709792000
 
+    INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
+    
     pair: address = create_from_blueprint(
-        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, INTEREST_ELASTICITY, code_offset=3
     )
     log MediumPairCreated(asset, collateral, pair)
     return pair
@@ -343,8 +349,10 @@ def deploy_high_risk_pair(
     MINIMUM_INTEREST_PER_SECOND: uint64 = 634195840
     MAXIMUM_INTEREST_PER_SECOND: uint64 = 317097920000
 
+    INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
+    
     pair: address = create_from_blueprint(
-        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, code_offset=3
+        blueprint, asset, collateral, oracle, MINIMUM_TARGET_UTILIZATION, MAXIMUM_TARGET_UTILIZATION, STARTING_INTEREST_PER_SECOND, MINIMUM_INTEREST_PER_SECOND, MAXIMUM_INTEREST_PER_SECOND, INTEREST_ELASTICITY, code_offset=3
     )
     log HighPairCreated(asset, collateral, pair)
     return pair
@@ -352,7 +360,7 @@ def deploy_high_risk_pair(
 @external
 def deploy_custom_risk_pair(
     asset: address, collateral: address, oracle: address, _blueprint: address, code_offset: uint256,
-    minimum_target_utilization: uint256, maximum_target_utilization: uint256, starting_interest_per_second: uint64, minimum_interest_per_second: uint64, maximum_interest_per_second: uint64
+    minimum_target_utilization: uint256, maximum_target_utilization: uint256, starting_interest_per_second: uint64, minimum_interest_per_second: uint64, maximum_interest_per_second: uint64, elasticity: uint256,
 ) -> address:
     """
     @dev Deploy a custom pair with a different set of parameters
@@ -367,11 +375,12 @@ def deploy_custom_risk_pair(
     @param starting_interest_per_second The starting interest per second for the pair
     @param minimum_interest_per_second The minimum interest per second for the pair
     @param maximum_interest_per_second The maximum interest per second for the pair
+    @param elasticity The interest rate elasticity factor
 
     @return pair The address of the deployed pair
     """
     pair: address = create_from_blueprint(
-        _blueprint, asset, collateral, oracle, minimum_target_utilization, maximum_target_utilization, starting_interest_per_second, minimum_interest_per_second, maximum_interest_per_second, code_offset=code_offset
+        _blueprint, asset, collateral, oracle, minimum_target_utilization, maximum_target_utilization, starting_interest_per_second, minimum_interest_per_second, maximum_interest_per_second, elasticity, code_offset=code_offset
     )
     log CustomPairCreated(_blueprint, pair, asset, collateral)
     return pair

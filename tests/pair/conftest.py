@@ -93,7 +93,7 @@ def cog_pair(account, cog_factory, oracle, asset, collateral):
 def cog_high_pair(account, cog_factory, oracle, asset, collateral):
     with boa.env.prank(account):
         pair = boa.load_partial('src/cog_pair.vy')
-        return pair.at(cog_factory.deploy_low_risk_pair(asset, collateral, oracle))
+        return pair.at(cog_factory.deploy_high_risk_pair(asset, collateral, oracle))
 
 @pytest.fixture(scope="session")
 def loan_router(account):

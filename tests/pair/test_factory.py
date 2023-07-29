@@ -45,5 +45,5 @@ def test_deploy_pairs(cog_factory, cog_pair_blueprint, account, asset, collatera
     cog_factory.deploy_high_risk_pair(asset,collateral,oracle, sender=account)
 
     cog_factory.deploy_custom_risk_pair(
-        asset, collateral, oracle, cog_pair_blueprint, 3, 600000000000000000, 800000000000000000, 1585489600, 634195840, 317097920000, sender=account
+        asset, collateral, oracle, cog_pair_blueprint, 3, 600000000000000000, 800000000000000000, 1585489600, 634195840, 317097920000, 28800000000000000000000000000000000000000, sender=account
     )
