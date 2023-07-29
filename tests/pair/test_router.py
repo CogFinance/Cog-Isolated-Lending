@@ -97,4 +97,7 @@ def test_router_works(accounts, loan_router, collateral_0, collateral_1, collate
     cog_pair_3.approve_borrow(loan_router.address, 2**256 -1, sender=account)
 
     loan_router.loan_tokens([hop_one, hop_two, hop_three, hop_four, hop_five], 2 ** 256 -1, sender=account)
+
+    assert collateral_4.balanceOf(account) > 0
+    assert cog_pair_3.user_borrow_part(account) > 0
     
