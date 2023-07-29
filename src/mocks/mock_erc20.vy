@@ -1,4 +1,5 @@
 # @version 0.3.9
+
 # @dev Implementation of ERC-20 token standard.
 # @author Takayuki Jimba (@yudetamago)
 # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
@@ -39,9 +40,7 @@ minter: address
 
 
 @external
-def __init__(
-    _name: String[32], _symbol: String[32], _decimals: uint8
-):
+def __init__(_name: String[32], _symbol: String[32], _decimals: uint8):
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals

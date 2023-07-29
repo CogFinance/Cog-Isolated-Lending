@@ -1,4 +1,5 @@
 # @version 0.3.9
+
 """
 @title Fuse Box
 @author cog.finance
@@ -59,7 +60,9 @@ def accept_ownership():
     @notice Note that this function can only be
             called by the current `pending_owner`.
     """
-    assert self.pending_owner == msg.sender, "Ownable2Step: caller is not the new owner"
+    assert (
+        self.pending_owner == msg.sender
+    ), "Ownable2Step: caller is not the new owner"
     self._transfer_ownership(msg.sender)
 
 
@@ -97,14 +100,18 @@ def _transfer_ownership(new_owner: address):
     self.owner = new_owner
     log OwnershipTransferred(old_owner, new_owner)
 
+
 interface IOracle:
     def get() -> (bool, uint256): nonpayable
 
+
 struct DataSource:
-    active: bool
-    oracle_address: address
+        active: bool
+        oracle_address: address
+
 
 fuse_box: public(DataSource[4])
+
 
 @external
 def __init__(sources: DataSource[4]):
@@ -115,6 +122,7 @@ def __init__(sources: DataSource[4]):
     self._transfer_ownership(msg.sender)
     self.fuse_box = sources
 
+
 @external
 def defuse_source(source_index: uint256):
     """
@@ -123,7 +131,13 @@ def defuse_source(source_index: uint256):
     """
     self._check_owner()
     self.fuse_box[source_index].active = False
-    assert self.fuse_box[0].active or self.fuse_box[1].active or self.fuse_box[2].active or self.fuse_box[3].active, "FuseBox: All data sources are inactive"
+    assert (
+        self.fuse_box[0].active
+        or self.fuse_box[1].active
+        or self.fuse_box[2].active
+        or self.fuse_box[3].active
+    ), "FuseBox: All data sources are inactive"
+
 
 @external
 def activate_source(source_index: uint256):
@@ -134,6 +148,7 @@ def activate_source(source_index: uint256):
     self._check_owner()
     self.fuse_box[source_index].active = True
     # No need to check if all data sources are active, as this is a redundant check
+
 
 @external
 def get() -> (bool, uint256):

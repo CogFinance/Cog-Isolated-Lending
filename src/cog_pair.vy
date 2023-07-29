@@ -39,12 +39,9 @@ def to_base_round_up(total: Rebase, elastic: uint256) -> uint256:
 
         # mamushi: Exhibit 1
         if (
-            (
-                (base * convert(total.elastic, uint256))
-                / convert(total.base, uint256)
-            )
-            < elastic
-        ):
+            (base * convert(total.elastic, uint256))
+            / convert(total.base, uint256)
+        ) < elastic:
             base = base + 1
 
         return base
@@ -281,11 +278,14 @@ event RemoveCollateral:
     amount: indexed(uint256)
     user_collateral_share: indexed(uint256)
 
+
 event Paused:
     time: indexed(uint256)
 
+
 event UnPaused:
     time: indexed(uint256)
+
 
 # ERC20 Events
 
@@ -384,10 +384,10 @@ PROTOCOL_FEE_DIVISOR: constant(uint256) = 1000000
 
 # If IR surges ~10% in 1 day then Protocol begins accruing PoL
 # dr/dt, where dt = 1 day (86400), and dr is change in interest_rate per second or 3170979200 (10% interest rate)
-PROTOCOL_SURGE_THRESHOLD: constant(uint64) = 36701  
+PROTOCOL_SURGE_THRESHOLD: constant(uint64) = 36701
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 MINIMUM_TARGET_UTILIZATION: immutable(uint256)
-MAXIMUM_TARGET_UTILIZATION: immutable(uint256) 
+MAXIMUM_TARGET_UTILIZATION: immutable(uint256)
 FACTOR_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
 STARTING_INTEREST_PER_SECOND: immutable(uint64)
@@ -416,6 +416,7 @@ def totalSupply() -> uint256:
 allowance: public(HashMap[address, HashMap[address, uint256]])
 
 NAME: constant(String[17]) = "Cog Pool LP Token"
+
 
 @view
 @external
@@ -472,6 +473,7 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
     self.balanceOf[receiver] += amount
     log Transfer(sender, receiver, amount)
     return True
+
 
 # @t11s said I didn't need to support permit (https://twitter.com/transmissions11/status/1673478816168296450), so I removed it, if you need permit for something make a wrapper contract
 # that kind of sounds like you problem tbh, it's just an LP token, make your users use 2 clicks it's not that hard
@@ -709,6 +711,7 @@ def redeem(
 def _isPaused():
     assert (not self.paused)
 
+
 @internal
 def efficient_accrue():
     _accrue_info: AccrueInfo = self.accrue_info
@@ -718,8 +721,9 @@ def efficient_accrue():
     if elapsed_time == 0:
         # Prevents re-executing this logic if multiple actions are taken in the same block
         return
-        
+
     self._accrue(_accrue_info, elapsed_time)
+
 
 @internal
 def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
@@ -798,9 +802,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
         _accrue_info.interest_per_second = new_interest_per_second
 
         if _accrue_info.interest_per_second < MINIMUM_INTEREST_PER_SECOND:
-            _accrue_info.interest_per_second = (
-                MINIMUM_INTEREST_PER_SECOND  
-            )
+            _accrue_info.interest_per_second = (MINIMUM_INTEREST_PER_SECOND)
     elif utilization > MAXIMUM_TARGET_UTILIZATION:
         over_factor: uint256 = (
             (utilization - MAXIMUM_TARGET_UTILIZATION)
@@ -817,12 +819,9 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
             uint64,
         )
         _accrue_info.interest_per_second = new_interest_per_second
-        
-        if new_interest_per_second > MAXIMUM_INTEREST_PER_SECOND:
-            _accrue_info.interest_per_second = (
-                MAXIMUM_INTEREST_PER_SECOND  
-            )
 
+        if new_interest_per_second > MAXIMUM_INTEREST_PER_SECOND:
+            _accrue_info.interest_per_second = (MAXIMUM_INTEREST_PER_SECOND)
     dt: uint64 = (
         convert(block.timestamp, uint64) - self.surge_info.last_elapsed_time
     )
@@ -850,6 +849,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
             # Reset protocol fee elsewise
             self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10% Protocol Fee
     self.accrue_info = _accrue_info
+
 
 @internal
 def _add_collateral(to: address, amount: uint256):
@@ -1078,7 +1078,17 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
 # 				External Implementations				#
 # ///////////////////////////////////////////////////// #
 @external
-def __init__(_asset: address, _collateral: address, _oracle: address, min_target_utilization: uint256, max_target_utilization: uint256, starting_interest_per_second: uint64, min_interest: uint64, max_interest: uint64, elasticity: uint256):
+def __init__(
+    _asset: address,
+    _collateral: address,
+    _oracle: address,
+    min_target_utilization: uint256,
+    max_target_utilization: uint256,
+    starting_interest_per_second: uint64,
+    min_interest: uint64,
+    max_interest: uint64,
+    elasticity: uint256,
+):
     assert (
         _collateral != 0x0000000000000000000000000000000000000000
     ), "Invalid Collateral"
@@ -1092,7 +1102,7 @@ def __init__(_asset: address, _collateral: address, _oracle: address, min_target
     STARTING_INTEREST_PER_SECOND = starting_interest_per_second
     MINIMUM_INTEREST_PER_SECOND = min_interest
     MAXIMUM_INTEREST_PER_SECOND = max_interest
-    INTEREST_ELASTICITY =  elasticity
+    INTEREST_ELASTICITY = elasticity
     self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10%
     self.BORROW_OPENING_FEE = 50
     factory = msg.sender
@@ -1128,7 +1138,9 @@ def remove_collateral(to: address, amount: uint256):
         msg.sender, self.exchange_rate
     ), "Insufficient Collateral"
 
-borrow_approvals : public(HashMap[address, HashMap[address, uint256]])
+
+borrow_approvals: public(HashMap[address, HashMap[address, uint256]])
+
 
 @external
 def approve_borrow(borrower: address, amount: uint256) -> bool:
@@ -1136,8 +1148,11 @@ def approve_borrow(borrower: address, amount: uint256) -> bool:
     log Approval(msg.sender, borrower, amount)
     return True
 
+
 @external
-def borrow(amount: uint256, _from: address = msg.sender, to: address = msg.sender) -> uint256:
+def borrow(
+    amount: uint256, _from: address = msg.sender, to: address = msg.sender
+) -> uint256:
     """
     @param to The address to send the borrowed tokens to
     @param amount The amount of asset to borrow, in tokens
@@ -1274,11 +1289,13 @@ def pause():
     self.paused = True
     log Paused(block.timestamp)
 
+
 @external
 def unpause():
     assert (msg.sender == factory)
     self.paused = False
     log UnPaused(block.timestamp)
+
 
 @external
 def roll_over_pol():
