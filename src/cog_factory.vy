@@ -251,7 +251,7 @@ def deploy_stable_risk_pair(
     MINIMUM_TARGET_UTILIZATION: uint256 = 100000000000000000
     MAXIMUM_TARGET_UTILIZATION: uint256 = 650000000000000000
 
-    # 0.25% minimum interest per second, 0.25% starting interest per second, 25% maximum interest per second
+    # 0.25% minimum interest per second, 1% starting interest per second, 25% maximum interest per second
     STARTING_INTEREST_PER_SECOND: uint64 = 158548960
     MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
     MAXIMUM_INTEREST_PER_SECOND: uint64 = 7927448000
