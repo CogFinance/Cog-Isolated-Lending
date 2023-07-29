@@ -1179,10 +1179,10 @@ def get_exchange_rate() -> (bool, uint256):
 
 
 @external
-def liquidate(user: address, maxBorrowParts: uint256, to: address):
+def liquidate(user: address, max_borrow_parts: uint256, to: address):
     """
     @param user The user to liquidate
-    @param maxBorrowParts The parts to liquidate
+    @param max_borrow_parts The parts to liquidate
     @param to The address to send the liquidated tokens to
     """
     exchange_rate: uint256 = 0
@@ -1197,7 +1197,7 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
 
     if not self._is_solvent(user, exchange_rate):
         available_borrow_part: uint256 = self.user_borrow_part[user]
-        borrow_part: uint256 = min(maxBorrowParts, available_borrow_part)
+        borrow_part: uint256 = min(max_borrow_parts, available_borrow_part)
         self.user_borrow_part[user] = available_borrow_part - borrow_part
 
         borrow_amount: uint256 = self.to_elastic(
