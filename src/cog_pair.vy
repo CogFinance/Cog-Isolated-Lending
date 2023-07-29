@@ -1209,6 +1209,11 @@ def liquidate(user: address, maxBorrowParts: uint256, to: address):
             / (LIQUIDATION_MULTIPLIER_PRECISION * EXCHANGE_RATE_PRECISION)
         )
 
+        # If the user doesn't have enough collateral to compensate for the multiplier penalty
+        # simply give up all their collateral
+        if collateral_share > self.user_collateral_share[user]:
+            collateral_share = self.user_collateral_share[user]
+
         self.user_collateral_share[user] = (
             self.user_collateral_share[user] - collateral_share
         )
