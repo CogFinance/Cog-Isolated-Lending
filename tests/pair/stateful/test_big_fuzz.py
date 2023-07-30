@@ -216,15 +216,15 @@ def test_user_gets_liquidated(accounts, collateral, asset, oracle, cog_pair):
 
     with boa.env.anchor():
         state = BigFuzz()
+        # Add in some buffer collateral
+        state.add_collateral(2, 100)
+
         state.add_collateral(3, 0.05)
         state.borrow(3, 0.99)
     
         (elastic, base) = state.cog_pair.total_borrow()
         assert base != 0
         start_borrow_part = state.cog_pair.user_borrow_part(state.accounts[3])
-        state.nudge_oracle(0.5)
-        state.nudge_oracle(0.5)
-        state.nudge_oracle(0.5)
         state.nudge_oracle(0.5)
         state.liquidate_insolvent_users()
         state.time_travel(86400 * 30)
