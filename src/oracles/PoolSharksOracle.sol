@@ -70,7 +70,7 @@ contract PoolSharksOracle is IOracle {
     PoolSharksRangePool public immutable pool;
     address public immutable token;
 
-
+    /// This is an average price based off a TWAP, and not a real-time price which should be used
     uint256 lastPrice;
 
     // @param poolAddress  The address of the Range pool which will act as a price information source

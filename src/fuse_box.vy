@@ -160,37 +160,38 @@ def get() -> (bool, uint256):
 
     total_price: uint256 = 0
     active_oracles: uint256 = 0
+    updated: bool = False
 
     if fuses[0].active:
-        success: bool = False
+        updated_0: bool = False
         price: uint256 = 0
-        (success, price) = IOracle(fuses[0].oracle_address).get()
-        assert success, "Oracle 0 Didnt Work"
+        (updated_0, price) = IOracle(fuses[0].oracle_address).get()
+        updated = updated or updated_0
         total_price += price
         active_oracles += 1
 
     if fuses[1].active:
-        success: bool = False
+        updated_1: bool = False
         price: uint256 = 0
-        (success, price) = IOracle(fuses[1].oracle_address).get()
-        assert success, "Oracle 1 Didnt Work"
+        (updated_1, price) = IOracle(fuses[1].oracle_address).get()
+        updated = updated or updated_1
         total_price += price
         active_oracles += 1
 
     if fuses[2].active:
-        success: bool = False
+        updated_2: bool = False
         price: uint256 = 0
-        (success, price) = IOracle(fuses[2].oracle_address).get()
-        assert success, "Oracle 2 Didnt Work"
+        (updated_2, price) = IOracle(fuses[2].oracle_address).get()
+        updated = updated or updated_2
         total_price += price
         active_oracles += 1
 
     if fuses[3].active:
-        success: bool = False
+        updated_3: bool = False
         price: uint256 = 0
-        (success, price) = IOracle(fuses[3].oracle_address).get()
-        assert success, "Oracle 3 Didnt Work"
+        (updated_3, price) = IOracle(fuses[3].oracle_address).get()
+        updated = updated or updated_3
         total_price += price
         active_oracles += 1
 
-    return (True, (total_price / active_oracles))
+    return (updated, (total_price / active_oracles))
