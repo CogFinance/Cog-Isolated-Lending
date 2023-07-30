@@ -50,6 +50,9 @@ class BigFuzz(RuleBasedStateMachine):
         if to_borrow <= 0:  # could be <0 if user is insolvent
             return
 
+        (_, price) = self.oracle.get()
+        to_borrow = int(to_borrow * (price / 10**18))
+
         if to_borrow > self.asset.balanceOf(self.cog_pair):
             to_borrow = self.asset.balanceOf(self.cog_pair)
 
@@ -98,6 +101,28 @@ class BigFuzz(RuleBasedStateMachine):
             self.collateral.approve(self.cog_pair, amount)
             self.cog_pair.add_collateral(user, amount)
 
+
+    @rule(user_id=user_id, amount=amount)
+    def deposit(self, user_id, amount):
+        user = self.accounts[user_id]
+        amount = int(amount * 10 ** 18)
+        if amount + self.cog_pair.convertToAssets(self.cog_pair.balanceOf(user)) >= (2 ** 128):
+            return
+
+        with boa.env.prank(user):
+            self.asset.mint(user, amount)
+            self.asset.approve(self.cog_pair, amount)
+            self.cog_pair.deposit(amount)
+ 
+    @rule(user_id=user_id, amount=amount)
+    def withdraw(self, user_id, amount): 
+        user = self.accounts[user_id]
+        amount = int(amount * self.cog_pair.balanceOf(user))
+        if amount > self.cog_pair.maxRedeem(user):
+            amount = self.cog_pair.maxRedeem(user) - 100
+
+        with boa.env.prank(user):
+            self.cog_pair.redeem(amount)
 
     @rule(user_id=user_id, amount=amount)
     def remove_collateral(self, user_id, amount):
@@ -164,7 +189,7 @@ class BigFuzz(RuleBasedStateMachine):
                     self.asset.approve(self.cog_pair, 100 * 10 **18)
                     print(self.cog_pair.user_borrow_part(user))
                     self.cog_pair.liquidate(user, self.cog_pair.user_borrow_part(user), liquidator)
-    
+
     @invariant()
     def interest_stays_within_bounds(self):
         self.cog_pair.accrue()
@@ -199,8 +224,70 @@ def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
             cog_pair.add_collateral(account, MINT_AMOUNT)
 
 
-    BigFuzz.TestCase.settings = settings(max_examples=5, stateful_step_count=15, deadline=None)
+    BigFuzz.TestCase.settings = settings(max_examples=15, stateful_step_count=30, deadline=None)
     run_state_machine_as_test(BigFuzz)
+
+def test_happy_path_works(accounts, collateral, asset, oracle, cog_pair):
+    for k, v in locals().items():
+        setattr(BigFuzz, k, v)
+
+    with boa.env.prank(accounts[0]):
+        oracle.setPrice(10**18)
+        oracle.setUpdated(True)
+
+    with boa.env.anchor():
+        state = BigFuzz()
+        state = BigFuzz()
+        state.deposit(3, 10) 
+        start_bal = state.cog_pair.convertToAssets(state.cog_pair.balanceOf(accounts[3]))
+        
+        start_fee = state.cog_pair.protocol_fee()
+
+        # absurd amount of collateral so we borrow everything
+        state.add_collateral(4, 1000)
+        state.borrow(4, 0.99)
+        state.time_travel(86400 * 7)
+        # let surge pass
+        state.cog_pair.accrue()
+        state.time_travel(86400 * 365)
+        state.repay(4, 1)
+
+        state.withdraw(3, 1)
+        end_bal = state.asset.balanceOf(accounts[3])
+        assert start_bal < end_bal
+
+def test_surge_triggers(accounts, collateral, asset, oracle, cog_pair):
+    for k, v in locals().items():
+        setattr(BigFuzz, k, v)
+
+    with boa.env.prank(accounts[0]):
+        oracle.setPrice(10**18)
+        oracle.setUpdated(True)
+
+    with boa.env.anchor():
+        state = BigFuzz()
+        state.deposit(3, 10) 
+        
+        start_fee = state.cog_pair.protocol_fee()
+
+        # absurd amount of collateral so we borrow everything
+        state.add_collateral(4, 1000)
+        state.borrow(4, 0.99)
+
+        end_fee = state.cog_pair.protocol_fee()
+
+        assert start_fee < end_fee
+        assert end_fee == 1000000
+
+
+        state.repay(4, 0.99)
+        state.time_travel(86400 * 7)
+
+        state.cog_pair.accrue()
+        surge_recover_fee = state.cog_pair.protocol_fee()
+
+        # Gov fee returns to normal
+        assert surge_recover_fee < end_fee
 
 def test_user_gets_liquidated(accounts, collateral, asset, oracle, cog_pair):
     for k, v in locals().items():
