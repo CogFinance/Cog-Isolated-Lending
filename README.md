@@ -2,6 +2,10 @@
 
 The first implementation of the Cog Finance protocol, written primarily in Vyper. This serves as a spec and benchmark implementation of Cog Finance, implemented with security and simplicity being of the highest concern.
 
+## State of the Art
+
+This repo was designed in part based off of the structure from the [Curve Stablecoin](https://github.com/curvefi/curve-stablecoin) structure, and follows similar structuring to it.
+
 # Installation
 
 This repo makes full use of Vyper's Swiss Army Knife set of tools, to fully test and analyze the Cog Finance Contracts. The contracts are designed to be battle-hardened, with beyond standard security measures in place.
