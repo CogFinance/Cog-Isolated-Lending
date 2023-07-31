@@ -1,13 +1,13 @@
 name: Cog
 contracts_folder: src 
+tests_folder: ape_tests
 
 plugins:
   - name: vyper
   - name: solidity
+  - name: scroll
 
 vyper:
   evm_version: berlin
 
-geth:
-  scroll:
-    uri: https://alpha-rpc.scroll.io/l2
+
