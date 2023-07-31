@@ -2,30 +2,31 @@
 pragma solidity 0.8.19;
 
 // @title Cog PoolSharks Oracle Adapter
-// @notice THis contract works as an adapter to a PoolSharks TWAP Range Pool to act as price feed 
+// @notice This contract works as an adapter to a PoolSharks TWAP Range Pool to act as price feed
 //  for Cog Pairs. `get()` is the only function used by Cog Pairs directly, all else exists primarily for UI Reasons
 //
-//                          ▒▒▒▒▒▒▒▒▒▒░░                  
-//                     ▒▒▒▒▒▒▒▒▒▒▒▒░░                    
-//        ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░                      
-//    ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░                      
+//                          ▒▒▒▒▒▒▒▒▒▒░░
+//                     ▒▒▒▒▒▒▒▒▒▒▒▒░░
+//        ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░
+//    ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░
 //  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒          ▒▒▒▒▒▒▒▒
-//▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░    ▒▒▒▒▒▒▒▒  
-//▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░▒▒▒▒▒▒▒▒  
-//▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▒▒░░▒▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒    
-//  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▒▒░░▒▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒    
-//    ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒██▒▒░░▒▒░░▒▒░░▒▒▒▒▒▒▒▒░░▒▒▒▒    
-//        ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░  ░░▒▒    
-//          ░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒░░░░░░        ░░▒▒    
-//            ▒▒▒▒░░░░░░░░░░░░▒▒▒▒▒▒                ░░    
-//            ▒▒▒▒▒▒          ▒▒▒▒▒▒                      
-//            ▒▒▒▒▒▒            ▒▒▒▒                      
-//            ▒▒▒▒                ▒▒                      
-//            ▒▒                                          
-
+//▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░    ▒▒▒▒▒▒▒▒
+//▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░▒▒▒▒▒▒▒▒
+//▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▒▒░░▒▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+//  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▒▒░░▒▒░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+//    ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒██▒▒░░▒▒░░▒▒░░▒▒▒▒▒▒▒▒░░▒▒▒▒
+//        ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░  ░░▒▒
+//          ░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒░░░░░░        ░░▒▒
+//            ▒▒▒▒░░░░░░░░░░░░▒▒▒▒▒▒                ░░
+//            ▒▒▒▒▒▒          ▒▒▒▒▒▒
+//            ▒▒▒▒▒▒            ▒▒▒▒
+//            ▒▒▒▒                ▒▒
+//            ▒▒
 
 interface PoolSharksRangePool {
-    function sample(uint32[] memory secondsAgo)
+    function sample(
+        uint32[] memory secondsAgo
+    )
         external
         view
         returns (
@@ -78,7 +79,10 @@ contract PoolSharksOracle is IOracle {
     constructor(address poolAddress, address tokenAddress) {
         pool = PoolSharksRangePool(poolAddress);
         token = tokenAddress;
-        require(pool.token0() == tokenAddress || pool.token1() == tokenAddress, "Invalid Pair for Given Token");
+        require(
+            pool.token0() == tokenAddress || pool.token1() == tokenAddress,
+            "Invalid Pair for Given Token"
+        );
     }
 
     // @return The updated price for token, with 18 decimals places
@@ -88,7 +92,7 @@ contract PoolSharksOracle is IOracle {
         samples[0] = 0;
         samples[1] = 30 seconds;
         samples[2] = 1 minutes;
-        (,, uint160 averagePrice,,) = pool.sample(samples);
+        (, , uint160 averagePrice, , ) = pool.sample(samples);
         bool potentialOverflow = averagePrice > type(uint128).max;
 
         if (potentialOverflow) {
@@ -152,7 +156,7 @@ contract PoolSharksOracle is IOracle {
     function name() external view returns (string memory) {
         return "PoolSharks LP Token Oracle";
     }
-    
+
     // @return Symbol for the Oracle
     function symbol() external view returns (string memory) {
         return "Pool";
@@ -164,7 +168,11 @@ contract PoolSharksOracle is IOracle {
     /// @param denominator The divisor
     /// @return result The 256-bit result
     /// @dev Credit to Remco Bloemen under MIT license https://xn--2-umb.com/21/muldiv
-    function mulDiv(uint256 a, uint256 b, uint256 denominator) internal pure returns (uint256 result) {
+    function mulDiv(
+        uint256 a,
+        uint256 b,
+        uint256 denominator
+    ) internal pure returns (uint256 result) {
         // 512-bit multiply [prod1 prod0] = a * b
         // Compute the product mod 2**256 and mod 2**256 - 1
         // then use the Chinese Remainder Theorem to reconstruct
@@ -247,7 +255,7 @@ contract PoolSharksOracle is IOracle {
 
             // Because the division is now exact we can divide by multiplying
             // with the modular inverse of denominator. This will give us the
-            // correct result modulo 2**256. Since the precoditions guarantee
+            // correct result modulo 2**256. Since the preconditions guarantee
             // that the outcome is less than 2**256, this is the final result.
             // We don't need to compute the high bits of the result and prod1
             // is no longer required.

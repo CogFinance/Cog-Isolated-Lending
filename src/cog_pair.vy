@@ -370,8 +370,8 @@ paused: public(bool)  # Status of if the pool is paused
 # ///////////////////////////////////////////////////// #
 EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
-COLLATERIZATION_RATE_PRECISION: constant(uint256) = 100000  # 1e5
-COLLATERIZATION_RATE: constant(uint256) = 75000  # 75%
+COLLATERALIZATION_RATE_PRECISION: constant(uint256) = 100000  # 1e5
+COLLATERALIZATION_RATE: constant(uint256) = 75000  # 75%
 
 BORROW_OPENING_FEE: public(uint256)
 BORROW_OPENING_FEE_PRECISION: constant(uint256) = 100000
