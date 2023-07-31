@@ -35,10 +35,6 @@ interface PoolSharksRangePool {
             uint128 averageLiquidity,
             int24 averageTick
         );
-
-    function token1() external view returns (address);
-
-    function token0() external view returns (address);
 }
 
 interface IOracle {
@@ -78,7 +74,7 @@ contract PoolSharksOracle is IOracle {
     constructor(address poolAddress, address tokenAddress) {
         pool = PoolSharksRangePool(poolAddress);
         token = tokenAddress;
-        require(pool.token0() == tokenAddress || pool.token1() == tokenAddress, "Invalid Pair for Given Token");
+        //require(pool.token0() == tokenAddress || pool.token1() == tokenAddress, "Invalid Pair for Given Token");
     }
 
     // @return The updated price for token, with 18 decimals places
