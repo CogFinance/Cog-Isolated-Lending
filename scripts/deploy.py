@@ -80,7 +80,6 @@ def deploy(network):
 
     print(f"Deployed the vault Blueprint to {blueprint_address}")
 
-
     print("==================================================")
     print(" Deployed Cog Pair Blueprint to {0}".format(blueprint_address))
     print("==================================================")
@@ -94,14 +93,39 @@ def deploy(network):
     # Ether/USD oracle
     oracle = account.deploy(project.ChainlinkOracle, "0x33e87B12b4694DE88D8D2e033a3Cad1F532Db2fb", "0x0000000000000000000000000000000000000000", 18, type=0, network=network)
 
+    print("==================================================")
+    print(" Deployed Mock Oracle to {0}".format(oracle.address))
+    print("==================================================")
+    
     mock_ether = account.deploy(project.mock_erc20, "Ether", "ETH", 18, type=0, network=network)
     mock_stable = account.deploy(project.mock_erc20, "Stable", "USD", 18, type=0, network=network)
+
+    print("==================================================")
+    print(" Deployed Mock WETH to {0}".format(mock_ether.address))
+    print(" Deployed Mock USD to {0}".format(mock_stable.address))
+    print("==================================================")
 
     pair_tx = factory.deploy_medium_risk_pair(mock_ether.address, mock_stable.address, oracle.address, type=0, sender=account, network=network)
     pair_addr = list(pair_tx.decode_logs(factory.MediumPairCreated))[0].pair
 
-    print(pair_addr)
+    print("==================================================")
+    print(" Deployed Med Risk Pair to {0}".format(pair_addr))
+    print("==================================================")
     
-    pair_instance = project.cog_pair.at(pair_addr)
+    # pair_instance = project.cog_pair.at(pair_addr)
 
-    result = pair_instance.get_exchange_rate(type=0, network=network, sender=account)
+    # result = pair_instance.get_exchange_rate(type=0, network=network, sender=account)
+
+    mint_ether_tx = mock_ether.mint(account.address, 10 ** 9 * 10 ** 18, type=0, sender=account, network=network)
+    # web3.eth.wait_for_transaction_receipt(mint_ether_tx)
+    mint_stable_tx = mock_stable.mint(account.address, 10 ** 9 * 10 ** 18, type=0, sender=account, network=network)
+    # web3.eth.wait_for_transaction_receipt(mint_stable_tx)
+    print("==================================================")
+    print(" Minted Mock Tokens")
+    print("==================================================")
+
+    loan_router = account.deploy(project.loan_router, type=0, network=network)
+
+    print("==================================================")
+    print(" Deployed Loan Router to {0}".format(loan_router.address))
+    print("==================================================")
