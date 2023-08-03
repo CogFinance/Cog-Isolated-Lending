@@ -8,6 +8,6 @@ plugins:
   - name: scroll
 
 vyper:
-  evm_version: berlin
+  evm_version: london
 
 
