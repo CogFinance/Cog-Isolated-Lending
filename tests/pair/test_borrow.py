@@ -79,3 +79,53 @@ def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle)
     # Test Invariant `total_borrow` is set equal to `total_borrow + amount`.
     (_, current_base) = cog_pair.total_borrow()
     assert  current_base == old_base + amount + fee
+
+def test_borrow_checks_proper_account(cog_pair, collateral, accounts, asset, oracle):
+    # Initial setup
+    account = accounts[0]
+    asset_one_coin_price = 1000000000000000000
+    
+    amount = 1000 * (10 ** 18)
+
+    oracle.setPrice(asset_one_coin_price, sender=account)
+    oracle.setUpdated(True, sender=account)
+    cog_pair.get_exchange_rate(sender=account)
+
+    asset.mint(account, amount, sender=account)
+    asset.approve(cog_pair, amount, sender=account)
+    cog_pair.deposit(amount, account, sender=account)
+
+    # Borrow
+    account = accounts[2]
+    cog_pair.approve_borrow(accounts[1], 2 ** 256 -1, sender=account)
+
+    account = accounts[1]
+
+    collateral.mint(account, amount*10, sender=account)
+    collateral.approve(cog_pair, amount*10, sender=account)
+    cog_pair.add_collateral(account, amount*10, sender=account)
+
+    with boa.reverts("Insufficient Collateral"):
+        cog_pair.borrow(amount, accounts[2], account, sender=account)
+
+def test_cannot_borrow_more_than_allowed(cog_pair, collateral, accounts, asset, oracle):
+    account = accounts[0]
+
+    asset_one_coin_price = 1000000000000000000
+    amount = 1000 * (10 ** 18)
+
+    oracle.setPrice(asset_one_coin_price, sender=account)
+    oracle.setUpdated(True, sender=account)
+    cog_pair.get_exchange_rate(sender=account)
+   
+    collateral.mint(account, amount*10, sender=account)
+    collateral.approve(cog_pair, amount*10, sender=account)
+    cog_pair.add_collateral(account, amount*10, sender=account)
+
+    cog_pair.approve_borrow(accounts[1], amount, sender=account)
+
+    account = accounts[1]
+    
+    with boa.reverts():
+        cog_pair.borrow(amount+1, accounts[0], account, sender=account)
+
