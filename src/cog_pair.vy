@@ -874,7 +874,7 @@ def _remove_collateral(to: address, amount: uint256):
     @param to The address to remove collateral for
     @param amount The amount of collateral to remove, in tokens
     """
-    new_collateral_share: uint256 = self.user_collateral_share[to] - amount
+    new_collateral_share: uint256 = self.user_collateral_share[msg.sender] - amount
     self.user_collateral_share[msg.sender] = new_collateral_share
     self.total_collateral_share = self.total_collateral_share - amount
     assert ERC20(collateral).transfer(
