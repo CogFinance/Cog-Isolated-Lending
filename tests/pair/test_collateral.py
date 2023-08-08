@@ -138,3 +138,15 @@ def test_cannot_remove_when_insolvent(cog_pair, accounts, collateral, asset, ora
 
     with boa.reverts():
         cog_pair.remove_collateral(account, asset_one_coin_price-1000000, sender=account)
+
+def test_collateral_remove_from_correct_account(collateral, cog_pair, accounts):
+    account_2 = accounts[1]
+
+    amount = 100 * 10 ** 18
+
+    collateral.mint(account_2, amount, sender=account_2)
+    collateral.approve(cog_pair, amount, sender=account_2)
+    cog_pair.add_collateral(account_2, amount, sender=account_2)
+
+    account_1 = accounts[0]
+    cog_pair.remove_collateral(account_1, amount, sender=account_2)
