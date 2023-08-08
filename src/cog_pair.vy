@@ -1164,7 +1164,7 @@ def borrow(
         self.borrow_approvals[_from][msg.sender] -= amount
     borrowed: uint256 = self._borrow(amount, _from, to)
     assert self._is_solvent(
-        msg.sender, self.exchange_rate
+        _from, self.exchange_rate
     ), "Insufficient Collateral"
     accrue_info: AccrueInfo = self.accrue_info
     # Now that utilization has changed, interest must be accrued to trigger any surge which now may be occuring
