@@ -91,8 +91,9 @@ contract LPETHChainlinkOracleV1 is IAggregator {
         (uint256 reserve0, uint256 reserve1,) = IUniswapV2Pair(pair).getReserves();
         uint256 totalSupply = pair.totalSupply();
         uint256 k = reserve0.mul(reserve1);
-        uint256 ethValue = sqrt((k / 1e18).mul(uint256(tokenOracle.latestAnswer())));
+        uint256 ethValue = sqrt((k / Decimal).mul(uint256(tokenOracle.latestAnswer())));
         uint256 totalValue = ethValue.mul(2);
-        return int256(totalValue.mul(1e18) / totalSupply);
+        uint256 constant Decimal = 1e18;
+        return int256(totalValue.mul(Decimal) / totalSupply);
     }
 }

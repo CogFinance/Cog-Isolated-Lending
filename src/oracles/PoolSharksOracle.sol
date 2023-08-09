@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // @title Cog PoolSharks Oracle Adapter
-// @notice This contract works as an adapter to a PoolSharks TWAP Range Pool to act as price feed
+// @notice THis contract works as an adapter to a PoolSharks TWAP Range Pool to act as price feed
 //  for Cog Pairs. `get()` is the only function used by Cog Pairs directly, all else exists primarily for UI Reasons
 //
 //                          ▒▒▒▒▒▒▒▒▒▒░░
@@ -22,49 +22,6 @@ pragma solidity 0.8.19;
 //            ▒▒▒▒▒▒            ▒▒▒▒
 //            ▒▒▒▒                ▒▒
 //            ▒▒
-
-interface PoolSharksRangePool {
-    function sample(
-        uint32[] memory secondsAgo
-    )
-        external
-        view
-        returns (
-            int56[] memory tickSecondsAccum,
-            uint160[] memory secondsPerLiquidityAccum,
-            uint160 averagePrice,
-            uint128 averageLiquidity,
-            int24 averageTick
-        );
-
-    function token1() external view returns (address);
-
-    function token0() external view returns (address);
-}
-
-interface IOracle {
-    /// @notice Get the latest exchange rate.
-    /// @return success if no valid (recent) rate is available, return false else true.
-    /// @return rate The rate of the requested asset / pair / pool.
-    function get() external returns (bool success, uint256 rate);
-
-    /// @notice Check the last exchange rate without any state changes.
-    /// @return success if no valid (recent) rate is available, return false else true.
-    /// @return rate The rate of the requested asset / pair / pool.
-    function peek() external view returns (bool success, uint256 rate);
-
-    /// @notice Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
-    /// @return rate The rate of the requested asset / pair / pool.
-    function peekSpot() external view returns (uint256 rate);
-
-    /// @notice Returns a human readable (short) name about this oracle.
-    /// @return (string) A human readable symbol name about this oracle.
-    function symbol() external view returns (string memory);
-
-    /// @notice Returns a human readable name about this oracle.
-    /// @return (string) A human readable name about this oracle.
-    function name() external view returns (string memory);
-}
 
 contract PoolSharksOracle is IOracle {
     uint256 constant PRECISION = 1e18;
@@ -92,13 +49,15 @@ contract PoolSharksOracle is IOracle {
         samples[0] = 0;
         samples[1] = 30 seconds;
         samples[2] = 1 minutes;
-        (, , uint160 averagePrice, , ) = pool.sample(samples);
-        bool potentialOverflow = averagePrice > type(uint128).max;
 
-        if (potentialOverflow) {
-            averagePrice >>= 32;
-        }
-        uint256 fullPrice = averagePrice * averagePrice;
+        (, , uint160 averagePrice, , ) = pool.sample(samples);
+
+        Decimal.D256 memory normalizedPrice = Decimal
+            .fromUint(averagePrice)
+            .div(Decimal.fromUint(10 ** 18));
+
+        uint256 normalizedPrice;
+
         // fullPrice is currently in Q64.96
         // so to reformat it to 1e18
         //  fullPrice    normalizedPrice
@@ -106,18 +65,23 @@ contract PoolSharksOracle is IOracle {
         //    2**96           1e18
         //
         // So we multiply fullPrice by 1e18 then divide by 2 ** 96
-        uint256 normalizedPrice;
-        if (potentialOverflow) {
+        if (averagePrice > type(uint128).max) {
+            averagePrice >>= 32;
+            uint256 fullPrice = mulDiv(averagePrice, averagePrice, 2 ** 64);
             // Because we have already rsh 32 bits so fullPrice is a Q.64
             normalizedPrice = mulDiv(fullPrice, 1e18, 2 ** 64);
         } else {
+            uint256 fullPrice = mulDiv(averagePrice, averagePrice, 2 ** 96);
             normalizedPrice = mulDiv(fullPrice, 1e18, 2 ** 96);
         }
+
         if (pool.token1() == token) {
             // We are trying to get price of token0
             return (1 * normalizedPrice);
         } else {
             // We are trying to get the price of token1
+            // Because 1e18 for oracle precision, we return normalizedPrice multiplied by a conversion
+            // factor of 1e36 over normalizedPrice
             return (1e36 / normalizedPrice);
         }
     }
@@ -153,12 +117,12 @@ contract PoolSharksOracle is IOracle {
     }
 
     // @return The name of the Oracle
-    function name() external view returns (string memory) {
+    function name() pure returns (string memory) {
         return "PoolSharks LP Token Oracle";
     }
 
     // @return Symbol for the Oracle
-    function symbol() external view returns (string memory) {
+    function symbol() pure returns (string memory) {
         return "Pool";
     }
 
@@ -255,7 +219,7 @@ contract PoolSharksOracle is IOracle {
 
             // Because the division is now exact we can divide by multiplying
             // with the modular inverse of denominator. This will give us the
-            // correct result modulo 2**256. Since the preconditions guarantee
+            // correct result modulo 2**256. Since the precoditions guarantee
             // that the outcome is less than 2**256, this is the final result.
             // We don't need to compute the high bits of the result and prod1
             // is no longer required.
