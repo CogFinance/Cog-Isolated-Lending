@@ -67,8 +67,10 @@ def test_totalAssets(cog_pair, oracle, accounts, collateral, asset):
 
     amt = cog_pair.user_borrow_part(account)
 
-    asset.mint(account, amt, sender=account)
-    asset.approve(cog_pair, amt, sender=account)
+    # amount is arbitrarily multiplied by 2 here because it represents a share value and so will be 
+    # slighly under the amount of assets needed
+    asset.mint(account, amt*2, sender=account)
+    asset.approve(cog_pair, amt*2, sender=account)
     cog_pair.repay(account, amt, sender=account)
 
     # In an ideal world this would be exact interest accrued, but given I want this test to apply across multiple interest model tweaks
@@ -125,8 +127,10 @@ def test_convertToShares(cog_pair, oracle, accounts, collateral, asset, amount):
     # So shares should lower than AMOUNT until all debt is repaid
     assert cog_pair.convertToShares(AMOUNT) < AMOUNT
     
-    asset.mint(account, amt, sender=account)
-    asset.approve(cog_pair, amt, sender=account)
+    # amount is arbitrarily multiplied by 2 here because it represents a share value and so will be 
+    # slighly under the amount of assets needed
+    asset.mint(account, amt*2, sender=account)
+    asset.approve(cog_pair, amt*2, sender=account)
     cog_pair.repay(account, amt, sender=account)
 
     # Once debt is repaid, and total_borrow is (0,0) shares mint 1:1 again, or atleast as close as possible, with rounding occuring downward
@@ -176,8 +180,10 @@ def test_convertToAssets(cog_pair, oracle, accounts, collateral, asset, amount):
     # So shares should higher than asset until all debt is repaid
     assert cog_pair.convertToAssets(AMOUNT) > AMOUNT
     
-    asset.mint(account, amt, sender=account)
-    asset.approve(cog_pair, amt, sender=account)
+    # amount is arbitrarily multiplied by 2 here because it represents a share value and so will be 
+    # slighly under the amount of assets needed
+    asset.mint(account, amt*2, sender=account)
+    asset.approve(cog_pair, amt*2, sender=account)
     cog_pair.repay(account, amt, sender=account)
 
     # Shares should still retain their superior value, which now includes interest after debt is repaid

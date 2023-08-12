@@ -62,6 +62,8 @@ class BigFuzz(RuleBasedStateMachine):
 
     @rule(user_id=user_id, amount=amount)
     def repay(self, user_id, amount):
+        # Accrue so calculations are correct
+        self.cog_pair.accrue()
         user = self.accounts[user_id]
         borrowed_amount = self.cog_pair.user_borrow_part(user)
         if borrowed_amount == 0:
@@ -69,7 +71,7 @@ class BigFuzz(RuleBasedStateMachine):
         (elastic, base) = self.cog_pair.total_borrow()
 
         assert elastic >= base
-
+        
         # FWIW there are occasionally bugs where this amount is rounded
         # up, and fails to overpay, so we subtract 1
         to_repay = int((amount * borrowed_amount))
@@ -82,9 +84,16 @@ class BigFuzz(RuleBasedStateMachine):
             # can cause some minor rounding issues and try to overpay
             to_repay = base
 
+
         with boa.env.prank(user):
-            self.asset.mint(user, to_repay)
-            self.asset.approve(self.cog_pair, to_repay)
+            elastic_borrow_part = 0 
+            if base == 0:
+                elastic_borrow_part = to_repay
+            else:
+                elastic_borrow_part = int((to_repay * elastic) // base);
+            
+            self.asset.mint(user, elastic_borrow_part+1)
+            self.asset.approve(self.cog_pair, elastic_borrow_part+1)
             self.cog_pair.repay(user, to_repay)
         
             self.cog_pair.accrue()
