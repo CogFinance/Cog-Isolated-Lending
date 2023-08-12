@@ -1258,7 +1258,7 @@ def liquidate(user: address, max_borrow_parts: uint256, to: address):
     )  # dev: Transfer failed
 
     assert ERC20(asset).transferFrom(
-        msg.sender, self, all_borrow_part, default_return_value=True
+        msg.sender, self, all_borrow_amount, default_return_value=True
     )  # dev: Transfer failed
 
     self.total_asset.elastic = self.total_asset.elastic + convert(
