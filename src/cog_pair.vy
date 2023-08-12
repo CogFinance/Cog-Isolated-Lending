@@ -1017,7 +1017,7 @@ def _borrow(amount: uint256, _from: address, to: address) -> uint256:
 def _repay(to: address, payment: uint256) -> uint256:
     """
     @param to: The address to repay the tokens for
-    @param payment: The amount of asset to repay, in tokens
+    @param payment: The amount of asset to repay, in shares of the borrow position
     @return: The amount of tokens repaid in shares
     """
     temp_total_borrow: Rebase = Rebase(
@@ -1034,7 +1034,7 @@ def _repay(to: address, payment: uint256) -> uint256:
     self.user_borrow_part[to] = self.user_borrow_part[to] - payment
     total_share: uint128 = self.total_asset.elastic
     assert ERC20(asset).transferFrom(
-        msg.sender, self, payment, default_return_value=True
+        msg.sender, self, amount, default_return_value=True
     )  # dev: Transfer Failed
 
     self.total_asset.elastic = total_share + convert(amount, uint128)
@@ -1177,7 +1177,7 @@ def borrow(
 def repay(to: address, payment: uint256) -> uint256:
     """
     @param to The address to repay the tokens for
-    @param payment The amount of asset to repay, in tokens
+    @param payment The amount of asset to repay, in debt position shares
     @return The amount of tokens repaid in shares
     """
     self.efficient_accrue()
