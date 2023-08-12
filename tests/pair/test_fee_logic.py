@@ -63,12 +63,13 @@ def test_borrow_fee_accumulates(accounts, collateral, asset, oracle, cog_pair):
 def test_surge_fee_enacts(accounts, collateral, asset, oracle, cog_pair):
     admin = accounts[0]
     test_user = accounts[1]
+
+    AMOUNT = 10 * 10 ** 18
+
     with boa.env.prank(admin):
         oracle.setPrice(5000000000000000000)
         oracle.setUpdated(True)
         cog_pair.get_exchange_rate()
-
-        AMOUNT = 10 * 10 ** 18
 
         # Fill the pool with some assets
         asset.mint(admin, AMOUNT)
@@ -83,11 +84,33 @@ def test_surge_fee_enacts(accounts, collateral, asset, oracle, cog_pair):
 
         cog_pair.accrue()
 
-        cog_pair.borrow((AMOUNT // 60))
+        cog_pair.borrow(AMOUNT)
+
+    boa.env.time_travel(86400 * 25)
+    cog_pair.accrue()
 
     # Protocol fee is at 100% during surge
     assert cog_pair.protocol_fee() == 1000000
 
+    boa.env.time_travel(86400 * 3)
+
+    cog_pair.accrue()
+
+    # Interest rate continues to grow by enough to trip the surge, so it doesn't end
+    assert cog_pair.protocol_fee() == 1000000
+
+    with boa.env.prank(test_user):
+        asset.mint(test_user, AMOUNT*100)
+        asset.approve(cog_pair, AMOUNT*100)
+
+        # Repay under half of the loan
+        cog_pair.repay(test_user, AMOUNT)
+
+    # Interest rate will now decrease
+    boa.env.time_travel(86400 * 5)
+    cog_pair.accrue()
+
+    assert cog_pair.protocol_fee() == 100000
 
 def test_roll_over_pol(accounts, collateral, asset, oracle, cog_pair):
     account = accounts[3]

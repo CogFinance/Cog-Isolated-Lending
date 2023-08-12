@@ -383,8 +383,9 @@ DEFAULT_PROTOCOL_FEE: public(uint256)
 PROTOCOL_FEE_DIVISOR: constant(uint256) = 1000000
 
 # If IR surges ~10% in 1 day then Protocol begins accruing PoL
-# dr/dt, where dt = 1 day (86400), and dr is change in interest_rate per second or 3170979200 (10% interest rate)
-PROTOCOL_SURGE_THRESHOLD: constant(uint64) = 36701
+# dr/dt, where dt = 3 days (86400 * 3), and dr is change in interest_rate per second or 3170979200 (5% interest rate)
+PROTOCOL_SURGE_THRESHOLD: constant(uint64) = 1635979200
+SURGE_DURATION: constant(uint64) = 86400 * 3 # 3 Days
 UTILIZATION_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 MINIMUM_TARGET_UTILIZATION: immutable(uint256)
 MAXIMUM_TARGET_UTILIZATION: immutable(uint256)
@@ -825,7 +826,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
     dt: uint64 = (
         convert(block.timestamp, uint64) - self.surge_info.last_elapsed_time
     )
-    if dt > 86400:
+    if dt > SURGE_DURATION:
         # if interest rate is increasing
         if (
             _accrue_info.interest_per_second
@@ -836,6 +837,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
                 _accrue_info.interest_per_second
                 - self.surge_info.last_interest_per_second
             )
+            print(dr)
             if dr > PROTOCOL_SURGE_THRESHOLD:
                 self.surge_info.last_elapsed_time = convert(
                     block.timestamp, uint64
