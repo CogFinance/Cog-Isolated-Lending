@@ -697,9 +697,8 @@ def redeem(
     @return - The amount of assets returned
     """
     self.efficient_accrue()
-    assets_out: uint256 = self._convertToAssets(
-        self._remove_asset(receiver, owner, shares)
-    )
+    assets_out: uint256 = self._remove_asset(receiver, owner, shares)
+    
     log Withdraw(msg.sender, receiver, owner, assets_out, shares)
 
     return assets_out

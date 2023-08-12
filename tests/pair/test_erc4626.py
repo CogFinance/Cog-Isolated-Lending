@@ -594,7 +594,7 @@ def test_previewRedeem(cog_pair, accounts, asset, collateral, oracle, amount):
     amount=st.integers(min_value=100000, max_value=2**96-1),
 )
 @settings(max_examples=5, deadline=None)
-def test_redeem(cog_pair, accounts, asset, amount):
+def test_redeem(cog_pair, accounts, collateral, asset, oracle, amount):
     """
     Invariants Tested
     -----------------
@@ -604,7 +604,6 @@ def test_redeem(cog_pair, accounts, asset, amount):
     Disallows burning of non-approved shares in redeem flow
     """
     # Mint enough so that withdrawls don't go below pool minimum
-
     account = accounts[9]
     asset.mint(account, 1000000000000000000, sender=account)
     asset.approve(cog_pair, 1000000000000000000, sender=account)
@@ -633,7 +632,10 @@ def test_redeem(cog_pair, accounts, asset, amount):
     cog_pair.approve(accounts[2], AMOUNT_IN_SHARES, sender=account)
     account = accounts[2]
 
-    cog_pair.redeem(AMOUNT_IN_SHARES, account, accounts[1], sender=account)
+    preview_amt = cog_pair.previewRedeem(AMOUNT_IN_SHARES)
+    actual_amt = cog_pair.redeem(AMOUNT_IN_SHARES, account, accounts[1], sender=account)
+
+    assert actual_amt == preview_amt
 
     # Disallows burning of non-approved shares in redeem flow
     account = accounts[3]
@@ -648,3 +650,46 @@ def test_redeem(cog_pair, accounts, asset, amount):
     with boa.reverts():
         cog_pair.redeem(AMOUNT_IN_SHARES, account, accounts[3], sender=account)
 
+    account = accounts[5]
+
+    AMOUNT_IN_SHARES = cog_pair.convertToShares(AMOUNT, sender=account)
+    asset.mint(account, AMOUNT, sender=account)
+    asset.approve(cog_pair, AMOUNT, sender=account)
+    cog_pair.mint(AMOUNT_IN_SHARES, account, sender=account)
+   
+    account = accounts[4]
+    # Next accrue interest to create a dramatic different between share and asset pricing
+    oracle.setPrice(10 ** 18, sender=account)
+
+    oracle.setUpdated(True, sender=account)
+    cog_pair.get_exchange_rate(sender=account)
+
+    asset.mint(account, amount, sender=account)
+    asset.approve(cog_pair, amount, sender=account)
+    cog_pair.deposit(amount, account, sender=account)
+
+    account = accounts[1]
+
+    collateral.mint(account, amount*10, sender=account)
+    collateral.approve(cog_pair, amount*10, sender=account)
+    cog_pair.add_collateral(account, amount*10, sender=account)
+
+    cog_pair.borrow(amount, sender=account)   
+
+    boa.env.time_travel(86400 * 365 * 5)
+    cog_pair.accrue()
+
+    borrowed_amount = cog_pair.user_borrow_part(account)
+    asset.mint(account, borrowed_amount*2, sender=account)
+    asset.approve(cog_pair, borrowed_amount*2, sender=account)
+    cog_pair.repay(account, borrowed_amount,sender=account)
+
+    account = accounts[5]
+    before_balance = asset.balanceOf(account)
+
+    preview_amt = cog_pair.previewRedeem(AMOUNT_IN_SHARES)
+    actual_amt = cog_pair.redeem(AMOUNT_IN_SHARES, sender=account)
+    assert actual_amt == preview_amt
+
+    new_balance = asset.balanceOf(account)
+    assert new_balance == before_balance + actual_amt
