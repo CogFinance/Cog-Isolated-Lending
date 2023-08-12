@@ -837,7 +837,6 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
                 _accrue_info.interest_per_second
                 - self.surge_info.last_interest_per_second
             )
-            print(dr)
             if dr > PROTOCOL_SURGE_THRESHOLD:
                 self.surge_info.last_elapsed_time = convert(
                     block.timestamp, uint64

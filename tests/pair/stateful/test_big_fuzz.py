@@ -274,20 +274,23 @@ def test_surge_triggers(accounts, collateral, asset, oracle, cog_pair):
         state.add_collateral(4, 1000)
         state.borrow(4, 0.99)
 
+        # Takes ~25 days to actually hit a high enough interest rate
+        # where elasticity can allow surges to occur
+        state.time_travel(86400 * 25)
+        state.cog_pair.accrue()
+        
         end_fee = state.cog_pair.protocol_fee()
 
         assert start_fee < end_fee
-        assert end_fee == 1000000
-
+        assert end_fee == 1_000_000
 
         state.repay(4, 0.99)
         state.time_travel(86400 * 7)
-
         state.cog_pair.accrue()
         surge_recover_fee = state.cog_pair.protocol_fee()
 
         # Gov fee returns to normal
-        assert surge_recover_fee < end_fee
+        assert surge_recover_fee < 1_000_000
 
 def test_user_gets_liquidated(accounts, collateral, asset, oracle, cog_pair):
     for k, v in locals().items():
