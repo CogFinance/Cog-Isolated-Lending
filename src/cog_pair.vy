@@ -572,7 +572,7 @@ def deposit(assets: uint256, receiver: address = msg.sender) -> uint256:
 
     @return - Returns the amount of shares minted for the deposit
     """
-    self._isPaused()
+    self._is_not_paused()
     shares_out: uint256 = self._add_asset(receiver, assets)
     log Deposit(msg.sender, receiver, assets, shares_out)
 
@@ -607,7 +607,7 @@ def mint(shares: uint256, receiver: address = msg.sender) -> uint256:
 
     @return - The amount of assets used
     """
-    self._isPaused()
+    self._is_not_paused()
     tokens_to_deposit: uint256 = self._convertToAssets(shares)
     shares_out: uint256 = self._add_asset(receiver, tokens_to_deposit)
     log Deposit(msg.sender, receiver, tokens_to_deposit, shares_out)
@@ -709,8 +709,8 @@ def redeem(
 # 		        Internal Implementations	         	#
 # ///////////////////////////////////////////////////// #
 @internal
-def _isPaused():
-    assert (not self.paused)
+def _is_not_paused():
+    assert (not self.paused), "Pair Paused"
 
 
 @internal
@@ -1158,7 +1158,7 @@ def borrow(
     @param amount The amount of asset to borrow, in tokens
     @return The amount of tokens borrowed
     """
-    self._isPaused()
+    self._is_not_paused()
     self.efficient_accrue()
     if _from != msg.sender:
         self.borrow_approvals[_from][msg.sender] -= amount
