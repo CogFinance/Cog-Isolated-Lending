@@ -158,40 +158,41 @@ def get() -> (bool, uint256):
     """
     fuses: DataSource[4] = self.fuse_box
 
-    total_price: uint256 = 0
+    avg_price: uint256 = 0
     active_oracles: uint256 = 0
     updated: bool = False
+
+    for i in range(4):
+        if fuses[i].active:
+            active_oracles += 1
 
     if fuses[0].active:
         updated_0: bool = False
         price: uint256 = 0
         (updated_0, price) = IOracle(fuses[0].oracle_address).get()
         updated = updated or updated_0
-        total_price += price
-        active_oracles += 1
+        avg_price += (price / active_oracles) + (price % active_oracles)
 
     if fuses[1].active:
         updated_1: bool = False
         price: uint256 = 0
         (updated_1, price) = IOracle(fuses[1].oracle_address).get()
         updated = updated or updated_1
-        total_price += price
-        active_oracles += 1
+        avg_price += (price / active_oracles) + (price % active_oracles)
 
     if fuses[2].active:
         updated_2: bool = False
         price: uint256 = 0
         (updated_2, price) = IOracle(fuses[2].oracle_address).get()
         updated = updated or updated_2
-        total_price += price
-        active_oracles += 1
+        avg_price += (price / active_oracles) + (price % active_oracles)
 
     if fuses[3].active:
         updated_3: bool = False
         price: uint256 = 0
         (updated_3, price) = IOracle(fuses[3].oracle_address).get()
         updated = updated or updated_3
-        total_price += price
-        active_oracles += 1
+        avg_price += (price / active_oracles) + (price % active_oracles)
 
-    return (updated, (total_price / active_oracles))
+
+    return (updated, avg_price)
