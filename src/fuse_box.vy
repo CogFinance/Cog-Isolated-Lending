@@ -119,8 +119,16 @@ def __init__(sources: DataSource[4]):
     @notice Fuse Box Constructor
     @param sources An array of data sources to be used by the Fuse Box
     """
+    assert (
+        sources[0].active
+        or sources[1].active
+        or sources[2].active
+        or sources[3].active
+    ), "FuseBox: All data sources are inactive"
+
     self._transfer_ownership(msg.sender)
     self.fuse_box = sources
+    
 
 
 @external
