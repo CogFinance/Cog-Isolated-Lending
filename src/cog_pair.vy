@@ -893,7 +893,6 @@ def _add_asset(to: address, amount: uint256) -> uint256:
     @return The amount of shares minted
     """
     _total_asset: Rebase = self.total_asset
-    total_asset_share: uint256 = convert(_total_asset.elastic, uint256)
     all_share: uint256 = convert(
         _total_asset.elastic + self.total_borrow.elastic, uint256
     )
@@ -1167,7 +1166,6 @@ def borrow(
     assert self._is_solvent(
         _from, self.exchange_rate
     ), "Insufficient Collateral"
-    accrue_info: AccrueInfo = self.accrue_info
     # Now that utilization has changed, interest must be accrued to trigger any surge which now may be occuring
     self._accrue(self.accrue_info, 0)
     return borrowed
