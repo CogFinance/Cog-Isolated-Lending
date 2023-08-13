@@ -637,7 +637,7 @@ def previewWithdraw(assets: uint256) -> uint256:
     @return - The amount of shares worth withdrawn
     @notice - Will revert if you try to preview withdrawing more assets than available currently in the vault's balance
     """
-    return min(self._convertToShares(assets), ERC20(asset).balanceOf(self))
+    return min(self._convertToShares(assets), self._convertToShares(ERC20(asset).balanceOf(self)))
 
 
 @external

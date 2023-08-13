@@ -454,7 +454,8 @@ def test_previewWithdraw(cog_pair, accounts, asset, collateral, oracle, amount):
 
     preview = cog_pair.previewWithdraw(AMOUNT)
 
-    assert preview == AMOUNT - int(AMOUNT/2)
+    # Shares will result in this value being lower as the share value has now increased
+    assert preview < AMOUNT - int(AMOUNT/2)
 
 
 @given(
