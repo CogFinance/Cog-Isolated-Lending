@@ -79,12 +79,15 @@ def test_can_liquidate(cog_pair, accounts, collateral, asset, oracle):
 
     account = accounts[1]
 
-    asset.mint(account, 90000000000000000000000000000, sender=account)
-    asset.approve(cog_pair, 90000000000000000000000000000, sender=account)
+    amount_to_liq = 157563024000000000000000000
+    asset.mint(account, amount_to_liq, sender=account)
+    asset.approve(cog_pair, amount_to_liq, sender=account)
 
     cog_pair.liquidate(
         accounts[2],
-        157563024000000000000000000,
+        amount_to_liq,
         accounts[1],
         sender=accounts[1]
     )
+
+    assert asset.balanceOf(account) == 0
