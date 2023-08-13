@@ -652,8 +652,10 @@ def withdraw(
     @return - The amount of shares burned
     """
     self.efficient_accrue()
-    shares_to_withdraw: uint256 = self._convertToShares(assets)
-    shares: uint256 = self._remove_asset(receiver, owner, shares_to_withdraw)
+    shares: uint256 = self._convertToShares(assets)
+    assets_withdraw: uint256 = self._remove_asset(receiver, owner, shares)
+    # Largely redundant check but pretty cheap gas wise and ensures values match up
+    assert assets_withdraw == assets, "Incorrect amount removed"
     log Withdraw(msg.sender, receiver, owner, assets, shares)
 
     return shares
