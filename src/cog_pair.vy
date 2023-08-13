@@ -489,13 +489,12 @@ def totalAssets() -> uint256:
     """
     @return - Returns the total amount of assets owned by the vault
     """
-    total_elastic: uint256 = convert(self.total_asset.elastic, uint256)
-    _total_borrow: Rebase = self.total_borrow
-    # This could maybe revert in the case of bad debt, is that desired?
-    total_interest: uint256 = convert(
-        _total_borrow.elastic - _total_borrow.base, uint256
-    )  # Interest is the difference between elastic and base, since they start at 1:1
-    return total_interest + total_elastic
+    total_assets_elastic: uint256 = convert(self.total_asset.elastic, uint256)
+    # Borrowed assets are subtracted from the above total, so combined elastic values of both
+    # total borrow and total assets should be the same
+    total_borrow_elastic: uint256 = convert(self.total_borrow.elastic, uint256)
+    # Interest is the difference between elastic and base, since they start at 1:1
+    return total_borrow_elastic + total_assets_elastic
 
 
 @view
