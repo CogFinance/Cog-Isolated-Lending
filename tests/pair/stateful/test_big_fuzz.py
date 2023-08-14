@@ -57,7 +57,7 @@ class BigFuzz(RuleBasedStateMachine):
             to_borrow = self.asset.balanceOf(self.cog_pair)
 
         with boa.env.prank(user):
-            self.cog_pair.borrow(to_borrow)
+            self.cog_pair.borrow(to_borrow-1)
 
 
     @rule(user_id=user_id, amount=amount)
