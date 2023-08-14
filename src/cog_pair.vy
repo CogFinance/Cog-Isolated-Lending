@@ -377,11 +377,11 @@ COLLATERIZATION_RATE: constant(uint256) = 75000  # 75%
 BORROW_OPENING_FEE: public(uint256)
 BORROW_OPENING_FEE_PRECISION: constant(uint256) = 100000
 
-# Starts at 10%, raised when PoL only mode is activated to PROTOCOL_FEE_DIVISOR or 100%
+# Starts at 10%, raised when PoL only mode is activated to PROTOCOL_FEE_PRECISION or 100%
 protocol_fee: public(uint256)
 
 DEFAULT_PROTOCOL_FEE: public(uint256)
-PROTOCOL_FEE_DIVISOR: constant(uint256) = 1000000
+PROTOCOL_FEE_PRECISION: constant(uint256) = 1000000
 
 # If IR surges ~10% in 1 day then Protocol begins accruing PoL
 # dr/dt, where dt = 3 days (86400 * 3), and dr is change in interest_rate per second or 3170979200 (5% interest rate)
@@ -763,7 +763,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
 
     # Calculate fees
     fee_amount: uint256 = (
-        interest_accrued * self.protocol_fee / PROTOCOL_FEE_DIVISOR
+        interest_accrued * self.protocol_fee / PROTOCOL_FEE_PRECISION
     )  # % of interest paid goes to fee
 
     fee_fraction = (
@@ -846,7 +846,7 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
                     _accrue_info.interest_per_second
                 )
                 # PoL Should accrue here, instead of to lenders, to discourage pid attacks as described in https://gauntlet.network/reports/pid
-                self.protocol_fee = PROTOCOL_FEE_DIVISOR  # 100% Protocol Fee
+                self.protocol_fee = PROTOCOL_FEE_PRECISION  # 100% Protocol Fee
         else:
             # Reset protocol fee elsewise
             self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10% Protocol Fee
@@ -978,8 +978,9 @@ def _update_exchange_rate() -> (bool, uint256):
 @internal
 def _borrow(amount: uint256, _from: address, to: address) -> uint256:
     """
-    @param to: The address to send the borrowed tokens to
     @param amount: The amount of asset to borrow, in tokens
+    @param _from: The account whom the loan should be taken out against
+    @param to: The address to send the borrowed tokens to
     @return: The amount of tokens borrowed
     """
     self._update_exchange_rate()
@@ -1155,8 +1156,10 @@ def borrow(
     amount: uint256, _from: address = msg.sender, to: address = msg.sender
 ) -> uint256:
     """
-    @param to The address to send the borrowed tokens to
     @param amount The amount of asset to borrow, in tokens
+    @param to The address to send the borrowed tokens to
+    @param _from: The account whom the loan should be taken out against
+    @param to The address to send the borrowed tokens to
     @return The amount of tokens borrowed
     """
     self._is_not_paused()
@@ -1281,7 +1284,7 @@ def update_borrow_fee(newFee: uint256):
 @external
 def update_default_protocol_fee(newFee: uint256):
     assert (msg.sender == factory)
-    assert (newFee <= PROTOCOL_FEE_DIVISOR)
+    assert (newFee <= PROTOCOL_FEE_PRECISION)
     self.DEFAULT_PROTOCOL_FEE = newFee
 
 

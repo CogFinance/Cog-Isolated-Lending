@@ -170,8 +170,6 @@ def set_priv_user_status(user: address, status: bool):
 @external
 def update_borrow_fee(pair: address, newFee: uint256):
     """
-    @dev Sets the status of a priviledged user
-
     @param pair The address of the pair to change the fee of
     @param newFee The fee to change the borrow fee to
     """
@@ -192,14 +190,12 @@ def update_default_protocol_fee(pair: address, newFee: uint256):
 
 
 @external
-def change_fee_to(new_owner: address):
+def change_fee_to(new_recipient: address):
     """
-    @dev Returns the address to which protocol fees are sent.
-
-    @param new_owner The address to which protocol fees are sent
+    @param new_recipient The address to which protocol fees are sent
     """
     self._check_owner()
-    self.fee_to = new_owner
+    self.fee_to = new_recipient
 
 
 @external
