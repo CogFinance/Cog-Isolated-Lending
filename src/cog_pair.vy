@@ -400,6 +400,8 @@ INTEREST_ELASTICITY: immutable(uint256)
 LIQUIDATION_MULTIPLIER: constant(uint256) = 112000  # 12
 LIQUIDATION_MULTIPLIER_PRECISION: constant(uint256) = 100000  # 1e5
 
+INTEREST_PER_SECOND_PRECISION: constant(uint256) = 1000000000000000000 # 1e18
+
 # //////////////////////////////////////////////////////////////// #
 #                              ERC20                               #
 # //////////////////////////////////////////////////////////////// #
@@ -654,8 +656,6 @@ def withdraw(
     self.efficient_accrue()
     shares: uint256 = self._convertToShares(assets)
     assets_withdraw: uint256 = self._remove_asset(receiver, owner, shares)
-    # Largely redundant check but pretty cheap gas wise and ensures values match up
-    assert assets_withdraw == assets, "Incorrect amount removed"
     log Withdraw(msg.sender, receiver, owner, assets, shares)
 
     return shares
@@ -750,8 +750,8 @@ def _accrue(accrue_info: AccrueInfo, elapsed_time: uint256):
         convert(_total_borrow.elastic, uint256)
         * convert(_accrue_info.interest_per_second, uint256)
         * elapsed_time
-        / 1000000000000000000
-    )  # 1e18, or the divisor for interest per second
+        / INTEREST_PER_SECOND_PRECISION
+    )  
 
     _total_borrow.elastic = _total_borrow.elastic + convert(
         interest_accrued, uint128

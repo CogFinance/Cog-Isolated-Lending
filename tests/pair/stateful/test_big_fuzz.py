@@ -212,6 +212,17 @@ class BigFuzz(RuleBasedStateMachine):
         assert interest_per_second <= 31709792000
         assert interest_per_second >= 79274480
 
+
+
+    @invariant()
+    def shares_worth_atleast_assets(self):
+        """
+        If shares are ever worse less than the same number of assets, bad debt has accrued
+        """
+        self.cog_pair.accrue()
+        assert self.cog_pair.convertToShares(1 * 10 ** 18) <= 1 * 10 ** 18
+
+
 def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
     for k, v in locals().items():
         setattr(BigFuzz, k, v)
