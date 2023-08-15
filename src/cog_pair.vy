@@ -1105,7 +1105,6 @@ def __init__(
     MINIMUM_INTEREST_PER_SECOND = min_interest
     MAXIMUM_INTEREST_PER_SECOND = max_interest
     INTEREST_ELASTICITY = elasticity
-    self.protocol_fee = self.DEFAULT_PROTOCOL_FEE  # 10%
     self.BORROW_OPENING_FEE = 50
     factory = msg.sender
 
