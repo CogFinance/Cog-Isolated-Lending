@@ -369,6 +369,7 @@ paused: public(bool)  # Status of if the pool is paused
 #                  Configuration Constants              #
 # ///////////////////////////////////////////////////// #
 # SAFETY : EXCHANGE_RATE_PRECISION strictly must be > COLLATERIZATION_RATE_PRECISION or a divide by zero error will occur
+# NOTE: Given they are also divided by each other, consider any potential precision loss as well
 EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
 COLLATERIZATION_RATE_PRECISION: constant(uint256) = 100000  # 1e5
