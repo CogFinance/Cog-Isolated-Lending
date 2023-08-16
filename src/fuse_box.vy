@@ -168,6 +168,9 @@ def get() -> (bool, uint256):
 
     avg_price: uint256 = 0
     active_oracles: uint256 = 0
+
+    remainder_sum: uint256 = 0
+
     updated: bool = False
 
     for i in range(4):
@@ -179,28 +182,33 @@ def get() -> (bool, uint256):
         price: uint256 = 0
         (updated_0, price) = IOracle(fuses[0].oracle_address).get()
         updated = updated or updated_0
-        avg_price += (price / active_oracles) + (price % active_oracles)
+        avg_price += (price / active_oracles)
+        remainder_sum += (price % active_oracles)
 
     if fuses[1].active:
         updated_1: bool = False
         price: uint256 = 0
         (updated_1, price) = IOracle(fuses[1].oracle_address).get()
         updated = updated or updated_1
-        avg_price += (price / active_oracles) + (price % active_oracles)
+        avg_price += (price / active_oracles)
+        remainder_sum += (price % active_oracles)
 
     if fuses[2].active:
         updated_2: bool = False
         price: uint256 = 0
         (updated_2, price) = IOracle(fuses[2].oracle_address).get()
         updated = updated or updated_2
-        avg_price += (price / active_oracles) + (price % active_oracles)
+        avg_price += (price / active_oracles)
+        remainder_sum += (price % active_oracles)
 
     if fuses[3].active:
         updated_3: bool = False
         price: uint256 = 0
         (updated_3, price) = IOracle(fuses[3].oracle_address).get()
         updated = updated or updated_3
-        avg_price += (price / active_oracles) + (price % active_oracles)
+        avg_price += (price / active_oracles)
+        remainder_sum += (price % active_oracles)
 
+    avg_price += (remainder_sum / active_oracles)
 
     return (updated, avg_price)
