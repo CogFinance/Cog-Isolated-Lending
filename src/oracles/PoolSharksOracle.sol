@@ -81,10 +81,10 @@ contract PoolSharksOracle is IOracle {
             averagePrice >>= 32;
             uint256 fullPrice = mulDiv(averagePrice, averagePrice, 2 ** 64);
             // Because we have already rsh 32 bits so fullPrice is a Q.64
-            normalizedPrice = mulDiv(fullPrice, 1e18, 2 ** 64);
+            normalizedPrice = mulDiv(fullPrice, PRECISION, 2 ** 64);
         } else {
             uint256 fullPrice = mulDiv(averagePrice, averagePrice, 2 ** 96);
-            normalizedPrice = mulDiv(fullPrice, 1e18, 2 ** 96);
+            normalizedPrice = mulDiv(fullPrice, PRECISION, 2 ** 96);
         }
 
         if (pool.token1() == token) {
@@ -94,7 +94,7 @@ contract PoolSharksOracle is IOracle {
             // We are trying to get the price of token1
             // Because 1e18 for oracle precision, we return normalizedPrice multiplied by a conversion
             // factor of 1e36 over normalizedPrice
-            return (1e36 / normalizedPrice);
+            return ((PRECISION * PRECISION) / normalizedPrice);
         }
     }
 
