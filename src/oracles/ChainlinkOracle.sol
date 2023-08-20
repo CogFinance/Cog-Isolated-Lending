@@ -28,7 +28,7 @@ contract ChainlinkOracle is IOracle {
 
     // Calculates the latest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
-    function _get(address multiply, address divide, uint256 decimals) internal view returns (uint256) {
+    function _get() internal view returns (uint256) {
         uint256 price = uint256(1e36);
         if (multiply != address(0)) {
             (, int256 mulPrice,,,) = IAggregator(multiply).latestRoundData();
@@ -45,20 +45,20 @@ contract ChainlinkOracle is IOracle {
         return price / decimals;
     }
 
-    function getDataParameter(address multiply, address divide, uint256 decimals) public pure returns (bytes memory) {
+    function getDataParameter() public pure returns (bytes memory) {
         return abi.encode(multiply, divide, decimals);
     }
 
     // Get the latest exchange rate
     /// @inheritdoc IOracle
     function get() public override returns (bool, uint256) {
-        return (true, _get(multiply, divide, decimals));
+        return (true, _get());
     }
 
     // Check the last exchange rate without any state changes
     /// @inheritdoc IOracle
     function peek() public view override returns (bool, uint256) {
-        return (true, _get(multiply, divide, decimals));
+        return (true, _get());
     }
 
     // Check the current spot exchange rate without any state changes

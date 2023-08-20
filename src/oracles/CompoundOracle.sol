@@ -8,6 +8,8 @@ interface IUniswapAnchoredView {
     function price(string memory symbol) external view returns (uint256);
 }
 
+/// @notice Do not use for stablecoins as price will be fixed, see https://github.com/CogFinance/Cog-Finance-v1/issues/55 for 
+/// further explanation
 contract CompoundOracle is IOracle {
     using BoringMath for uint256;
 
