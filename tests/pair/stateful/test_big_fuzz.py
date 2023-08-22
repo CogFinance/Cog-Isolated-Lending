@@ -154,7 +154,7 @@ class BigFuzz(RuleBasedStateMachine):
             return
 
         with boa.env.prank(user):
-            self.cog_pair.remove_collateral(user, int(collateral_amount * amount))
+            self.cog_pair.remove_collateral(user, int(collateral_amount * amount)-1)
 
     @rule(percent=st.floats(min_value=-0.5, max_value=0.5))
     def nudge_oracle(self, percent):
