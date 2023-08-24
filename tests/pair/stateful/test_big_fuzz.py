@@ -1,6 +1,4 @@
-import pytest
 import hypothesis.strategies as st
-from hypothesis._settings import HealthCheck
 from hypothesis.stateful import (
     RuleBasedStateMachine,
     initialize,
@@ -10,7 +8,7 @@ from hypothesis.stateful import (
 )
 from hypothesis import settings
 import boa
-
+from enum import Enum
 
 MINT_AMOUNT = 100*10**18
 BORROW = 1
@@ -19,6 +17,15 @@ COLLATERALIZATION_RATE_PCT = 75  # 75%
 NUM_STEPS = 100_000
 COLLATERIZATION_RATE = 75000
 
+class Action(Enum):
+    BORROW = 0
+    REPAY = 1
+    ADD_COLLATERAL = 2
+    REMOVE_COLLATERAL = 3
+    DEPOSIT = 4
+    MINT = 5
+    REDEEM = 6
+    WITHDRAW = 7
 
 class BigFuzz(RuleBasedStateMachine):
     # a strategy to generate a number which represents percent
@@ -29,6 +36,7 @@ class BigFuzz(RuleBasedStateMachine):
 
     @initialize()
     def setup(self):
+        self.LAST_ACTION = None
         return
 
     @rule(user_id=user_id, amount=amount)
@@ -57,7 +65,11 @@ class BigFuzz(RuleBasedStateMachine):
             to_borrow = self.asset.balanceOf(self.cog_pair)
 
         with boa.env.prank(user):
+            old_borrow_part = self.cog_pair.user_borrow_part(user)
             self.cog_pair.borrow(to_borrow-1)
+            new_borrow_part = self.cog_pair.user_borrow_part(user)
+            assert new_borrow_part > old_borrow_part
+            self.LAST_ACTION = Action.BORROW
 
 
     @rule(user_id=user_id, amount=amount)
@@ -94,9 +106,14 @@ class BigFuzz(RuleBasedStateMachine):
             
             self.asset.mint(user, elastic_borrow_part+1)
             self.asset.approve(self.cog_pair, elastic_borrow_part+1)
+
+            old_borrow_part = self.cog_pair.user_borrow_part(user)
             self.cog_pair.repay(user, to_repay)
+            new_borrow_part = self.cog_pair.user_borrow_part(user)
+            assert new_borrow_part < old_borrow_part
         
             self.cog_pair.accrue()
+            self.LAST_ACTION = Action.REPAY
 
     @rule(user_id=user_id, amount=amount)
     def add_collateral(self, user_id, amount):
@@ -108,7 +125,11 @@ class BigFuzz(RuleBasedStateMachine):
         with boa.env.prank(user):
             self.collateral.mint(user, amount)
             self.collateral.approve(self.cog_pair, amount)
+
+            old_share = self.cog_pair.user_collateral_share(user)
             self.cog_pair.add_collateral(user, amount)
+            assert self.cog_pair.user_collateral_share(user) == old_share + amount
+            self.LAST_ACTION = Action.ADD_COLLATERAL
 
 
     @rule(user_id=user_id, amount=amount)
@@ -121,7 +142,10 @@ class BigFuzz(RuleBasedStateMachine):
         with boa.env.prank(user):
             self.asset.mint(user, amount)
             self.asset.approve(self.cog_pair, amount)
-            self.cog_pair.deposit(amount)
+            old_balance = self.cog_pair.balanceOf(user)
+            new_tokens = self.cog_pair.deposit(amount)
+            assert self.cog_pair.balanceOf(user) - new_tokens == old_balance
+            self.LAST_ACTION = Action.DEPOSIT
  
     @rule(user_id=user_id, amount=amount)
     def withdraw(self, user_id, amount): 
@@ -132,6 +156,7 @@ class BigFuzz(RuleBasedStateMachine):
 
         with boa.env.prank(user):
             self.cog_pair.redeem(amount)
+            self.LAST_ACTION = Action.WITHDRAW
 
     @rule(user_id=user_id, amount=amount)
     def remove_collateral(self, user_id, amount):
@@ -154,18 +179,39 @@ class BigFuzz(RuleBasedStateMachine):
             return
 
         with boa.env.prank(user):
+            old_share = self.cog_pair.user_collateral_share(user)
             self.cog_pair.remove_collateral(user, int(collateral_amount * amount)-1)
+            new_share = self.cog_pair.user_collateral_share(user)
+            assert old_share > new_share
+
+            self.LAST_ACTION = Action.REMOVE_COLLATERAL
 
     @rule(percent=st.floats(min_value=-0.5, max_value=0.5))
     def nudge_oracle(self, percent):
+        (updated_0, rate_0) = self.cog_pair.get_exchange_rate()
         current_price = self.oracle.get()[1]
         new_price = int((1 + percent) * current_price)
         with boa.env.prank(self.accounts[0]):
             self.oracle.setPrice(new_price)
+            (updated_1, rate_1) = self.cog_pair.get_exchange_rate()
+            assert updated_1
+            if percent > 0 and percent > 0.01:
+                assert rate_1 > rate_0
+            if percent < 0 and percent < -0.01:
+                assert rate_1 < rate_0
 
     @rule(dt=time_shift)
     def time_travel(self, dt):
+        (borrow_elastic_0, borrow_base_0) = self.cog_pair.total_borrow()
         boa.env.time_travel(dt)
+        self.cog_pair.accrue()
+        (borrow_elastic_1, borrow_base_1) = self.cog_pair.total_borrow()
+        if borrow_elastic_0 == 0:
+            return
+
+        # If there is an outstanding borrow, the interest rate should increase
+        assert borrow_elastic_1 > borrow_elastic_0
+        assert borrow_base_1 == borrow_base_0
 
     @rule()
     def liquidate_insolvent_users(self):
@@ -196,8 +242,11 @@ class BigFuzz(RuleBasedStateMachine):
                 with boa.env.prank(liquidator):
                     self.asset.mint(liquidator, 100 * 10 ** 18)
                     self.asset.approve(self.cog_pair, 100 * 10 **18)
-                    print(self.cog_pair.user_borrow_part(user))
+
+                    old_borrow_part = self.cog_pair.user_borrow_part(user)
                     self.cog_pair.liquidate(user, self.cog_pair.user_borrow_part(user), liquidator)
+                    new_borrow_part = self.cog_pair.user_borrow_part(user)
+                    assert new_borrow_part < old_borrow_part
 
     @invariant()
     def interest_stays_within_bounds(self):
@@ -211,7 +260,6 @@ class BigFuzz(RuleBasedStateMachine):
     
         assert interest_per_second <= 31709792000
         assert interest_per_second >= 79274480
-
 
 
     @invariant()
@@ -244,7 +292,7 @@ def test_state_machine_isolation(accounts, collateral, asset, oracle, cog_pair):
             cog_pair.add_collateral(account, MINT_AMOUNT)
 
 
-    BigFuzz.TestCase.settings = settings(max_examples=15, stateful_step_count=30, deadline=None)
+    BigFuzz.TestCase.settings = settings(max_examples=25, stateful_step_count=30, deadline=None)
     run_state_machine_as_test(BigFuzz)
 
 def test_happy_path_works(accounts, collateral, asset, oracle, cog_pair):
