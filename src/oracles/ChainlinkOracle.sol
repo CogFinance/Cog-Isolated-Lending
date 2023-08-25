@@ -31,14 +31,18 @@ contract ChainlinkOracle is IOracle {
     function _get() internal view returns (uint256) {
         uint256 price = uint256(1e36);
         if (multiply != address(0)) {
-            (, int256 mulPrice,,,) = IAggregator(multiply).latestRoundData();
+            (, int256 mulPrice, uint256 startedAt,,) = IAggregator(multiply).latestRoundData();
+            require(mulPrice != 0, "Invalid mulPrice");
+            require(block.timestamp - startedAt <= 5 hours, "Stale Price Feed");
             price = price.mul(uint256(mulPrice));
         } else {
             price = price.mul(1e18);
         }
 
         if (divide != address(0)) {
-            (, int256 divPrice,,,) = IAggregator(divide).latestRoundData();
+            (, int256 divPrice, uint256 startedAt,,) = IAggregator(divide).latestRoundData();
+            require(divPrice != 0, "Invalid divPrice");
+            require(block.timestamp - startedAt <= 5 hours, "Stale Price Feed");
             price = price / uint256(divPrice);
         }
 
