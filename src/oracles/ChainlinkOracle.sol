@@ -38,7 +38,7 @@ contract ChainlinkOracle is IOracle {
         (
             /*uint80 roundID*/,
             int256 answer,
-            uint256 startedAt,
+            /*uint256 startedAt*/,
             /*uint256 updatedAt*/,
             /*uint80 answeredInRound*/
         ) = IAggregator(uptime_feed).latestRoundData();
