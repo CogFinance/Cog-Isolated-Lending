@@ -278,6 +278,11 @@ event RemoveCollateral:
     amount: indexed(uint256)
     user_collateral_share: indexed(uint256)
 
+event Borrow:
+    amount: indexed(uint256)
+    to: indexed(address)
+    from: indexed(address)
+
 
 event Paused:
     time: indexed(uint256)
@@ -1012,6 +1017,9 @@ def _borrow(amount: uint256, _from: address, to: address) -> uint256:
     assert ERC20(asset).transfer(
         to, amount, default_return_value=True
     )  # dev: Transfer Failed
+
+    log Borrow(amount, to, _from)
+
     return amount
 
 
