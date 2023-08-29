@@ -281,7 +281,7 @@ event RemoveCollateral:
 event Borrow:
     amount: indexed(uint256)
     to: indexed(address)
-    from: indexed(address)
+    _from: indexed(address)
 
 
 event Paused:
