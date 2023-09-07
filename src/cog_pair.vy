@@ -1165,8 +1165,7 @@ def borrow(
 ) -> uint256:
     """
     @param amount The amount of asset to borrow, in tokens
-    @param to The address to send the borrowed tokens to
-    @param _from: The account whom the loan should be taken out against
+    @param _from The account whom the loan should be taken out against
     @param to The address to send the borrowed tokens to
     @return The amount of tokens borrowed
     """

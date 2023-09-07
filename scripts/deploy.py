@@ -60,7 +60,7 @@ def cli():
     cls=NetworkBoundCommand,
 )
 @network_option()
-def deploy(network):
+def deploy_blueprint(network):
     colorama_init()
 
     # Deployer address
@@ -78,7 +78,103 @@ def deploy(network):
     
     blueprint_address = blueprint_event[0].addr
 
-    print(f"Deployed the vault Blueprint to {blueprint_address}")
+    print("==================================================")
+    print(" Deployed Cog Pair Blueprint to {0}".format(blueprint_address))
+    print("==================================================")
+
+@cli.command(
+    cls=NetworkBoundCommand,
+)
+@network_option()
+def deploy_factory(network, blueprint_address):
+    colorama_init()
+
+    # Deployer address
+    if ':local' in network:
+        account = accounts.test_accounts[0]
+    else:
+        account = accounts.load('alfa')
+        account.set_autosign(True)
+
+    factory = account.deploy(project.cog_factory, blueprint_address, account, type=0, network=network)
+
+    print("==================================================")
+    print(" Deployed Cog Factory to {0}".format(factory.address))
+    print("==================================================")
+
+@cli.command(
+    cls=NetworkBoundCommand,
+)
+@network_option()
+def deploy_chainlink_oracle(network, _mul, _div, _dec, _uptime_feed):
+    colorama_init()
+
+    # Deployer address
+    if ':local' in network:
+        account = accounts.test_accounts[0]
+    else:
+        account = accounts.load('alfa')
+        account.set_autosign(True)
+
+    oracle = account.deploy(project.ChainlinkOracle, _mul, _div, _dec, _uptime_feed, type=0, network=network)
+
+@cli.command(
+    cls=NetworkBoundCommand,
+)
+@network_option()
+def deploy_poolsharks_oracle(network, _pool, _token):
+    colorama_init()
+
+    # Deployer address
+    if ':local' in network:
+        account = accounts.test_accounts[0]
+    else:
+        account = accounts.load('alfa')
+        account.set_autosign(True)
+
+    oracle = account.deploy(project.PoolSharksOracle, _pool, _token, type=0, network=network)
+
+@cli.command(
+    cls=NetworkBoundCommand,
+)
+@network_option()
+def sepolia_testnet_deploy(network):
+    account = accounts.load('alfa')
+    account.set_autosign(True)
+
+    deployer = account.deploy(project.Deployer, type=0)
+
+    blueprint_bytecode = construct_blueprint_deploy_bytecode(project.cog_pair.contract_type.deployment_bytecode.bytecode)
+    blueprint_tx = deployer.deploy(blueprint_bytecode, type=0, network=network, sender=account)
+    blueprint_event = list(blueprint_tx.decode_logs(deployer.Deployed))
+    
+    blueprint_address = blueprint_event[0].addr
+
+    factory = account.deploy(project.cog_factory, blueprint_address, account, type=0, network=network)
+
+    oracle = account.deploy(project.PoolSharksOracle, type=0, network=network)
+
+@cli.command(
+    cls=NetworkBoundCommand,
+)
+@network_option()
+def deploy(network):
+    colorama_init()
+
+    # Deployer address
+    if ':local' in network:
+        account = accounts.test_accounts[0]
+    else:
+        account = accounts.load('alfa')
+        account.set_autosign(True)
+
+    deployer = account.deploy(project.Deployer, type=0)
+
+    blueprint_bytecode = construct_blueprint_deploy_bytecode(project.cog_pair.contract_type.deployment_bytecode.bytecode)
+    blueprint_tx = deployer.deploy(blueprint_bytecode, type=0, network=network, sender=account)
+    blueprint_event = list(blueprint_tx.decode_logs(deployer.Deployed))
+    
+    blueprint_address = blueprint_event[0].addr
 
     print("==================================================")
     print(" Deployed Cog Pair Blueprint to {0}".format(blueprint_address))
@@ -117,9 +213,8 @@ def deploy(network):
     # result = pair_instance.get_exchange_rate(type=0, network=network, sender=account)
 
     mint_ether_tx = mock_ether.mint(account.address, 10 ** 9 * 10 ** 18, type=0, sender=account, network=network)
-    # web3.eth.wait_for_transaction_receipt(mint_ether_tx)
     mint_stable_tx = mock_stable.mint(account.address, 10 ** 9 * 10 ** 18, type=0, sender=account, network=network)
-    # web3.eth.wait_for_transaction_receipt(mint_stable_tx)
+
     print("==================================================")
     print(" Minted Mock Tokens")
     print("==================================================")
