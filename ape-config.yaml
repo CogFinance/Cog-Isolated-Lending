@@ -7,7 +7,5 @@ plugins:
   - name: solidity
   - name: scroll
 
-vyper:
-  evm_version: istanbul
 
 

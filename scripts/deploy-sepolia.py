@@ -99,6 +99,7 @@ def deploy(network):
     loan_router = account.deploy(project.loan_router, type=0, network=network)
 
     print("==========================")
+    print("Account Used:             ", account)
     print("Blueprint Address:        ", blueprint_address)
     print("Factory Address:          ", factory.address)
     print("Loan Router Address:      ", loan_router.address)
