@@ -2,6 +2,10 @@
 
 The first implementation of the Cog Finance protocol, written primarily in Vyper. This serves as a spec and benchmark implementation of Cog Finance, implemented with security and simplicity being of the highest concern.
 
+[Verilog Oracle Audit](https://www.verilog.solutions/audits/cog_finance_v1_oracle/)
+
+[Veridise Contract Audit](./audits/VAR_Cog230731.pdf)
+
 ## State of the Art
 
 This repo was designed in part based off of the structure from the [Curve Stablecoin](https://github.com/curvefi/curve-stablecoin) structure, and follows similar structuring to it.
