@@ -79,6 +79,32 @@ def deploy_mock_tokens(network):
     print("Mock Sushi: ", mock_sushi.address)
 
 @cli.command(
+    cls=NetworkBoundCommand
+)
+@network_option()
+def deploy_pools(network):
+    account = accounts.load('alfa')
+    account.set_autosign(True)
+    usdc = "0x3a56859B3E176636095c142c87F73cC57B408b67"
+    dai = "0x7dCF144D7f39d7aD7aE0E6F9E612379F73BD8E80"
+    yfi = "0x681cfAC3f265b6041FF4648A1CcB214F1c0DcF38"
+    sushi = "0xa9e1ab5e6878621F80E03A4a5F8FB3705F4FFA2B"
+    steth = "0x5339F8fDFc2a9bE081fc1d924d9CF1473dA46C68"
+
+    steth_oracle = account.deploy(project.PoolSharksOracle, "0x0c568DC609fB92FfdbA18De673C332896e1B0513", steth,type=0, sender=account)
+    yfi_oracle = account.deploy(project.PoolSharksOracle, "0xdF6b73475B612f2a86E4145caD2ac607d01167EE", yfi, type=0,  sender=account)
+    sushi_oracle = account.deploy(project.PoolSharksOracle, "0xA3374d366C33E803A3fF4a3db4B38e5Aa4A1f2E5", sushi,type=0, sender=account)
+    dai_oracle = account.deploy(project.PoolSharksOracle, "0xF7B3eC2Fa17093FE895a0965C8Fc69f101C74847", dai, type=0,  sender=account)
+
+    factory = project.cog_factory.at("0x2F48272CcF4f6b77729A37385860a505283A5d33")
+
+    factory.deploy_high_risk_pair(sushi, yfi, sushi_oracle, type=0, sender=account, network=network)
+    factory.deploy_stable_risk_pair(usdc, dai, dai_oracle, type=0, sender=account, network=network)
+    factory.deploy_medium_risk_pair(dai, yfi, yfi_oracle, type=0, sender=account, network=network)
+    factory.deploy_medium_risk_pair(steth, usdc, steth_oracle, type=0, sender=account, network=network)
+    
+
+@cli.command(
     cls=NetworkBoundCommand,
 )
 @network_option()

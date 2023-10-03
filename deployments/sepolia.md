@@ -7,13 +7,13 @@ Loan Router Address: [`0x46015C1aeeada9F2F87991E46cB753af7bA078Ce`](https://sepo
 
 ## Test Pairs
 
-Mock Med Risk stETH-USDC: [`0xc6e3c3374f5b08d3d4a3bf4b59f836e575a4316d`]
+Mock Med Risk stETH-USDC: [`0xa91d12c7ebde6f8ee29a46d4295c319cff6236a0`]
 
-Mock Med Risk YFI-DAI: [`0x855c2d7ff7281ef909170096e471cb42cad6146a`]
+Mock Med Risk YFI-DAI: [`0xca6435444f702807f1a339ba9148e3643b213d66`]
 
-Mock High Risk SUSHI-YFI: [`0x0ec6a3c97e17f1565667c1edc24ac6f5aa5b268c`]
+Mock High Risk SUSHI-YFI: [`0x6c5948797b269f1143fd585a80e87c74896f6ed5`]
 
-Mock Stable USDC-DAI: [`0xdf57650fe70da7e6e7c81ba42ecd0159e7ff51d1`]
+Mock Stable USDC-DAI: [`0x3a6F72628bcfE1ECDe5D6a8183360c043A0B0A16`]
 
 ### Mock Token Addresses
 
