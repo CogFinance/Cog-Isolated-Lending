@@ -1071,7 +1071,6 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
         * COLLATERIZATION_RATE
     )
 
-    borrow_part = self.user_borrow_part[user]
     borrow_part = self.mul_div(
         (borrow_part * convert(_total_borrow.elastic, uint256)),
         exchange_rate,
@@ -1212,21 +1211,21 @@ def liquidate(user: address, max_borrow_parts: uint256, to: address):
     updated, exchange_rate = self._update_exchange_rate()
     self.efficient_accrue()
 
-    all_collateral_share: uint256 = 0
-    all_borrow_amount: uint256 = 0
-    all_borrow_part: uint256 = 0
+    collateral_share: uint256 = 0
+    borrow_amount: uint256 = 0
+    borrow_part: uint256 = 0
     _total_borrow: Rebase = self.total_borrow
 
     if not self._is_solvent(user, exchange_rate):
         available_borrow_part: uint256 = self.user_borrow_part[user]
-        borrow_part: uint256 = min(max_borrow_parts, available_borrow_part)
+        borrow_part = min(max_borrow_parts, available_borrow_part)
         self.user_borrow_part[user] = available_borrow_part - borrow_part
 
-        borrow_amount: uint256 = self.to_elastic(
+        borrow_amount = self.to_elastic(
             _total_borrow, borrow_part, False
         )
 
-        collateral_share: uint256 = (
+        collateral_share = (
             (borrow_amount * LIQUIDATION_MULTIPLIER * exchange_rate)
             / (LIQUIDATION_MULTIPLIER_PRECISION * EXCHANGE_RATE_PRECISION)
         )
@@ -1242,33 +1241,29 @@ def liquidate(user: address, max_borrow_parts: uint256, to: address):
             self.user_collateral_share[user] - collateral_share
         )
 
-        all_collateral_share += collateral_share
-        all_borrow_amount += borrow_amount
-        all_borrow_part += borrow_part
-
-    assert all_borrow_amount != 0, "CogPair: all are solvent"
+    assert borrow_amount != 0, "CogPair: User is solvent"
 
     self.total_borrow.elastic = self.total_borrow.elastic - convert(
-        all_borrow_amount, uint128
+        borrow_amount, uint128
     )
     self.total_borrow.base = self.total_borrow.base - convert(
-        all_borrow_part, uint128
+        borrow_part, uint128
     )
 
     self.total_collateral_share = (
-        self.total_collateral_share - all_collateral_share
+        self.total_collateral_share - collateral_share
     )
 
     assert ERC20(collateral).transfer(
-        to, all_collateral_share, default_return_value=True
+        to, collateral_share, default_return_value=True
     )  # dev: Transfer failed
 
     assert ERC20(asset).transferFrom(
-        msg.sender, self, all_borrow_amount, default_return_value=True
+        msg.sender, self, borrow_amount, default_return_value=True
     )  # dev: Transfer failed
 
     self.total_asset.elastic = self.total_asset.elastic + convert(
-        all_borrow_part, uint128
+        borrow_part, uint128
     )
 
 

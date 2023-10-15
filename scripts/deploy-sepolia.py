@@ -79,6 +79,26 @@ def deploy_mock_tokens(network):
     print("Mock Sushi: ", mock_sushi.address)
 
 @cli.command(
+    cls=NetworkBoundCommand,
+)
+@network_option()
+def deploy_single_pool(network):
+    account = accounts.load('alfa')
+    account.set_autosign(True)
+
+    usdc = "0x3a56859B3E176636095c142c87F73cC57B408b67"
+    dai = "0x7dCF144D7f39d7aD7aE0E6F9E612379F73BD8E80"
+
+    factory = project.cog_factory.at("0x2F48272CcF4f6b77729A37385860a505283A5d33")
+
+    dai_oracle = account.deploy(project.mock_oracle, type=0,  sender=account)
+
+    dai_oracle.setPrice(10 ** 18, type=0, sender=account)
+
+    factory.deploy_stable_risk_pair(usdc, dai, dai_oracle, type=0, sender=account, network=network)
+
+
+@cli.command(
     cls=NetworkBoundCommand
 )
 @network_option()
