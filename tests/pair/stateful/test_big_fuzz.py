@@ -251,15 +251,17 @@ class BigFuzz(RuleBasedStateMachine):
     @invariant()
     def interest_stays_within_bounds(self):
         self.cog_pair.accrue()
-        
+       
+        ONE_PERCENT = 317097920
+
         (interest_per_second, last_accrued, fees_earned_fraction) = self.cog_pair.accrue_info()
         (total_borrow_elastic, total_borrow_base) = self.cog_pair.total_borrow()
         if total_borrow_base == 0:
-            STARTING_INTEREST_PER_SECOND = 317097920
+            STARTING_INTEREST_PER_SECOND = ONE_PERCENT * 7
             assert interest_per_second == STARTING_INTEREST_PER_SECOND
     
-        assert interest_per_second <= 31709792000
-        assert interest_per_second >= 79274480
+        assert interest_per_second <= ONE_PERCENT * 150
+        assert interest_per_second >= ONE_PERCENT * 4
 
 
     @invariant()

@@ -237,6 +237,9 @@ def __init__(_blueprint: address, _fee_to: address):
 #               Pair Deployment Functions               #
 # ///////////////////////////////////////////////////// #
 
+# Approx. 1% APR for interest_per_second
+ONE_PERCENT: constant(uint64) = 317097920
+
 @external
 def deploy_stable_risk_pair(
     asset: address, collateral: address, oracle: address
@@ -251,14 +254,14 @@ def deploy_stable_risk_pair(
     @return pair The address of the deployed pair
     """
 
-    # 10% minimum utilization, 65% maximum utilization
-    MINIMUM_TARGET_UTILIZATION: uint256 = 100000000000000000
-    MAXIMUM_TARGET_UTILIZATION: uint256 = 650000000000000000
+    # 15% minimum utilization, 35% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 150000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 350000000000000000
 
-    # 0.25% minimum interest per second, 1% starting interest per second, 25% maximum interest per second
-    STARTING_INTEREST_PER_SECOND: uint64 = 158548960
-    MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
-    MAXIMUM_INTEREST_PER_SECOND: uint64 = 7927448000
+    # 2% minimum APR, 5% starting APR, 25% maximum APR
+    STARTING_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 5)
+    MINIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 2)
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 25)
 
     INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
 
@@ -293,14 +296,14 @@ def deploy_low_risk_pair(
     @return pair The address of the deployed pair
     """
 
-    # 40% minimum utilization, 80% maximum utilization
-    MINIMUM_TARGET_UTILIZATION: uint256 = 400000000000000000
-    MAXIMUM_TARGET_UTILIZATION: uint256 = 800000000000000000
+    # 20% minimum utilization, 40% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 200000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 400000000000000000
 
-    # 0.25% minimum interest per second, 2% starting interest per second, 50% maximum interest per second
-    STARTING_INTEREST_PER_SECOND: uint64 = 634195840
-    MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
-    MAXIMUM_INTEREST_PER_SECOND: uint64 = 15854896000
+    # 2% minimum interest per second, 5% starting interest per second, 35% maximum interest per second
+    STARTING_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 5)
+    MINIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 2)
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 35)
 
     INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
 
@@ -336,14 +339,14 @@ def deploy_medium_risk_pair(
     @return pair The address of the deployed pair
     """
 
-    # 60% minimum utilization, 80% maximum utilization
-    MINIMUM_TARGET_UTILIZATION: uint256 = 600000000000000000
-    MAXIMUM_TARGET_UTILIZATION: uint256 = 800000000000000000
+    # 60% minimum utilization, 60% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 500000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 600000000000000000
 
-    # 0.25% minimum interest per second, 1% starting interest per second, 100% maximum interest per second
-    STARTING_INTEREST_PER_SECOND: uint64 = 317097920
-    MINIMUM_INTEREST_PER_SECOND: uint64 = 79274480
-    MAXIMUM_INTEREST_PER_SECOND: uint64 = 31709792000
+    # 4% minimum APR, 1% starting APR, 150% maximum APR
+    STARTING_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 7)
+    MINIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 4)
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 150)
 
     INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
 
@@ -378,16 +381,16 @@ def deploy_high_risk_pair(
     @return pair The address of the deployed pair
     """
 
-    # 60% minimum utilization, 80% maximum utilization
-    MINIMUM_TARGET_UTILIZATION: uint256 = 600000000000000000
-    MAXIMUM_TARGET_UTILIZATION: uint256 = 800000000000000000
+    # 30% minimum utilization, 50% maximum utilization
+    MINIMUM_TARGET_UTILIZATION: uint256 = 300000000000000000
+    MAXIMUM_TARGET_UTILIZATION: uint256 = 500000000000000000
 
-    # 0.25% minimum interest per second, 5% starting interest per second, 1000% maximum interest per second
-    STARTING_INTEREST_PER_SECOND: uint64 = 1585489600
-    MINIMUM_INTEREST_PER_SECOND: uint64 = 634195840
-    MAXIMUM_INTEREST_PER_SECOND: uint64 = 317097920000
+    # 5% minimum interest per second, 12% starting interest per second, 1000% maximum interest per second
+    STARTING_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 12) 
+    MINIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 5)
+    MAXIMUM_INTEREST_PER_SECOND: uint64 = (ONE_PERCENT * 1000)
 
-    INTEREST_ELASTICITY: uint256 = 28800000000000000000000000000000000000000
+    INTEREST_ELASTICITY: uint256 = 20000000000000000000000000000000000000000
 
     pair: address = create_from_blueprint(
         blueprint,
