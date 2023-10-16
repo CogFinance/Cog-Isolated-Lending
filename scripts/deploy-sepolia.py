@@ -129,7 +129,7 @@ def deploy_pools(network):
 )
 @network_option()
 def deploy(network):
-    account = accounts.load('alfa')
+    account = accounts.load('mainnet')
     account.set_autosign(True)
 
     deployer = account.deploy(project.Deployer, type=0)
