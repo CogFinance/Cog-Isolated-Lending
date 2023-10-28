@@ -1,0 +1,3 @@
+[profile.default]
+evm_version = "shanghai"
+ffi = true

@@ -1,8 +1,9 @@
-# @version 0.3.9
+# @version 0.3.10
 
 # Empty IUniswapV3Pool interface
 interface IUniswapV3Pool:
-    def factory() -> address: view #Not used
+    def token0() -> address: view
+    def token1() -> address: view
 
 # BunniToken Interface
 interface IBunniToken:
@@ -22,6 +23,8 @@ interface IOracle:
     def symbol() -> String[1]: view
     def name() -> String[1]: view
 
+from vyper.interfaces import ERC20Detailed
+
 implements: IOracle
 
 # BunniKey struct
@@ -30,25 +33,28 @@ struct BunniKey:
     tickLower: int24
     tickUpper: int24
 
-bunny_lens: public(IBunniLens)
+bunni_lens: public(IBunniLens)
 bunni_token: public(address)
 bunni_key: public(BunniKey)
 asset_0_oracle: public(IOracle)
 asset_1_oracle: public(IOracle)
+decimals_asset_0: public(uint256)
+decimals_asset_1: public(uint256)
 
 
 @external
-def __init__(_bunny_lens: address, _bunni_token: address, _asset_0_oracle: address, _asset_1_oracle: address):
+def __init__(_bunni_lens: address, _bunni_token: address, _asset_0_oracle: address, _asset_1_oracle: address):
     pool: IUniswapV3Pool = IBunniToken(_bunni_token).pool()
     tickLower: int24 = IBunniToken(_bunni_token).tickLower()
     tickUpper: int24 = IBunniToken(_bunni_token).tickUpper()
 
     self.bunni_key = BunniKey({pool: pool, tickLower: tickLower, tickUpper: tickUpper})
-    self.bunny_lens = IBunniLens(_bunny_lens)
+    self.bunni_lens = IBunniLens(_bunni_lens)
     self.bunni_token = _bunni_token
     self.asset_0_oracle = IOracle(_asset_0_oracle)
     self.asset_1_oracle = IOracle(_asset_1_oracle)
-
+    self.decimals_asset_0 = convert(ERC20Detailed(pool.token0()).decimals(), uint256)
+    self.decimals_asset_1 = convert(ERC20Detailed(pool.token1()).decimals(), uint256)
 
 @view
 @internal
@@ -57,9 +63,9 @@ def _get_final_rate(rate_0: uint256, rate_1: uint256) -> uint256:
     amount_0: uint256 = 0
     amount_1: uint256 = 0
 
-    (_, amount_0, amount_1) = self.bunny_lens.pricePerFullShare(self.bunni_key)
+    (_, amount_0, amount_1) = self.bunni_lens.pricePerFullShare(self.bunni_key)
 
-    return  amount_0 * rate_0 + amount_1 * rate_1
+    return  (amount_0 * rate_0) / 10 ** self.decimals_asset_0 + (amount_1 * rate_1) / 10 ** self.decimals_asset_1
 
 
 @external
