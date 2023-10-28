@@ -1,10 +1,9 @@
 pragma solidity 0.8.19;
 
-import "./../interfaces/IOracle.sol";
-//import "./BunniOracle.sol";
+//import "./../interfaces/IOracle.sol";
+import "./BunniOracle.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { Test } from "forge-std/Test.sol";
-import "./../utils/VyperDeployer.sol";
 
 interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -16,15 +15,10 @@ interface IERC20 {
     function approve(address spender, uint256 value) external returns (bool);
     function transferFrom(address from, address to, uint256 value) external returns (bool);
     function mint(address to, uint256 amount) external;
-    function decimals() external view returns (uint256);
 }
 
-interface chainlinkAggregatorV3Interface {
-  function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
-  function decimals() external view returns (uint8);
-}
-
-interface IUniswapV3Pool {
+//UniswapV3Pool interface
+interface IUniswapPool {
   function swap(
     address recipient,
     bool zeroForOne,
@@ -36,22 +30,17 @@ interface IUniswapV3Pool {
   function token1() external view returns (address);
 }
 
-interface IBunniToken {
-    function pool() external view returns (IUniswapV3Pool);
+interface IBunniTkn {
+    function pool() external view returns (IUniswapPool);
 }
 
 interface IBunniOracle {
     function bunni_key() external view returns(BunniKey memory);
 }
 
-interface IBunniLens {
-    function pricePerFullShare(BunniKey calldata key) external view returns (uint128, uint256, uint256);
-}
-
-struct BunniKey {
-    IUniswapV3Pool pool;
-    int24 tickLower;
-    int24 tickUpper;
+interface chainlinkAggregatorV3Interface {
+  function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+  function decimals() external view returns (uint8);
 }
 
 contract BunniOracleTest is Test {
@@ -60,19 +49,19 @@ contract BunniOracleTest is Test {
 
   //USDC/WETH
   IOracle usdc_weth_bunniOracle;
-  IUniswapV3Pool usdc_weth_pool;
+  IUniswapPool usdc_weth_pool;
   address usdc_weth_bunniToken = 0x680026A1C99a1eC9878431F730706810bFac9f31; //USDC/WETH LP bunni token
   uint256 bunni_USDC_WETH_Price;
 
   //DAI/USDC
   IOracle dai_usdc_bunniOracle;
-  IUniswapV3Pool dai_usdc_pool;
+  IUniswapPool dai_usdc_pool;
   address dai_usdc_bunniToken = 0xC962Df6E0A931913B1a1D75E91299153A9D839b8; //DAI/USDC LP bunni token
   uint256 bunni_DAI_USDC_Price;
 
   //rETH/WETH
   IOracle reth_weth_bunniOracle;
-  IUniswapV3Pool reth_weth_pool;
+  IUniswapPool reth_weth_pool;
   address reth_weth_bunniToken = 0x55Dcf951f9009425aAfE8Bfca348577451ACB433; //rETH/WETH LP bunni token
   uint256 bunni_rETH_WETH_Price;
   
@@ -88,7 +77,7 @@ contract BunniOracleTest is Test {
   address chainlink_rETH_ETH_Oracle = 0x536218f9E9Eb48863970252233c8F271f554C2d0;
 
   //Utils
-  IUniswapV3Pool currentPool;
+  IUniswapPool currentPool;
   uint160 constant UNI_V3_SLIPPAGE = 7 * 10 ** 45;
 
   function setUp() public {
@@ -100,9 +89,9 @@ contract BunniOracleTest is Test {
     }
 
     //get pool addresses
-    usdc_weth_pool = IBunniToken(usdc_weth_bunniToken).pool();
-    dai_usdc_pool = IBunniToken(dai_usdc_bunniToken).pool();
-    reth_weth_pool = IBunniToken(reth_weth_bunniToken).pool();
+    usdc_weth_pool = IBunniTkn(usdc_weth_bunniToken).pool();
+    dai_usdc_pool = IBunniTkn(dai_usdc_bunniToken).pool();
+    reth_weth_pool = IBunniTkn(reth_weth_bunniToken).pool();
 
     //mock cog oracles
     uint256 WETH_Price = 10 ** 18; //in wei
@@ -178,35 +167,31 @@ contract BunniOracleTest is Test {
 
     //deploy bunni oracles
     {
-      VyperDeployer deployer = new VyperDeployer();
-      bytes memory usdc_weth_args  = abi.encode(bunniLens, usdc_weth_bunniToken, usdc_oracle, weth_oracle);
-      usdc_weth_bunniOracle = IOracle(deployer.deployContract("bunni_oracle", usdc_weth_args));
+      usdc_weth_bunniOracle = IOracle(new BunniOracle(bunniLens, usdc_weth_bunniToken, usdc_oracle, weth_oracle));
 
-      bytes memory dai_usdc_args  = abi.encode(bunniLens, dai_usdc_bunniToken, dai_oracle, usdc_oracle);
-      dai_usdc_bunniOracle = IOracle(deployer.deployContract("bunni_oracle", dai_usdc_args));
+      dai_usdc_bunniOracle = IOracle(new BunniOracle(bunniLens, dai_usdc_bunniToken, dai_oracle, usdc_oracle));
 
-      bytes memory reth_weth_args  = abi.encode(bunniLens, reth_weth_bunniToken, reth_oracle, weth_oracle);
-      reth_weth_bunniOracle = IOracle(deployer.deployContract("bunni_oracle", reth_weth_args));
+      reth_weth_bunniOracle = IOracle(new BunniOracle(bunniLens, reth_weth_bunniToken, reth_oracle, weth_oracle));
     }
 
     //set bunni token prices
     (, uint256 usdcAmountBunni1, uint256 wethAmountBunni1) = IBunniLens(bunniLens).pricePerFullShare(IBunniOracle(address(usdc_weth_bunniOracle)).bunni_key());
     bunni_USDC_WETH_Price =
-      (usdcAmountBunni1 * chainlink_USDC_Price) / 10 ** IERC20(usdc_weth_pool.token0()).decimals()
+      (usdcAmountBunni1 * chainlink_USDC_Price) / 10 ** ERC20(usdc_weth_pool.token0()).decimals()
       +
-      (wethAmountBunni1 * WETH_Price) / 10 ** IERC20(usdc_weth_pool.token1()).decimals();
+      (wethAmountBunni1 * WETH_Price) / 10 ** ERC20(usdc_weth_pool.token1()).decimals();
 
     (, uint256 daiAmountBunni2, uint256 usdcAmountBunni2) = IBunniLens(bunniLens).pricePerFullShare(IBunniOracle(address(dai_usdc_bunniOracle)).bunni_key());
     bunni_DAI_USDC_Price =
-      (daiAmountBunni2 * chainlink_DAI_Price) / 10 ** IERC20(dai_usdc_pool.token0()).decimals()
+      (daiAmountBunni2 * chainlink_DAI_Price) / 10 ** ERC20(dai_usdc_pool.token0()).decimals()
       +
-      (usdcAmountBunni2 * chainlink_USDC_Price) / 10 ** IERC20(dai_usdc_pool.token1()).decimals();
+      (usdcAmountBunni2 * chainlink_USDC_Price) / 10 ** ERC20(dai_usdc_pool.token1()).decimals();
 
     (, uint256 rethAmountBunni3, uint256 wethAmountBunni3) = IBunniLens(bunniLens).pricePerFullShare(IBunniOracle(address(reth_weth_bunniOracle)).bunni_key());
     bunni_rETH_WETH_Price =
-      (rethAmountBunni3 * chainlink_rETH_Price) / 10 ** IERC20(reth_weth_pool.token0()).decimals()
+      (rethAmountBunni3 * chainlink_rETH_Price) / 10 ** ERC20(reth_weth_pool.token0()).decimals()
       +
-      (wethAmountBunni3 * WETH_Price) / 10 ** IERC20(reth_weth_pool.token1()).decimals();
+      (wethAmountBunni3 * WETH_Price) / 10 ** ERC20(reth_weth_pool.token1()).decimals();
     
   }
 
