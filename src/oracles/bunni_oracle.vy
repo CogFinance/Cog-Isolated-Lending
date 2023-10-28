@@ -1,6 +1,6 @@
 # @version 0.3.10
 
-# Empty IUniswapV3Pool interface
+# IUniswapV3Pool interface
 interface IUniswapV3Pool:
     def token0() -> address: view
     def token1() -> address: view
