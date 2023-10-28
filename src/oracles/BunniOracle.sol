@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 import "../interfaces/IOracle.sol";
-import "forge-std/console.sol";
 
 //UniswapV3Pool interface
 interface IUniswapV3Pool {
