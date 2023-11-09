@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "./BoringMathLib.sol";
-import "./IIOracle.sol";
+import "../libraries//BoringMath.sol";
+import "../interfaces/IOracle.sol";
 
 // Chainlink Aggregator
 

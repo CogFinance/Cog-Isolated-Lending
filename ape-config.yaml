@@ -4,8 +4,21 @@ tests_folder: ape_tests
 
 plugins:
   - name: vyper
+  - name: hardhat
   - name: solidity
   - name: scroll
 
 
+ethereum:
+  default_network: mainnet-fork
+  mainnet_fork:
+    default_provider: hardhat
+    transaction_acceptance_timeout: 99999999
 
+hardhat:
+  port: auto
+  fork:
+    ethereum:
+      mainnet:
+        upstream_provider: "https://rpc-scroll.icecreamswap.com"
+        enable_hardhat_deployments: true

@@ -143,3 +143,11 @@ def burnFrom(_to: address, _value: uint256):
     """
     self.allowance[_to][msg.sender] -= _value
     self._burn(_to, _value)
+
+@external
+@payable
+def deposit():
+    value: uint256 = msg.value
+    self.totalSupply += value
+    self.balanceOf[msg.sender] += value
+    log Transfer(empty(address), msg.sender, value)
