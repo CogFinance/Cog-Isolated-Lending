@@ -32,7 +32,7 @@ contract LayerZeroOracle is IOracle {
     // Calculates the latest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
     function _get() internal view returns (uint256) {
-        uint256 price = decimals;
+        uint256 price = 1e36;
 
         (, int256 mulPrice, ,,) = IAggregatorxF33d(price_feed).latestRoundData(multiply);
         require(mulPrice != 0, "Invalid mulPrice");
@@ -42,7 +42,7 @@ contract LayerZeroOracle is IOracle {
         require(divPrice != 0, "Invalid divPrice");
         price = price / uint256(divPrice);
 
-        return price;
+        return price / decimals;
     }
 
     function getDataParameter() public view returns (bytes memory) {

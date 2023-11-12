@@ -1071,6 +1071,9 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
         * COLLATERIZATION_RATE
     )
 
+    print(_total_borrow.elastic)
+    print(_total_borrow.base)
+
     borrow_part = self.mul_div(
         (borrow_part * convert(_total_borrow.elastic, uint256)),
         exchange_rate,
@@ -1078,6 +1081,8 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
         False,
     )
 
+    print(collateral_amt)
+    print(borrow_part)
     return collateral_amt >= borrow_part
 
 
