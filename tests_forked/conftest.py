@@ -22,7 +22,7 @@ def weth(project, account):
 
 @pytest.fixture(scope="session")
 def oracle(project, account):
-    return account.deploy(project.LayerZeroOracle, "0x4baa701a4768dc8f7309be7d88fbb6a4529a4985bbf0a00b05bd1205711b5916", "0x8c03583c927c551c0c480da519b38bd4fd858b12dea8ab8e649c5135e00ed78b", 10 ** 26, "0x3DD5C2Acd2F41947E73B384Ef52C049BAc0B65d0")
+    return account.deploy(project.LayerZeroOracle, "0x8c03583c927c551c0c480da519b38bd4fd858b12dea8ab8e649c5135e00ed78b", "0x4baa701a4768dc8f7309be7d88fbb6a4529a4985bbf0a00b05bd1205711b5916", 10 ** 18, "0x3DD5C2Acd2F41947E73B384Ef52C049BAc0B65d0")
     
 @pytest.fixture(scope="session")
 def cog_factory(project, account):

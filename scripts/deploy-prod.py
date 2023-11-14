@@ -47,6 +47,24 @@ def construct_blueprint_deploy_bytecode(initial_gateseal_bytecode: str):
 
     return with_deploy_preamble
 
+"""
+Constant Addresses for Deployment
+"""
+FACTORY_MAINNET = "0xbAbD55549c266c6755b99173fE7604238D04117d"
+CRV_TOKEN = "0xB755039eDc7910C1F1BD985D48322E55A31AC0bF"
+WETH_TOKEN = "0x5300000000000000000000000000000000000004"
+AAVE_TOKEN = "0x79379C0E09a41d7978f883a56246290eE9a8c4d3"
+
+"""
+LayerZero Price Feeds
+"""
+LAYERZERO_ORACLE = "0x3DD5C2Acd2F41947E73B384Ef52C049BAc0B65d0"
+ETH_PRICE_FEED = "0x8c03583c927c551c0c480da519b38bd4fd858b12dea8ab8e649c5135e00ed78b"
+CRV_PRICE_FEED = "0x4baa701a4768dc8f7309be7d88fbb6a4529a4985bbf0a00b05bd1205711b5916"
+USDC_PRICE_FEED = "0xbe06225708673194bfdf29a4d5e6278a57cac755e64f4ff5102f77fdf63b7844"
+WSTETH_PRICE_FEED = "0xa827d7b9c9757ba97294e0d662738f64683fdc2713f0c9c929dc6184291c94c4"
+AAVE_PRICE_FEED = "0xabd61589644157a95dfb88a2c28637b590d0723f439a52668767656f6817afe9"
+
 @click.group()
 def cli():
     """
@@ -85,10 +103,12 @@ def deploy_core_contracts(network):
 )
 @network_option()
 def deploy_layerZeroPair(network):
-    account = accounts.load('mainnet')
+    account = accounts.load('alfa')
     account.set_autosign(True)
 
-    deployer = account.deploy(project.Deployer, type=0)
+    factory = project.cog_factory.at(FACTORY_MAINNET)
 
     # 18 decimals is default, +/- depending upon the difference in price_feeds
-    oracle = account.deploy(project.LayerZeroOracle, "", "", 10 ** 18, "")
+    oracle = account.deploy(project.LayerZeroOracle, ETH_PRICE_FEED, AAVE_PRICE_FEED, 10 ** 18, LAYERZERO_ORACLE, type=0)
+
+    factory.deploy_high_risk_pair(WETH_TOKEN, AAVE_TOKEN, oracle.address, sender=account, type=0) 
