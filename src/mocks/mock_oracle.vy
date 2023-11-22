@@ -1,4 +1,4 @@
-# @version 0.3.9
+# @version 0.3.10
 
 price: public(uint256)
 updated: public(bool)

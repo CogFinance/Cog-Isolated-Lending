@@ -9,8 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 
 def test_crv_pair_collateral(cog_high_pair, asset, oracle, collateral, accounts):
     crv_price_feed =  56000000
