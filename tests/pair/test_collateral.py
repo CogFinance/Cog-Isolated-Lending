@@ -9,8 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 
 @given(
     amount=st.integers(min_value=100000, max_value=2**128),

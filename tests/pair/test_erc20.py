@@ -9,9 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
-
 # Invariants found from https://eips.ethereum.org/EIPS/eip-20
 
 def test_metadata(cog_pair):

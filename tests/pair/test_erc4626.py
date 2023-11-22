@@ -9,8 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 def test_asset(cog_pair, asset):
     assert asset.address == cog_pair.asset()
 

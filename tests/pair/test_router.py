@@ -9,8 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 # Since the router can use up to 5 pairs, we need 5 fixtures for potential pools
 
 @pytest.fixture(scope="session")

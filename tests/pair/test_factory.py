@@ -6,8 +6,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 def test_admin_controls(cog_factory, accounts, account):
     assert cog_factory.owner() == account
 

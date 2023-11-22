@@ -6,8 +6,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 def test_pause_and_unpause(cog_pair, asset, cog_factory, account):
     cog_factory.set_priv_user_status(account, True, sender=account)
     

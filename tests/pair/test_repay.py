@@ -9,7 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
 
 
 def test_repay_invariants(cog_pair, oracle, accounts, collateral, asset):

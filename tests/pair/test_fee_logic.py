@@ -6,8 +6,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 def test_borrow_fee_accumulates(accounts, collateral, asset, oracle, cog_pair):
     account = accounts[0]
     oracle.setPrice(10 ** 18, sender=account)

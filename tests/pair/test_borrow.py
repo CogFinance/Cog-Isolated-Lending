@@ -9,8 +9,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
 # Most mission critical logic for borrow actually exists in accrue, and is best tested there
 
 def test_borrow_medium_invariants(cog_pair, collateral, accounts, asset, oracle):

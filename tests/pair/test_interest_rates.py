@@ -7,7 +7,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
 
 ONE_PERCENT = 317097920 
 

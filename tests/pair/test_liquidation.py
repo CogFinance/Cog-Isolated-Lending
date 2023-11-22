@@ -6,9 +6,6 @@ from hypothesis import (
     strategies as st,
 )
 
-from tests.fixtures import *
-
-
 def test_cannot_liquidate(cog_pair, accounts, collateral, asset, oracle):
     account = accounts[0]
     oracle.setPrice(5000000000000000000, sender=account)
