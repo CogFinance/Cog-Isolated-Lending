@@ -21,7 +21,7 @@ def weth(project, account):
     return project.mock_erc20.at("0x5300000000000000000000000000000000000004")
 
 @pytest.fixture(scope="session")
-def oracle(project, account):
+def lz_oracle(project, account):
     return account.deploy(project.LayerZeroOracle, "0x8c03583c927c551c0c480da519b38bd4fd858b12dea8ab8e649c5135e00ed78b", "0x4baa701a4768dc8f7309be7d88fbb6a4529a4985bbf0a00b05bd1205711b5916", 10 ** 18, "0x3DD5C2Acd2F41947E73B384Ef52C049BAc0B65d0")
     
 @pytest.fixture(scope="session")
@@ -29,7 +29,7 @@ def cog_factory(project, account):
     return project.cog_factory.at("0xbAbD55549c266c6755b99173fE7604238D04117d")
 
 @pytest.fixture(scope="session")
-def cog_pair(project, account, cog_factory, oracle, crv, weth):
+def lz_cog_pair(project, account, cog_factory, lz_oracle, crv, weth):
     return project.cog_pair.at(cog_factory.deploy_medium_risk_pair(weth, crv, oracle, sender=account).events[0].pair)
 
 
