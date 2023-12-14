@@ -1077,7 +1077,6 @@ def _is_solvent(user: address, exchange_rate: uint256) -> bool:
         convert(_total_borrow.base, uint256),
         False,
     )
-
     return collateral_amt >= borrow_part
 
 

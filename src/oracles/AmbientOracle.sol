@@ -9,7 +9,7 @@ interface AmbientQuery {
 
 // @title Cog Ambient Oracle Adapter
 contract AmbientOracle is IOracle {
-    uint256 constant PRECISION = 1e18;
+    uint256 constant wad = 1e18;
 
     AmbientQuery immutable lens;
 
@@ -46,16 +46,16 @@ contract AmbientOracle is IOracle {
         //    2**64           1e18
         //
         // So we multiply fullPrice by 1e18 then divide by 2 ** 64
-        uint256 normalizedPrice = mulDiv(fullPrice, PRECISION, 2 ** 64);
+        uint256 normalizedPrice = mulDiv(fullPrice, wad, 2 ** 64);
 
         if (token1 == priceToken) {
             // We are trying to get price of token0
-            return (1 * normalizedPrice);
+            return ((1 * normalizedPrice) * wad);
         } else {
             // We are trying to get the price of token1
             // Because 1e18 for oracle precision, we return normalizedPrice multiplied by a conversion
             // factor of 1e36 over normalizedPrice
-            return ((PRECISION * PRECISION) / normalizedPrice);
+            return ((wad * wad) / normalizedPrice) * wad;
         }
     }
 
