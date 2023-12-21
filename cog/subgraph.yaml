@@ -3,25 +3,46 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: MockstETH
+    name: CogPair
     network: scroll-sepolia
     source:
-      address: "0x5339F8fDFc2a9bE081fc1d924d9CF1473dA46C68"
-      abi: MockstETH
+      address: "0xA5832adC1e4487B635a483722e4fc34062467479"
+      abi: CogPair
       startBlock: 2639000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
+        - AddCollateral
+        - RemoveCollateral
+        - Borrow
+        - Paused
+        - UnPaused
         - Transfer
         - Approval
+        - Deposit
+        - Withdraw
       abis:
-        - name: MockstETH
-          file: ./abis/MockstETH.json
+        - name: CogPair
+          file: ./abis/CogPair.json
       eventHandlers:
+        - event: AddCollateral(indexed address,indexed uint256,indexed uint256)
+          handler: handleAddCollateral
+        - event: RemoveCollateral(indexed address,indexed uint256,indexed uint256)
+          handler: handleRemoveCollateral
+        - event: Borrow(indexed uint256,indexed address,indexed address)
+          handler: handleBorrow
+        - event: Paused(indexed uint256)
+          handler: handlePaused
+        - event: UnPaused(indexed uint256)
+          handler: handleUnPaused
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
         - event: Approval(indexed address,indexed address,uint256)
           handler: handleApproval
-      file: ./src/mockst-eth.ts
+        - event: Deposit(indexed address,indexed address,uint256,uint256)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleWithdraw
+      file: ./src/cog-pair.ts

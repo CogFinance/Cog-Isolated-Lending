@@ -7,25 +7,25 @@ import {
   afterAll
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { Transfer } from "../generated/schema"
-import { Transfer as TransferEvent } from "../generated/MockstETH/MockstETH"
-import { handleTransfer } from "../src/mockst-eth"
-import { createTransferEvent } from "./mockst-eth-utils"
+import { AddCollateral } from "../generated/schema"
+import { AddCollateral as AddCollateralEvent } from "../generated/CogPair/CogPair"
+import { handleAddCollateral } from "../src/cog-pair"
+import { createAddCollateralEvent } from "./cog-pair-utils"
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
 describe("Describe entity assertions", () => {
   beforeAll(() => {
-    let sender = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
+    let to = Address.fromString("0x0000000000000000000000000000000000000001")
+    let amount = BigInt.fromI32(234)
+    let user_collateral_share = BigInt.fromI32(234)
+    let newAddCollateralEvent = createAddCollateralEvent(
+      to,
+      amount,
+      user_collateral_share
     )
-    let receiver = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let value = BigInt.fromI32(234)
-    let newTransferEvent = createTransferEvent(sender, receiver, value)
-    handleTransfer(newTransferEvent)
+    handleAddCollateral(newAddCollateralEvent)
   })
 
   afterAll(() => {
@@ -35,26 +35,26 @@ describe("Describe entity assertions", () => {
   // For more test scenarios, see:
   // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
 
-  test("Transfer created and stored", () => {
-    assert.entityCount("Transfer", 1)
+  test("AddCollateral created and stored", () => {
+    assert.entityCount("AddCollateral", 1)
 
     // 0xa16081f360e3847006db660bae1c6d1b2e17ec2a is the default address used in newMockEvent() function
     assert.fieldEquals(
-      "Transfer",
+      "AddCollateral",
       "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "sender",
+      "to",
       "0x0000000000000000000000000000000000000001"
     )
     assert.fieldEquals(
-      "Transfer",
+      "AddCollateral",
       "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "receiver",
-      "0x0000000000000000000000000000000000000001"
+      "amount",
+      "234"
     )
     assert.fieldEquals(
-      "Transfer",
+      "AddCollateral",
       "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "value",
+      "user_collateral_share",
       "234"
     )
 

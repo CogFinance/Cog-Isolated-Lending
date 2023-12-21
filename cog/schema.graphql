@@ -1,8 +1,54 @@
+type AddCollateral @entity(immutable: true) {
+  id: Bytes!
+  to: Bytes! # address
+  amount: BigInt! # uint256
+  user_collateral_share: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RemoveCollateral @entity(immutable: true) {
+  id: Bytes!
+  to: Bytes! # address
+  amount: BigInt! # uint256
+  user_collateral_share: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Borrow @entity(immutable: true) {
+  id: Bytes!
+  amount: BigInt! # uint256
+  to: Bytes! # address
+  _from: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  time: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UnPaused @entity(immutable: true) {
+  id: Bytes!
+  time: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type Transfer @entity(immutable: true) {
   id: Bytes!
   sender: Bytes! # address
   receiver: Bytes! # address
-  value: BigInt! # uint256
+  amount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -12,7 +58,30 @@ type Approval @entity(immutable: true) {
   id: Bytes!
   owner: Bytes! # address
   spender: Bytes! # address
-  value: BigInt! # uint256
+  allowance: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Deposit @entity(immutable: true) {
+  id: Bytes!
+  depositor: Bytes! # address
+  receiver: Bytes! # address
+  assets: BigInt! # uint256
+  shares: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Withdraw @entity(immutable: true) {
+  id: Bytes!
+  withdrawer: Bytes! # address
+  receiver: Bytes! # address
+  owner: Bytes! # address
+  assets: BigInt! # uint256
+  shares: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
