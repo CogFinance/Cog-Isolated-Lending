@@ -1,0 +1,8 @@
+{
+  "scroll-sepolia": {
+    "MockstETH": {
+      "address": "0x5339F8fDFc2a9bE081fc1d924d9CF1473dA46C68",
+      "startBlock": 2639000
+    }
+  }
+}
