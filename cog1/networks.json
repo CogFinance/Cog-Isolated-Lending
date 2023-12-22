@@ -1,0 +1,8 @@
+{
+  "mainnet": {
+    "stETHUsdcPair": {
+      "address": "0x41D54dE8D81ee9232b67A4A936FC2e49B9853cE8",
+      "startBlock": 1771714
+    }
+  }
+}
