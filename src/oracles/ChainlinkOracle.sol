@@ -20,38 +20,20 @@ contract ChainlinkOracle is IOracle {
     address immutable divide;
     uint256 immutable decimals;
 
-    address immutable uptime_feed;
-
-    constructor(address _mul, address _div, uint256 _dec, address _uptime_feed) public {
+    constructor(address _mul, address _div, uint256 _dec) public {
         multiply = _mul;
         divide = _div;
         decimals = _dec;
-
-        uptime_feed = _uptime_feed;
     }
 
     // Calculates the latest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
     function _get() internal view returns (uint256) {
-        uint256 price = uint256(1e36);
-
-        (
-            /*uint80 roundID*/,
-            int256 answer,
-            /*uint256 startedAt*/,
-            /*uint256 updatedAt*/,
-            /*uint80 answeredInRound*/
-        ) = IAggregator(uptime_feed).latestRoundData();
-
-        // Answer == 0: Sequencer is up
-        // Answer == 1: Sequencer is down
-        bool isSequencerUp = answer == 0;
-        require(isSequencerUp, "Sequencer Down");
+        uint256 price = uint256(1e18);
 
         if (multiply != address(0)) {
             (, int256 mulPrice, uint256 startedAt,,) = IAggregator(multiply).latestRoundData();
             require(mulPrice != 0, "Invalid mulPrice");
-            require(block.timestamp - startedAt <= 5 hours, "Stale Price Feed");
             price = price.mul(uint256(mulPrice));
         } else {
             price = price.mul(1e18);
@@ -60,7 +42,6 @@ contract ChainlinkOracle is IOracle {
         if (divide != address(0)) {
             (, int256 divPrice, uint256 startedAt,,) = IAggregator(divide).latestRoundData();
             require(divPrice != 0, "Invalid divPrice");
-            require(block.timestamp - startedAt <= 5 hours, "Stale Price Feed");
             price = price / uint256(divPrice);
         }
 
