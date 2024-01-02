@@ -1,14 +1,14 @@
 specVersion: 0.0.5
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum
-    name: CogPair
-    network: scroll-sepolia
+    name: stETHUsdcPair
+    network: mainnet
     source:
-      address: "0xA5832adC1e4487B635a483722e4fc34062467479"
-      abi: CogPair
-      startBlock: 2639000
+      address: "0x41D54dE8D81ee9232b67A4A936FC2e49B9853cE8"
+      abi: stETHUsdcPair
+      startBlock: 1771714
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -24,8 +24,8 @@ dataSources:
         - Deposit
         - Withdraw
       abis:
-        - name: CogPair
-          file: ./abis/CogPair.json
+        - name: stETHUsdcPair
+          file: stETHUsdcPair/abis/stETHUsdcPair.json
       eventHandlers:
         - event: AddCollateral(indexed address,indexed uint256,indexed uint256)
           handler: handleAddCollateral
@@ -45,4 +45,4 @@ dataSources:
           handler: handleDeposit
         - event: Withdraw(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleWithdraw
-      file: ./src/cog-pair.ts
+      file: stETHUsdcPair/stETHUsdcPair.wasm
