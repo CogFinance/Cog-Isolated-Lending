@@ -1,7 +1,6 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { Token } from "../../generated/schema"
 import { ERC20 } from '../../generated/UniswapV3Pool/ERC20'
-import { getTokenPriceInUSD } from '../utils/prices'
 import { TokenDailySnapshot, TokenHourlySnapshot } from '../../generated/schema'
 import { dayFromTimestamp, hourFromTimestamp } from '../utils/dates'
 
@@ -19,5 +18,33 @@ export function createPair(address: Address, timestamp: BigInt): Token {
   }
 
   export function getOrCreatePair(address: Address, timestamp: BigInt): Pair {
+    let pair = Pair.load(address.toHexString())
 
+    if (pair === null) {
+      pair = createPair(address, timestamp)
+    } else {
+      updatePair(pair, timestamp)
+    }
+  
+    return pair
   }
+  
+  export function getPair(address: string): Pair {
+    let pair = Pair.load(address) as Pair
+  
+    return pair
+  }
+
+  export function handleMediumPairCreated(Event: PairCreatedEvent): void {
+    let entity = new pairCreated {
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+    }
+    entity.factory = event.params.factory
+    }
+
+    export function handleHighPairCreated(Event: PairCreatedEvent): void {
+        let entity = new pairCreated {
+        event.transaction.hash.concatI32(event.logIndex.toI32())
+        }
+        entity.factory = event.params.factory
+        }
