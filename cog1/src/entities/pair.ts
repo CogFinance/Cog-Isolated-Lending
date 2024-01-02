@@ -7,14 +7,17 @@ import { dayFromTimestamp, hourFromTimestamp } from '../utils/dates'
 
 export function createPair(address: Address, timestamp: BigInt): Token {
     const pair = new Pair(address.toHexString())
-    token.timestamp = timestamp
+    pair.timestamp = timestamp
   
     const erc20Token = ERC20.bind(address)
-    token.name = erc20Token.name()
-    token.symbol = erc20Token.symbol()
-    token.decimals = erc20Token.decimals()
-    token.price = getTokenPriceInUSD(token.id, timestamp)
-    token.save()
+    pair.name = erc20Token.name()
+    pair.symbol = erc20Token.symbol()
+    pair.decimals = erc20Token.decimals()
+    pair.save()
   
-    return token
+    return pair
+  }
+
+  export function getOrCreatePair(address: Address, timestamp: BigInt): Pair {
+
   }

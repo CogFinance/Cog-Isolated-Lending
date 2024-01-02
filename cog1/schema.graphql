@@ -86,3 +86,23 @@ type Withdraw @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type MediumPairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type HighPairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
