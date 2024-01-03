@@ -18,6 +18,23 @@ type RemoveCollateral @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type Token @entity {
+  id: ID!
+  timestamp: BigInt!
+  name: String!
+  symbol: String!
+  decimals: Int!
+  price: BigDecimal!
+}
+
+type Pair @entity {
+  id: ID!
+  timestamp: BigInt!
+  name: String!
+  symbol: String!
+  decimals: Int!
+}
+
 type Borrow @entity(immutable: true) {
   id: Bytes!
   amount: BigInt! # uint256
@@ -82,6 +99,36 @@ type Withdraw @entity(immutable: true) {
   owner: Bytes! # address
   assets: BigInt! # uint256
   shares: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MediumPairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type HighPairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AnswerUpdated @entity(immutable: true) {
+  id: Bytes!
+  current: BigInt! # int256
+  roundId: BigInt! # uint256
+  updatedAt: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

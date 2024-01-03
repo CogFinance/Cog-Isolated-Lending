@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0x41D54dE8D81ee9232b67A4A936FC2e49B9853cE8"
       abi: stETHUsdcPair
-      startBlock: 1771714
+      startBlock: 88210
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
