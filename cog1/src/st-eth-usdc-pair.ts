@@ -8,7 +8,7 @@ import {
   Approval as ApprovalEvent,
   Deposit as DepositEvent,
   Withdraw as WithdrawEvent
-} from "../generated/stETHUsdcPair/stETHUsdcPair"
+} from "../../generated/stETHUsdcPair/stETHUsdcPair"
 import {
   AddCollateral,
   RemoveCollateral,
@@ -19,7 +19,7 @@ import {
   Approval,
   Deposit,
   Withdraw
-} from "../generated/schema"
+} from "../../generated/schema"
 
 export function handleAddCollateral(event: AddCollateralEvent): void {
   let entity = new AddCollateral(

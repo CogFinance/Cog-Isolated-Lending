@@ -1,6 +1,6 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { Token } from "../../generated/schema"
-import { ERC20 } from '../../generated/UniswapV3Pool/ERC20'
+import { ERC20 } from '../../generated/AccessControlledOffchainAggregator/ERC20'
 import { getTokenPriceInUSD } from '../utils/prices'
 import { TokenDailySnapshot, TokenHourlySnapshot } from '../../generated/schema'
 import { dayFromTimestamp, hourFromTimestamp } from '../utils/dates'

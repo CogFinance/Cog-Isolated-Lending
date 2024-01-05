@@ -1,6 +1,6 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { Token } from "../../generated/schema"
-import { ERC20 } from '../../generated/ERC20'
+import { ERC20 } from '../../generated/AccessControlledOffchainAggregator/ERC20'
 import { TokenDailySnapshot, TokenHourlySnapshot } from '../../generated/schema'
 import { dayFromTimestamp, hourFromTimestamp } from '../utils/dates'
 
@@ -35,14 +35,14 @@ export function createPair(address: Address, timestamp: BigInt): Token {
     return pair
   }
 
-  export function handleMediumPairCreated(Event: PairCreatedEvent): void {
+  export function handleMediumPairCreated(Event: MediumPairCreatedEvent): void {
     let entity = new mediumPairCreated {
     event.transaction.hash.concatI32(event.logIndex.toI32())
     }
     entity.factory = event.params.factory
     }
 
-    export function handleHighPairCreated(Event: PairCreatedEvent): void {
+    export function handleHighPairCreated(Event: HighPairCreatedEvent): void {
         let entity = new highPairCreated {
         event.transaction.hash.concatI32(event.logIndex.toI32())
         }
