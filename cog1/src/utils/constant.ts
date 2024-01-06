@@ -19,5 +19,9 @@ export const BIG_DECIMAL_MIN_1 = BigDecimal.fromString('-1');
 export const BIG_DECIMAL_YEAR = BigDecimal.fromString('31536000');
 export const ZERO_ADDRESS = Address.fromHexString('0x0000000000000000000000000000000000000000');
 
-export const STETH_POOL = Address.fromString('0x5300000000000000000000000000000000000004');
-export const USDC_POOL = Address.fromString('0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4');
+export const USDC_TOKEN = Address.fromString('0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4');
+export const WETH_TOKEN = Address.fromString('0x5300000000000000000000000000000000000004');
+export const CRV_TOKEN = Address.fromString('0xB755039eDc7910C1F1BD985D48322E55A31AC0bF');
+export const AAVE_TOKEN = Address.fromString('0x79379c0e09a41d7978f883a56246290ee9a8c4d3');
+export const WSTETH_TOKEN = Address.fromString('0xf610A9dfB7C89644979b4A0f27063E9e7d7Cda32');
+export const RETH_TOKEN = Address.fromString('0x53878B874283351D26d206FA512aEcE1Bef6C0dD');

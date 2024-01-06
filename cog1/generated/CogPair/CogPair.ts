@@ -240,7 +240,7 @@ export class Withdraw__Params {
   }
 }
 
-export class stETHUsdcPair__get_exchange_rateResult {
+export class CogPair__get_exchange_rateResult {
   value0: boolean;
   value1: BigInt;
 
@@ -265,7 +265,7 @@ export class stETHUsdcPair__get_exchange_rateResult {
   }
 }
 
-export class stETHUsdcPair__total_assetResultValue0Struct extends ethereum.Tuple {
+export class CogPair__total_assetResultValue0Struct extends ethereum.Tuple {
   get elastic(): BigInt {
     return this[0].toBigInt();
   }
@@ -275,7 +275,7 @@ export class stETHUsdcPair__total_assetResultValue0Struct extends ethereum.Tuple
   }
 }
 
-export class stETHUsdcPair__total_borrowResultValue0Struct extends ethereum.Tuple {
+export class CogPair__total_borrowResultValue0Struct extends ethereum.Tuple {
   get elastic(): BigInt {
     return this[0].toBigInt();
   }
@@ -285,7 +285,7 @@ export class stETHUsdcPair__total_borrowResultValue0Struct extends ethereum.Tupl
   }
 }
 
-export class stETHUsdcPair__accrue_infoResultValue0Struct extends ethereum.Tuple {
+export class CogPair__accrue_infoResultValue0Struct extends ethereum.Tuple {
   get interest_per_second(): BigInt {
     return this[0].toBigInt();
   }
@@ -299,7 +299,7 @@ export class stETHUsdcPair__accrue_infoResultValue0Struct extends ethereum.Tuple
   }
 }
 
-export class stETHUsdcPair__surge_infoResultValue0Struct extends ethereum.Tuple {
+export class CogPair__surge_infoResultValue0Struct extends ethereum.Tuple {
   get last_interest_per_second(): BigInt {
     return this[0].toBigInt();
   }
@@ -309,9 +309,9 @@ export class stETHUsdcPair__surge_infoResultValue0Struct extends ethereum.Tuple 
   }
 }
 
-export class stETHUsdcPair extends ethereum.SmartContract {
-  static bind(address: Address): stETHUsdcPair {
-    return new stETHUsdcPair("stETHUsdcPair", address);
+export class CogPair extends ethereum.SmartContract {
+  static bind(address: Address): CogPair {
+    return new CogPair("CogPair", address);
   }
 
   totalSupply(): BigInt {
@@ -1052,21 +1052,21 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  get_exchange_rate(): stETHUsdcPair__get_exchange_rateResult {
+  get_exchange_rate(): CogPair__get_exchange_rateResult {
     let result = super.call(
       "get_exchange_rate",
       "get_exchange_rate():(bool,uint256)",
       []
     );
 
-    return new stETHUsdcPair__get_exchange_rateResult(
+    return new CogPair__get_exchange_rateResult(
       result[0].toBoolean(),
       result[1].toBigInt()
     );
   }
 
   try_get_exchange_rate(): ethereum.CallResult<
-    stETHUsdcPair__get_exchange_rateResult
+    CogPair__get_exchange_rateResult
   > {
     let result = super.tryCall(
       "get_exchange_rate",
@@ -1078,7 +1078,7 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      new stETHUsdcPair__get_exchange_rateResult(
+      new CogPair__get_exchange_rateResult(
         value[0].toBoolean(),
         value[1].toBigInt()
       )
@@ -1153,20 +1153,20 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  total_asset(): stETHUsdcPair__total_assetResultValue0Struct {
+  total_asset(): CogPair__total_assetResultValue0Struct {
     let result = super.call(
       "total_asset",
       "total_asset():((uint128,uint128))",
       []
     );
 
-    return changetype<stETHUsdcPair__total_assetResultValue0Struct>(
+    return changetype<CogPair__total_assetResultValue0Struct>(
       result[0].toTuple()
     );
   }
 
   try_total_asset(): ethereum.CallResult<
-    stETHUsdcPair__total_assetResultValue0Struct
+    CogPair__total_assetResultValue0Struct
   > {
     let result = super.tryCall(
       "total_asset",
@@ -1178,26 +1178,24 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      changetype<stETHUsdcPair__total_assetResultValue0Struct>(
-        value[0].toTuple()
-      )
+      changetype<CogPair__total_assetResultValue0Struct>(value[0].toTuple())
     );
   }
 
-  total_borrow(): stETHUsdcPair__total_borrowResultValue0Struct {
+  total_borrow(): CogPair__total_borrowResultValue0Struct {
     let result = super.call(
       "total_borrow",
       "total_borrow():((uint128,uint128))",
       []
     );
 
-    return changetype<stETHUsdcPair__total_borrowResultValue0Struct>(
+    return changetype<CogPair__total_borrowResultValue0Struct>(
       result[0].toTuple()
     );
   }
 
   try_total_borrow(): ethereum.CallResult<
-    stETHUsdcPair__total_borrowResultValue0Struct
+    CogPair__total_borrowResultValue0Struct
   > {
     let result = super.tryCall(
       "total_borrow",
@@ -1209,9 +1207,7 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      changetype<stETHUsdcPair__total_borrowResultValue0Struct>(
-        value[0].toTuple()
-      )
+      changetype<CogPair__total_borrowResultValue0Struct>(value[0].toTuple())
     );
   }
 
@@ -1280,20 +1276,20 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  accrue_info(): stETHUsdcPair__accrue_infoResultValue0Struct {
+  accrue_info(): CogPair__accrue_infoResultValue0Struct {
     let result = super.call(
       "accrue_info",
       "accrue_info():((uint64,uint64,uint128))",
       []
     );
 
-    return changetype<stETHUsdcPair__accrue_infoResultValue0Struct>(
+    return changetype<CogPair__accrue_infoResultValue0Struct>(
       result[0].toTuple()
     );
   }
 
   try_accrue_info(): ethereum.CallResult<
-    stETHUsdcPair__accrue_infoResultValue0Struct
+    CogPair__accrue_infoResultValue0Struct
   > {
     let result = super.tryCall(
       "accrue_info",
@@ -1305,23 +1301,19 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      changetype<stETHUsdcPair__accrue_infoResultValue0Struct>(
-        value[0].toTuple()
-      )
+      changetype<CogPair__accrue_infoResultValue0Struct>(value[0].toTuple())
     );
   }
 
-  surge_info(): stETHUsdcPair__surge_infoResultValue0Struct {
+  surge_info(): CogPair__surge_infoResultValue0Struct {
     let result = super.call("surge_info", "surge_info():((uint64,uint64))", []);
 
-    return changetype<stETHUsdcPair__surge_infoResultValue0Struct>(
+    return changetype<CogPair__surge_infoResultValue0Struct>(
       result[0].toTuple()
     );
   }
 
-  try_surge_info(): ethereum.CallResult<
-    stETHUsdcPair__surge_infoResultValue0Struct
-  > {
+  try_surge_info(): ethereum.CallResult<CogPair__surge_infoResultValue0Struct> {
     let result = super.tryCall(
       "surge_info",
       "surge_info():((uint64,uint64))",
@@ -1332,9 +1324,7 @@ export class stETHUsdcPair extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      changetype<stETHUsdcPair__surge_infoResultValue0Struct>(
-        value[0].toTuple()
-      )
+      changetype<CogPair__surge_infoResultValue0Struct>(value[0].toTuple())
     );
   }
 

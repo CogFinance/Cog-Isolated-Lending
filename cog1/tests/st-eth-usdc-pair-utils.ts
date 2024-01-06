@@ -10,7 +10,7 @@ import {
   Approval,
   Deposit,
   Withdraw
-} from "../generated/stETHUsdcPair/stETHUsdcPair"
+} from "../generated/CogPair/CogPair"
 
 export function createAddCollateralEvent(
   to: Address,

@@ -104,11 +104,45 @@ type Withdraw @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type CustomPairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  pair: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type StablePairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  pair: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LowPairCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  asset: Bytes! # address
+  collateral: Bytes! # address
+  pair: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type MediumPairCreated @entity(immutable: true) {
   id: Bytes!
   owner: Bytes! # address
   asset: Bytes! # address
   collateral: Bytes! # address
+  pair: Bytes! # address
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -119,6 +153,7 @@ type HighPairCreated @entity(immutable: true) {
   owner: Bytes! # address
   asset: Bytes! # address
   collateral: Bytes! # address
+  pair: Bytes! # address
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

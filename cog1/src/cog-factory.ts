@@ -17,6 +17,8 @@ import {
     )
     entity.asset = event.params.asset
     entity.collateral = event.params.collateral
+    entity.pair = event.params.pair
+
   
     entity.blockNumber = event.block.number
     entity.blockTimestamp = event.block.timestamp
@@ -31,6 +33,7 @@ import {
     )
     entity.asset = event.params.asset
     entity.collateral = event.params.collateral
+    entity.pair = event.params.pair
   
     entity.blockNumber = event.block.number
     entity.blockTimestamp = event.block.timestamp
@@ -45,6 +48,8 @@ import {
     )
     entity.asset = event.params.asset
     entity.collateral = event.params.collateral
+    entity.pair = event.params.pair
+
   
     entity.blockNumber = event.block.number
     entity.blockTimestamp = event.block.timestamp
@@ -59,6 +64,8 @@ import {
     )
     entity.asset = event.params.asset
     entity.collateral = event.params.collateral
+    entity.pair = event.params.pair
+
   
     entity.blockNumber = event.block.number
     entity.blockTimestamp = event.block.timestamp

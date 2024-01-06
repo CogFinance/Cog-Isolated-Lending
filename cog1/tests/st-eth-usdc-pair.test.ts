@@ -8,8 +8,8 @@ import {
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
 import { AddCollateral } from "../generated/schema"
-import { AddCollateral as AddCollateralEvent } from "../generated/stETHUsdcPair/stETHUsdcPair"
-import { handleAddCollateral } from "../src/st-eth-usdc-pair"
+import { AddCollateral as AddCollateralEvent } from "../generated/CogPair/CogPair"
+import { handleAddCollateral } from "../src/cog-pair"
 import { createAddCollateralEvent } from "./st-eth-usdc-pair-utils"
 
 // Tests structure (matchstick-as >=0.5.0)
