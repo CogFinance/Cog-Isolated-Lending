@@ -21,8 +21,20 @@ def usdc(project, account):
     return project.mock_erc20.at("0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4")
 
 @pytest.fixture(scope="session")
+def usdt(project, account):
+    return project.mock_erc20.at("0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df")
+
+@pytest.fixture(scope="session")
+def dai(project, account):
+    return project.mock_erc20.at("0xcA77eB3fEFe3725Dc33bccB54eDEFc3D9f764f97")
+
+@pytest.fixture(scope="session")
 def weth(project, account):
     return project.mock_erc20.at("0x5300000000000000000000000000000000000004")
+
+@pytest.fixture(scope="session")
+def wsteth(project, account):
+    return project.mock_erc20.at("0xf610A9dfB7C89644979b4A0f27063E9e7d7Cda32")
 
 @pytest.fixture(scope="session")
 def lz_oracle(project, account):
@@ -37,10 +49,6 @@ def cog_factory(project, account):
     return project.cog_factory.at("0xbAbD55549c266c6755b99173fE7604238D04117d")
 
 @pytest.fixture(scope="session")
-def lz_cog_pair(project, account, cog_factory, lz_oracle, crv, weth):
-    return project.cog_pair.at(cog_factory.deploy_medium_risk_pair(weth, crv, lz_oracle, sender=account).events[0].pair)
-
-@pytest.fixture(scope="session")
 def ambient_cog_pair(project, account, cog_factory, weth, usdc, ambient_oracle):
-    return project.cog_pair.at(cog_factory.deploy_medium_risk_pair(weth, usdc, ambient_oracle, sender=account).events[0].pair)
+    return project.cog_pair.at(cog_factory.deploy_stable_risk_pair(weth, usdc, ambient_oracle, sender=account).events[0].pair)
 

@@ -375,7 +375,7 @@ paused: public(bool)  # Status of if the pool is paused
 EXCHANGE_RATE_PRECISION: constant(uint256) = 1000000000000000000  # 1e18
 
 COLLATERIZATION_RATE_PRECISION: constant(uint256) = 100000  # 1e5
-COLLATERIZATION_RATE: constant(uint256) = 75000  # 75%
+COLLATERIZATION_RATE: constant(uint256) = 85000  # 85%
 
 BORROW_OPENING_FEE: public(uint256)
 BORROW_OPENING_FEE_PRECISION: constant(uint256) = 100000
@@ -1021,9 +1021,8 @@ def _borrow(amount: uint256, _from: address, to: address) -> uint256:
 
 
 @internal
-def _repay(to: address, payment: uint256) -> uint256:
+def _repay(payment: uint256) -> uint256:
     """
-    @param to: The address to repay the tokens for
     @param payment: The amount of asset to repay, in shares of the borrow position
     @return: The amount of tokens repaid in shares
     """
@@ -1038,7 +1037,7 @@ def _repay(to: address, payment: uint256) -> uint256:
     temp_total_borrow, amount = self.sub(self.total_borrow, payment, True)
     self.total_borrow = temp_total_borrow
 
-    self.user_borrow_part[to] = self.user_borrow_part[to] - payment
+    self.user_borrow_part[msg.sender] = self.user_borrow_part[msg.sender] - payment
     total_share: uint128 = self.total_asset.elastic
     assert ERC20(asset).transferFrom(
         msg.sender, self, amount, default_return_value=True
@@ -1178,14 +1177,13 @@ def borrow(
 
 
 @external
-def repay(to: address, payment: uint256) -> uint256:
+def repay(payment: uint256) -> uint256:
     """
-    @param to The address to repay the tokens for
     @param payment The amount of asset to repay, in debt position shares
     @return The amount of tokens repaid in shares
     """
     self.efficient_accrue()
-    return self._repay(to, payment)
+    return self._repay(payment)
 
 
 @external
@@ -1262,7 +1260,7 @@ def liquidate(user: address, max_borrow_parts: uint256, to: address):
     )  # dev: Transfer failed
 
     self.total_asset.elastic = self.total_asset.elastic + convert(
-        borrow_part, uint128
+        borrow_amount, uint128
     )
 
 

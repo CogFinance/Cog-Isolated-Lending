@@ -1,33 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
-import "../libraries/BoringMath.sol";
-import "../interfaces/IOracle.sol";
-
-// Chainlink Aggregator
 
 interface IAggregator {
+    function latestAnswer() external view returns (int256 latestAnswer);
+
     function latestRoundData()
         external
         view
         returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
 
-contract ChainlinkOracle is IOracle {
-    using BoringMath for uint256; // Keep everything in uint256
-
+contract ChainlinkOracle {
     address immutable multiply;
     address immutable divide;
     uint256 immutable decimals;
 
-    address immutable uptime_feed;
-
-    constructor(address _mul, address _div, uint256 _dec, address _uptime_feed) public {
+    constructor(address _mul, address _div, uint256 _dec) {
         multiply = _mul;
         divide = _div;
         decimals = _dec;
-
-        uptime_feed = _uptime_feed;
     }
 
     // Calculates the latest exchange rate
@@ -35,32 +27,16 @@ contract ChainlinkOracle is IOracle {
     function _get() internal view returns (uint256) {
         uint256 price = uint256(1e36);
 
-        (
-            /*uint80 roundID*/,
-            int256 answer,
-            /*uint256 startedAt*/,
-            /*uint256 updatedAt*/,
-            /*uint80 answeredInRound*/
-        ) = IAggregator(uptime_feed).latestRoundData();
-
-        // Answer == 0: Sequencer is up
-        // Answer == 1: Sequencer is down
-        bool isSequencerUp = answer == 0;
-        require(isSequencerUp, "Sequencer Down");
-
         if (multiply != address(0)) {
-            (, int256 mulPrice, uint256 startedAt,,) = IAggregator(multiply).latestRoundData();
-            require(mulPrice != 0, "Invalid mulPrice");
-            require(block.timestamp - startedAt <= 5 hours, "Stale Price Feed");
-            price = price.mul(uint256(mulPrice));
+            int256 mulPrice = IAggregator(multiply).latestAnswer();
+            price = price * uint256(mulPrice);
         } else {
-            price = price.mul(1e18);
+            price = price * 1e18;
         }
 
         if (divide != address(0)) {
-            (, int256 divPrice, uint256 startedAt,,) = IAggregator(divide).latestRoundData();
+            int256 divPrice = IAggregator(divide).latestAnswer();
             require(divPrice != 0, "Invalid divPrice");
-            require(block.timestamp - startedAt <= 5 hours, "Stale Price Feed");
             price = price / uint256(divPrice);
         }
 
@@ -72,30 +48,25 @@ contract ChainlinkOracle is IOracle {
     }
 
     // Get the latest exchange rate
-    /// @inheritdoc IOracle
-    function get() public override returns (bool, uint256) {
+    function get() public returns (bool, uint256) {
         return (true, _get());
     }
 
     // Check the last exchange rate without any state changes
-    /// @inheritdoc IOracle
-    function peek() public view override returns (bool, uint256) {
+    function peek() public view returns (bool, uint256) {
         return (true, _get());
     }
 
     // Check the current spot exchange rate without any state changes
-    /// @inheritdoc IOracle
-    function peekSpot() external view override returns (uint256 rate) {
+    function peekSpot() external view returns (uint256 rate) {
         (, rate) = peek();
     }
 
-    /// @inheritdoc IOracle
-    function name() public view override returns (string memory) {
+    function name() public view returns (string memory) {
         return "Chainlink";
     }
 
-    /// @inheritdoc IOracle
-    function symbol() public view override returns (string memory) {
+    function symbol() public view returns (string memory) {
         return "LINK";
     }
 }

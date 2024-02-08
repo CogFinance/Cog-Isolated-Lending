@@ -34,7 +34,6 @@ contract AmbientOracle is IOracle {
     // @return The updated price for token, with 18 decimals places
     function calculatePrice() internal view returns (uint256) {
         // averagePrice is token1 per token0
-
         uint128 averagePrice = lens.queryPrice(token0, token1, 420);
 
         uint256 fullPrice = mulDiv(averagePrice, averagePrice, 2 ** 64);
@@ -48,9 +47,9 @@ contract AmbientOracle is IOracle {
         // So we multiply fullPrice by 1e18 then divide by 2 ** 64
         uint256 normalizedPrice = mulDiv(fullPrice, wad, 2 ** 64);
 
-        if (token1 == priceToken) {
+        if (token0 == priceToken) {
             // We are trying to get price of token0
-            return ((1 * normalizedPrice) * wad);
+            return (normalizedPrice * wad);
         } else {
             // We are trying to get the price of token1
             // Because 1e18 for oracle precision, we return normalizedPrice multiplied by a conversion

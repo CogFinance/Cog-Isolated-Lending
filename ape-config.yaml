@@ -20,5 +20,5 @@ hardhat:
   fork:
     ethereum:
       mainnet:
-        upstream_provider: "https://rpc-scroll.icecreamswap.com"
+        upstream_provider: "https://scroll-mainnet-public.unifra.io"
         enable_hardhat_deployments: true
