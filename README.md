@@ -68,6 +68,19 @@ The factory which handles the deployment of the Cog Pairs. The factory works by 
 
 ## External Integrations and Testing
 
+### Deployments
+```
+Account Used:              0x54a4c29196aAD6FA77F9b4e35288E5234ac4F31a
+Blueprint Address:         0x2bFD6CaB1d31ee6A9D841438420A8B562806253E
+Factory Address:           0xCd44fecb08bb28405992358131Fd5081A0F550D0
+Loan Router Address:       0x76aAF37B8b9Cb03D84597d2187a02eB128684669
+USDT/ETH -                 0x4ac126e5dd1cd496203a7e703495caa8112a20ca
+USDC/ETH -                 0x63fdafa50c09c49f594f47ea7194b721291ec50f
+DAI/ETH -                  0x43187a6052a4bf10912cde2c2f94953e39fce8c7 
+USDT/WSTETH -              0x5c121db888ad212670017080047ed16ce99a2a96
+WSTETH/USDT -              0xE04a78DC12Bd6969125B6bEb75e26Ce61d95cbaC
+```
+
 ### Supported Protocols
 
 To allow the most flexible deployment of Cog, this repo prepares several integrations in mind, primarily [Bunni](https://github.com/zeframlou/bunni) for leveraged liquidity provision, and [Uniswap V3 TWAP](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol#L236).
