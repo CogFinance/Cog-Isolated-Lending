@@ -120,7 +120,7 @@ def deploy_core_contracts(network):
 )
 @network_option()
 def deploy_chainlinkpair(network):
-    account = accounts.load('alfa')
+    account = accounts.load('alfa2')
     account.set_autosign(True)
 
     factory = project.cog_factory.at("0xCd44fecb08bb28405992358131Fd5081A0F550D0")
@@ -141,7 +141,7 @@ def deploy_chainlinkpair(network):
     #receipt = factory.deploy_low_risk_pair(USDT_TOKEN, WSTETH_TOKEN, eth_wsteth.address, sender=account, type=0) 
     #wsteth_pair =  "0x" + receipt.logs[0]['topics'][-1].hex()[26:]
 
-    wsteth_usdt = project.TriChainlinkOracleMul.deploy(ETH_USD_PRICE_FEED, WSTETH_ETH_PRICE_FEED, USDT_USD_PRICE_FEED, 10 ** 18, sender=account, type=0)
+    wsteth_usdt = project.TriChainlinkOracleMul.deploy(ETH_USD_PRICE_FEED, WSTETH_ETH_PRICE_FEED, USDT_USD_PRICE_FEED, 10 ** 30, sender=account, type=0)
     receipt = factory.deploy_low_risk_pair(WSTETH_TOKEN, USDT_TOKEN, wsteth_usdt.address, sender=account, type=0) 
     wsteth_usdt_cog_pair = project.cog_pair.at("0x" + receipt.logs[0]['topics'][-1].hex()[26:])
 

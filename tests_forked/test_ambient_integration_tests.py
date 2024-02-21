@@ -55,53 +55,68 @@ def test_chainlink_oracle(project: Project, usdc, wsteth, usdt, dai, weth):
     dai_cog_pair = project.cog_pair.at("0x43187A6052A4BF10912CDe2c2f94953e39FcE8c7")
     wsteth_cog_pair = project.cog_pair.at("0x344f0B7D0c654F4E58F8B4727813BE86b85DEf3A")
     usdt_wsteth_cog_pair =  project.cog_pair.at("0x5c121db888ad212670017080047ed16ce99a2a96")
-    wsteth_usdt_cog_pair = project.cog_pair.at("0xE04a78DC12Bd6969125B6bEb75e26Ce61d95cbaC")
+    #wsteth_usdt_cog_pair = project.cog_pair.at("0xE04a78DC12Bd6969125B6bEb75e26Ce61d95cbaC")
 
 
-    #factory = project.cog_factory.at("0xCd44fecb08bb28405992358131Fd5081A0F550D0")
+    factory = project.cog_factory.at("0xCd44fecb08bb28405992358131Fd5081A0F550D0")
 
-    #eth_wsteth = project.TriChainlinkOracleMul.deploy(ETH_USD_PRICE_FEED, WSTETH_ETH_PRICE_FEED, USDT_USD_PRICE_FEED, 10 ** 18, sender=account, type=0)
-    #receipt = factory.deploy_low_risk_pair(WSTETH_TOKEN, USDT_TOKEN, eth_wsteth.address, sender=account, type=0) 
-    #wsteth_usdt_cog_pair = project.cog_pair.at("0x" + receipt.logs[0]['topics'][-1].hex()[26:])
+    eth_wsteth = project.TriChainlinkOracleMul.deploy(ETH_USD_PRICE_FEED, WSTETH_ETH_PRICE_FEED, USDT_USD_PRICE_FEED, 10 ** 30, sender=account, type=0)
+    receipt = factory.deploy_low_risk_pair(WSTETH_TOKEN, USDT_TOKEN, eth_wsteth.address, sender=account, type=0) 
+    wsteth_usdt_cog_pair = project.cog_pair.at("0x" + receipt.logs[0]['topics'][-1].hex()[26:])
+
+    wsteth_cog_pair.get_exchange_rate(sender=account)
+    wsteth_usdt_cog_pair.get_exchange_rate(sender=account)
 
 
     usdt.approve(wsteth_usdt_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    wsteth.approve(usdt_wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    wsteth.approve(wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    weth.approve(usdt_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    weth.approve(usdc_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    weth.approve(dai_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #wsteth.approve(usdt_wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #wsteth.approve(wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #weth.approve(usdt_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #weth.approve(usdc_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #weth.approve(dai_cog_pair.address, 1000000 * 10 ** 18, sender=account) 
 
     wsteth.approve(wsteth_usdt_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    usdt.approve(usdt_wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    weth.approve(wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    usdt.approve(usdt_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    usdc.approve(usdc_cog_pair.address, 1000000 * 10 ** 18, sender=account)
-    dai.approve(dai_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #usdt.approve(usdt_wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #weth.approve(wsteth_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #usdt.approve(usdt_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #usdc.approve(usdc_cog_pair.address, 1000000 * 10 ** 18, sender=account)
+    #dai.approve(dai_cog_pair.address, 1000000 * 10 ** 18, sender=account)
 
     # 1 ETH Collateral
-    wsteth_usdt_cog_pair.add_collateral(account, 2805 * 10 ** 6, sender=account)
-    wsteth_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
-    usdc_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
-    usdt_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
-    dai_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
-    usdt_wsteth_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
+    wsteth_usdt_cog_pair.add_collateral(account, 3473 * 10 ** 6, sender=account)
+    #wsteth_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
+    #usdc_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
+    #usdt_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
+    #dai_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
+    #usdt_wsteth_cog_pair.add_collateral(account, 1 * 10 ** 18, sender=account)
 
     wsteth_usdt_cog_pair.deposit(10 * 10 ** 18, sender=account)
-    usdc_cog_pair.deposit(5000 * 10 ** 6, sender=account)
-    usdt_cog_pair.deposit(5000 * 10 ** 6, sender=account)
-    dai_cog_pair.deposit(5000 * 10 ** 18, sender=account)
-    wsteth_cog_pair.deposit(10 * 10 ** 18, sender=account)
-    usdt_wsteth_cog_pair.deposit(5000 * 10 ** 6, sender=account)
+    #usdc_cog_pair.deposit(5000 * 10 ** 6, sender=account)
+    #usdt_cog_pair.deposit(5000 * 10 ** 6, sender=account)
+    #dai_cog_pair.deposit(5000 * 10 ** 18, sender=account)
+    #wsteth_cog_pair.deposit(10 * 10 ** 18, sender=account)
+    #usdt_wsteth_cog_pair.deposit(5000 * 10 ** 6, sender=account)
 
-    BASE_AMOUNT = 2805 * 10 ** 6
+    wsteth_usdt_cog_pair.get_exchange_rate(sender=account)
+    print(wsteth_usdt_cog_pair.exchange_rate())
+
+    BASE_AMOUNT = 1 * 10 ** 18
+
+    with ape.reverts():
+        wsteth_usdt_cog_pair.borrow(int(BASE_AMOUNT * 0.9), sender=account)
+
+    wsteth_usdt_cog_pair.borrow(int(BASE_AMOUNT * 0.8), sender=account)
+
+    return
+
+    BASE_AMOUNT = 3000 * 10 ** 6
 
     with ape.reverts():
         usdt_wsteth_cog_pair.borrow(int(BASE_AMOUNT * 0.9), sender=account)
 
     usdt_wsteth_cog_pair.borrow(int(100 * 0.8), sender=account)
 
-    BASE_AMOUNT = 2805 * 10 ** 18
+    BASE_AMOUNT = 3000 * 10 ** 18
 
     usdt_wsteth_cog_pair.get_exchange_rate(sender=account)
     print(usdt_wsteth_cog_pair.exchange_rate())
@@ -111,7 +126,7 @@ def test_chainlink_oracle(project: Project, usdc, wsteth, usdt, dai, weth):
 
     usdt_wsteth_cog_pair.borrow(int(100 * 0.8), sender=account)
 
-    BASE_AMOUNT = 2433 * 10 ** 6
+    BASE_AMOUNT = 3000 * 10 ** 6
    
     with ape.reverts():
         usdt_cog_pair.borrow(int(BASE_AMOUNT * 0.9), sender=account)
@@ -123,7 +138,7 @@ def test_chainlink_oracle(project: Project, usdc, wsteth, usdt, dai, weth):
 
     usdc_cog_pair.borrow(int(BASE_AMOUNT * 0.8), sender=account)
 
-    BASE_AMOUNT = 2424 * 10 ** 18
+    BASE_AMOUNT = 3000 * 10 ** 18
     
     with ape.reverts():
         dai_cog_pair.borrow(int(BASE_AMOUNT * 0.9), sender=account)

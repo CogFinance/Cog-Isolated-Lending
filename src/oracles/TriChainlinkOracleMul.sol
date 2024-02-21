@@ -28,7 +28,7 @@ contract TriChainlinkOracleMul {
     // Calculates the latest exchange rate
     // Uses both divide and multiply only for tokens not supported directly by Chainlink, for example MKR/USD
     function _get() internal view returns (uint256) {
-        uint256 price = uint256(1e48);
+        uint256 price = uint256(1e18);
 
         if (multiply != address(0)) {
             int256 mulPrice = IAggregatorV2(multiply).latestAnswer();
