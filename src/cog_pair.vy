@@ -112,9 +112,6 @@ def sub(_total: Rebase, base: uint256, round_up: bool) -> (Rebase, uint256):
     total.base -= convert(base, uint128)
     return (total, elastic)
 
-        # a theoretically possible overflow.
-        result += 1
-
 # ///////////////////////////////////////////////////// #
 #						Interfaces						#
 # ///////////////////////////////////////////////////// #
